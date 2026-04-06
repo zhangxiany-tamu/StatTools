@@ -75,9 +75,9 @@ describe("MCP Server End-to-End", () => {
     if (!pythonIndexed) ctx.skip();
   };
 
-  it("lists 8 tools", async () => {
+  it("lists 10 tools", async () => {
     const tools = await listTools(server);
-    expect(tools).toHaveLength(8);
+    expect(tools).toHaveLength(10);
 
     const names = tools.map((t) => t.name);
     expect(names).toContain("stat_search");
@@ -87,6 +87,8 @@ describe("MCP Server End-to-End", () => {
     expect(names).toContain("stat_session");
     expect(names).toContain("stat_describe");
     expect(names).toContain("stat_install");
+    expect(names).toContain("stat_extract");
+    expect(names).toContain("stat_plot");
     expect(names).toContain("stat_method");
   });
 

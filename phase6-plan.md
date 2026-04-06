@@ -8,6 +8,8 @@ Phases 1-5 built the infrastructure: 8 MCP tools, 93k indexed functions, 647 saf
 
 Do not add more infrastructure. Validate what exists, then expand based on evidence.
 
+For package-priority planning across the CRAN ecosystem, see [TOP500_COVERAGE_MATRIX.md](./TOP500_COVERAGE_MATRIX.md).
+
 ## Step 1: Run Real Workflows (20-30 tasks)
 
 Start a fresh Claude Code session. StatTools is already configured in `~/.claude/settings.json` with `STATTOOLS_LOG_USAGE=1`.

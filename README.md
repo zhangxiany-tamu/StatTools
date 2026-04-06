@@ -159,6 +159,8 @@ npm run validate     # Checks Node, R, build, index, server, and runs a real wor
 
 This runs 12 checks including starting the MCP server and executing a complete search → resolve → load → call → session workflow.
 
+For real external-client validation through Claude Code CLI, including exact prompts for OLS, mixed-effects, reshape, `ggplot2`, and `glmnet`, see [AGENT_WORKFLOW_RUNBOOK.md](./AGENT_WORKFLOW_RUNBOOK.md).
+
 ## Development
 
 ```bash

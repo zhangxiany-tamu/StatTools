@@ -60,6 +60,17 @@ import {
   type StatMethodInput,
 } from "./tools/statMethod.js";
 
+import {
+  STAT_EXTRACT_SCHEMA,
+  executeStatExtract,
+  type StatExtractInput,
+} from "./tools/statExtract.js";
+import {
+  STAT_PLOT_SCHEMA,
+  executeStatPlot,
+  type StatPlotInput,
+} from "./tools/statPlot.js";
+
 import { reindexPackage } from "./search/incrementalReindex.js";
 
 import type { StatToolResult } from "./types.js";
@@ -185,6 +196,18 @@ export async function createStatToolsServer(
           "Call a method on a Python session object. Use for sklearn/statsmodels workflows: model.fit(X, y), model.predict(X), model.score(X, y), scaler.transform(X), etc. The object must have been created by a previous stat_call.",
         inputSchema: STAT_METHOD_SCHEMA,
       },
+      {
+        name: "stat_extract",
+        description:
+          "Extract columns from a data handle as a vector or matrix. Use to build X matrices and y vectors for APIs like glmnet that don't accept formulas. Single column returns a vector, multiple columns return a data frame or matrix (set as_matrix=true).",
+        inputSchema: STAT_EXTRACT_SCHEMA,
+      },
+      {
+        name: "stat_plot",
+        description:
+          "Render a plot to a file (PNG/PDF/SVG) and return the file path. Accepts either a stored ggplot handle or an R expression string. Session data handles are available by name in expressions. Example: expression='ggplot(data_1, aes(x=wt, y=mpg)) + geom_point() + geom_smooth(method=\"lm\")'",
+        inputSchema: STAT_PLOT_SCHEMA,
+      },
     ],
   }));
 
@@ -262,6 +285,23 @@ export async function createStatToolsServer(
           args as unknown as StatMethodInput,
           sessionStore,
           pythonWorker,
+        );
+        break;
+
+      case "stat_extract":
+        result = await executeStatExtract(
+          args as unknown as StatExtractInput,
+          workerPool,
+          sessionStore,
+          pythonWorker,
+        );
+        break;
+
+      case "stat_plot":
+        result = await executeStatPlot(
+          args as unknown as StatPlotInput,
+          workerPool,
+          sessionStore,
         );
         break;
 

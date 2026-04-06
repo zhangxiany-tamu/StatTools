@@ -65,7 +65,9 @@ dispatch <- function(req) {
       "inspect"      = dispatch_inspect(id, params),
       "persist"      = dispatch_persist(id, params),
       "restore"      = dispatch_restore(id, params),
-      "list_objects" = dispatch_list_objects(id, params),
+      "list_objects"     = dispatch_list_objects(id, params),
+      "extract_columns"  = dispatch_extract_columns(id, params),
+      "render_plot"      = dispatch_render_plot(id, params),
       error_response(id, -1L, paste0("Unknown method: ", method))
     ),
     error = function(e) {
@@ -388,6 +390,175 @@ dispatch_list_objects <- function(id, params) {
     objects = objects,
     loaded_packages = loadedNamespaces(),
     r_version = paste0(R.version$major, ".", R.version$minor)
+  ))
+}
+
+# ---- Extract Columns / Build Matrix -----------------------------------------
+
+dispatch_extract_columns <- function(id, params) {
+  obj_id <- params$object %||% params$handle
+  columns <- params$columns  # character vector of column names
+  assign_to <- params$assign_to
+  as_matrix <- isTRUE(params$as_matrix)
+
+  if (is.null(obj_id) || !exists(obj_id, envir = .ss, inherits = FALSE)) {
+    available <- paste(ls(envir = .ss), collapse = ", ")
+    return(error_response(id, 4L,
+      paste0("Object '", obj_id, "' not found. Available: ",
+             if (nchar(available) > 0) available else "(none)")))
+  }
+
+  obj <- get(obj_id, envir = .ss, inherits = FALSE)
+  if (!is.data.frame(obj)) {
+    return(error_response(id, 2L,
+      paste0("'", obj_id, "' is not a data frame (class: ", class(obj)[1], ")")))
+  }
+
+  # Convert from JSON array (list) to character vector
+  columns <- unlist(columns)
+  if (is.null(columns) || length(columns) == 0) {
+    return(error_response(id, 2L, "Missing 'columns' parameter"))
+  }
+
+  # Check for missing columns
+  missing <- setdiff(columns, names(obj))
+  if (length(missing) > 0) {
+    return(error_response(id, 5L,
+      paste0("Columns not found: ", paste(missing, collapse = ", ")),
+      suggestion = paste0("Available: ", paste(names(obj), collapse = ", "))))
+  }
+
+  # Extract
+  if (length(columns) == 1 && !as_matrix) {
+    result <- obj[[columns]]
+    r_class <- "numeric"
+    type <- "data"
+    summary_text <- paste0(obj_id, "$", columns, " (", length(result), " values)")
+  } else {
+    result <- obj[, columns, drop = FALSE]
+    if (as_matrix) {
+      result <- as.matrix(result)
+      r_class <- "matrix"
+      summary_text <- paste0(obj_id, "[", paste(columns, collapse = ","), "] (", nrow(result), "x", ncol(result), " matrix)")
+    } else {
+      r_class <- "data.frame"
+      summary_text <- paste0(obj_id, "[", paste(columns, collapse = ","), "] (", nrow(result), "x", ncol(result), ")")
+    }
+    type <- "data"
+  }
+
+  # Assign to session
+  ref_id <- assign_to %||% paste0(obj_id, "_", paste(columns[1:min(2, length(columns))], collapse = "_"))
+  assign(ref_id, result, envir = .ss)
+  size <- as.numeric(object.size(result))
+  register_object(ref_id, type, r_class, size, summary_text)
+
+  # Format preview
+  formatted <- format_for_json(result)
+
+  list(id = id,
+    result = list(
+      object_id = ref_id,
+      class = r_class,
+      dimensions = if (is.matrix(result) || is.data.frame(result))
+        list(rows = nrow(result), cols = ncol(result))
+      else list(length = length(result)),
+      preview = formatted
+    ),
+    objectsCreated = list(list(
+      id = ref_id, type = type, rClass = r_class,
+      sizeBytes = size, summary = summary_text
+    ))
+  )
+}
+
+# ---- Render Plot to File ----------------------------------------------------
+
+dispatch_render_plot <- function(id, params) {
+  # Accepts either:
+  # 1. object: handle ID of a ggplot/recordedplot object
+  # 2. expression: R expression string that produces a plot
+  obj_id <- params$object
+  expr_str <- params$expression
+  file_format <- params$format %||% "png"
+  width <- params$width %||% 800
+  height <- params$height %||% 600
+  dpi <- params$dpi %||% 150
+
+  if (is.null(obj_id) && is.null(expr_str)) {
+    return(error_response(id, 2L, "Provide either 'object' (handle ID) or 'expression' (R code that produces a plot)"))
+  }
+
+  # Create output path
+  out_dir <- file.path(tempdir(), "stattools", "plots")
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  out_file <- file.path(out_dir, paste0("plot_", format(Sys.time(), "%Y%m%d_%H%M%S"), "_", sample(1000:9999, 1), ".", file_format))
+
+  if (!file_format %in% c("png", "pdf", "svg")) {
+    return(error_response(id, 2L, paste0("Unsupported format: ", file_format, ". Use png, pdf, or svg.")))
+  }
+
+  if (!is.null(obj_id) && !exists(obj_id, envir = .ss, inherits = FALSE)) {
+    return(error_response(id, 4L, paste0("Object '", obj_id, "' not found in session")))
+  }
+
+  plot_err <- tryCatch({
+    # Open device (grDevices may not be attached in vanilla Rscript)
+    if (file_format == "png") {
+      grDevices::png(out_file, width = width, height = height, res = dpi)
+    } else if (file_format == "pdf") {
+      grDevices::pdf(out_file, width = width / 72, height = height / 72)
+    } else {
+      grDevices::svg(out_file, width = width / 72, height = height / 72)
+    }
+
+    if (!is.null(obj_id)) {
+      obj <- get(obj_id, envir = .ss, inherits = FALSE)
+      if (inherits(obj, "ggplot") || inherits(obj, "gg")) {
+        print(obj)
+      } else if (inherits(obj, "recordedplot")) {
+        replayPlot(obj)
+      } else {
+        print(obj)
+      }
+    } else {
+      # Ensure base R plotting packages are available in the evaluation
+      require(graphics, quietly = TRUE)
+      require(grDevices, quietly = TRUE)
+      require(stats, quietly = TRUE)
+      # print() the result — required for ggplot objects which don't auto-render
+      plot_result <- eval(parse(text = expr_str), envir = .ss)
+      if (inherits(plot_result, "ggplot") || inherits(plot_result, "gg")) {
+        print(plot_result)
+      }
+    }
+
+    grDevices::dev.off()
+    NULL  # no error
+  }, error = function(e) {
+    tryCatch(grDevices::dev.off(), error = function(e2) NULL)
+    conditionMessage(e)
+  })
+
+  if (!is.null(plot_err)) {
+    return(error_response(id, 1L,
+      paste0("Plot rendering failed: ", plot_err),
+      suggestion = "Check that the expression produces a valid plot"))
+  }
+
+  if (!file.exists(out_file)) {
+    return(error_response(id, 1L, "Plot file was not created"))
+  }
+
+  file_size <- file.info(out_file)$size
+
+  list(id = id, result = list(
+    file_path = out_file,
+    format = file_format,
+    width = width,
+    height = height,
+    file_size_bytes = file_size,
+    message = paste0("Plot saved to: ", out_file)
   ))
 }
 

@@ -100,6 +100,8 @@ export type RpcRequest = {
     | "call"
     | "call_method"
     | "select_columns"
+    | "extract_columns"
+    | "render_plot"
     | "load_data"
     | "schema"
     | "inspect"

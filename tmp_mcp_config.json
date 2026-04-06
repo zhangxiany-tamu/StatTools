@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "stattools": {
+      "command": "/Users/xianyangzhang/.nvm/versions/node/v22.18.0/bin/node",
+      "args": ["/Users/xianyangzhang/My Drive/Agent Studio/stattools/dist/index.js"],
+      "env": {
+        "STATTOOLS_DATA_ROOTS": "/tmp:/Users/xianyangzhang/My Drive/Agent Studio/stattools/test/fixtures/data",
+        "STATTOOLS_LOG_USAGE": "1",
+        "R_PATH": "/opt/homebrew/bin/Rscript",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/Users/xianyangzhang/.nvm/versions/node/v22.18.0/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}
