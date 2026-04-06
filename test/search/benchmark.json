@@ -560,13 +560,13 @@
       "requires_install": false
     },
     {
-      "query": "Bayesian linear regression posterior inference",
+      "query": "Bayesian regression rstanarm Stan",
       "expected_top3": [
         "rstanarm::stan_glm"
       ],
-      "note": "Bayesian GLM via Stan — curated alias must fire; requires_install because rstanarm compiles Stan",
+      "note": "Bayesian regression via rstanarm — query made specific to disambiguate from posterior summary",
       "category": "bayesian",
-      "requires_install": true
+      "requires_install": false
     },
     {
       "query": "Bayesian generalized linear model Stan MCMC",
@@ -575,7 +575,7 @@
       ],
       "note": "brms provides a formula interface to Stan",
       "category": "bayesian",
-      "requires_install": true
+      "requires_install": false
     },
     {
       "query": "posterior distribution credible interval summary",

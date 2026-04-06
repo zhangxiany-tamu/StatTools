@@ -134,21 +134,9 @@ Functions are classified into tiers:
 
 ## Search Quality
 
-Benchmark: 111 queries across 12 categories. Current pass rate: 100% top-3 (95/95 installable queries). MRR: 0.746.
+Benchmark: 111 queries across 12 categories. Current pass rate: 100% top-3 (97/97 installable queries). MRR: 0.746.
 
-| Category | Pass Rate |
-|----------|-----------|
-| Regression | 100% |
-| Testing | 100% |
-| Wrangling | 100% |
-| Survival | 100% |
-| Mixed Models | 100% |
-| Time Series | 100% |
-| ML | 100% |
-| Visualization | 100% |
-| Diagnostics | 100% |
-| I/O | 100% |
-| Bayesian | 75% (3/4; 2 require rstanarm/brms install) |
+All 12 categories at 100%: regression, testing, wrangling, survival, mixed models, time series, ML, visualization, diagnostics, I/O, Bayesian, Python (when indexed).
 
 ## Environment Variables
 

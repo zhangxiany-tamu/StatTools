@@ -593,11 +593,16 @@ const CURATED_ALIASES: Record<string, string[]> = {
 
   // ---- Bayesian ----
   "bayesian regression": ["stan_glm", "brm"],
+  "bayesian linear regression": ["stan_glm"],
+  "bayesian linear": ["stan_glm"],
+  "bayesian glm": ["stan_glm", "brm"],
+  "stan glm": ["stan_glm"],
+  "stan mcmc": ["stan_glm", "brm"],
+  "bayesian model": ["brm", "stan_glm"],
   "bayesian": ["stan_glm", "brm"],
   "posterior distribution": ["describe_posterior"],
   "posterior": ["describe_posterior", "hdi"],
   "credible interval": ["hdi", "ci"],
-  "bayesian model": ["brm", "stan_glm"],
   "bayes factor": ["bayesfactor", "bayesfactor_models"],
   "describe posterior": ["describe_posterior"],
   "rope": ["rope", "equivalence_test"],
