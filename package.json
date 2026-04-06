@@ -1,0 +1,37 @@
+{
+  "name": "stattools",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MCP server exposing CRAN R packages as agent-callable tools",
+  "main": "dist/index.js",
+  "bin": {
+    "stattools": "dist/index.js"
+  },
+  "scripts": {
+    "preinstall": "node scripts/check-node.js",
+    "prebuild": "node scripts/check-node.js",
+    "pretest": "node scripts/check-node.js",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build-index": "tsx scripts/build-index.ts",
+    "extract-tarballs": "tsx scripts/extract-tarballs.ts",
+    "validate": "tsx scripts/validate-setup.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

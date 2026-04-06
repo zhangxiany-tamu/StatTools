@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Database (built via npm run build-index)
+data/stattools.db
+data/stattools.db-wal
+data/stattools.db-shm
+
+# Tarball cache (built via npm run extract-tarballs)
+data/tarball_cache/
+
+# Usage logs (runtime artifacts)
+data/usage_log.jsonl
+data/validation_report.json
+
+# Test artifacts
+data/stattools_*_test.db*
+data/stattools_e2e_*.db*
+
+# OS files
+.DS_Store

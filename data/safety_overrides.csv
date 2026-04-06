@@ -1,0 +1,648 @@
+function_id,safety_class,reason
+stats::lm,safe,Pure computation
+stats::glm,safe,Pure computation
+stats::t.test,safe,Pure computation
+stats::chisq.test,safe,Pure computation
+stats::cor,safe,Pure computation
+stats::cor.test,safe,Pure computation
+stats::cov,safe,Pure computation
+stats::var,safe,Pure computation
+stats::sd,safe,Pure computation
+stats::aov,safe,Pure computation
+stats::anova,safe,Pure computation
+stats::TukeyHSD,safe,Pure computation
+stats::prcomp,safe,Pure computation
+stats::princomp,safe,Pure computation
+stats::kmeans,safe,Pure computation
+stats::hclust,safe,Pure computation
+stats::cutree,safe,Pure computation
+stats::dist,safe,Pure computation
+stats::shapiro.test,safe,Pure computation
+stats::ks.test,safe,Pure computation
+stats::wilcox.test,safe,Pure computation
+stats::fisher.test,safe,Pure computation
+stats::prop.test,safe,Pure computation
+stats::mcnemar.test,safe,Pure computation
+stats::friedman.test,safe,Pure computation
+stats::kruskal.test,safe,Pure computation
+stats::bartlett.test,safe,Pure computation
+stats::var.test,safe,Pure computation
+stats::oneway.test,safe,Pure computation
+stats::pairwise.t.test,safe,Pure computation
+stats::pairwise.wilcox.test,safe,Pure computation
+stats::power.t.test,safe,Pure computation
+stats::power.prop.test,safe,Pure computation
+stats::power.anova.test,safe,Pure computation
+stats::nls,safe,Pure computation
+stats::loess,safe,Pure computation
+stats::lowess,safe,Pure computation
+stats::smooth.spline,safe,Pure computation
+stats::density,safe,Pure computation
+stats::ecdf,safe,Pure computation
+stats::quantile,safe,Pure computation
+stats::median,safe,Pure computation
+stats::weighted.mean,safe,Pure computation
+stats::predict,safe,Pure computation
+stats::predict.lm,safe,Pure computation
+stats::predict.glm,safe,Pure computation
+stats::fitted,safe,Pure computation
+stats::residuals,safe,Pure computation
+stats::coef,safe,Pure computation
+stats::confint,safe,Pure computation
+stats::vcov,safe,Pure computation
+stats::logLik,safe,Pure computation
+stats::AIC,safe,Pure computation
+stats::BIC,safe,Pure computation
+stats::step,safe,Model selection
+stats::update,safe,Model update
+stats::model.matrix,safe,Pure computation
+stats::formula,safe,Pure computation
+stats::terms,safe,Pure computation
+stats::influence,safe,Pure computation
+stats::influence.measures,safe,Pure computation
+stats::cooks.distance,safe,Pure computation
+stats::hatvalues,safe,Pure computation
+stats::rstandard,safe,Pure computation
+stats::rstudent,safe,Pure computation
+stats::dfbetas,safe,Pure computation
+stats::dffits,safe,Pure computation
+stats::acf,safe,Pure computation
+stats::pacf,safe,Pure computation
+stats::ccf,safe,Pure computation
+stats::ar,safe,Pure computation
+stats::arima,safe,Pure computation
+stats::stl,safe,Pure computation
+stats::decompose,safe,Pure computation
+stats::HoltWinters,safe,Pure computation
+stats::Box.test,safe,Pure computation
+tseries::pp.test,safe,Pure computation
+stats::tsdiag,safe,Pure computation
+stats::embed,safe,Pure computation
+stats::lag,safe,Pure computation
+stats::window,safe,Pure computation
+stats::time,safe,Pure computation
+stats::start,safe,Pure computation
+stats::end,safe,Pure computation
+stats::frequency,safe,Pure computation
+stats::ts,safe,Pure computation
+stats::filter,safe,Pure computation
+stats::approx,safe,Pure computation
+stats::approxfun,safe,Pure computation
+stats::spline,safe,Pure computation
+stats::splinefun,safe,Pure computation
+stats::optim,safe,Pure computation
+stats::optimize,safe,Pure computation
+stats::nlm,safe,Pure computation
+stats::constrOptim,safe,Pure computation
+stats::uniroot,safe,Pure computation
+stats::integrate,safe,Pure computation
+stats::complete.cases,safe,Pure computation
+stats::na.omit,safe,Pure computation
+stats::na.exclude,safe,Pure computation
+stats::summary.lm,safe,Pure computation
+stats::summary.glm,safe,Pure computation
+stats::summary.aov,safe,Pure computation
+base::summary,safe,Pure computation
+base::mean,safe,Pure computation
+base::sum,safe,Pure computation
+base::min,safe,Pure computation
+base::max,safe,Pure computation
+base::range,safe,Pure computation
+base::length,safe,Pure computation
+base::nrow,safe,Pure computation
+base::ncol,safe,Pure computation
+base::dim,safe,Pure computation
+base::names,safe,Pure computation
+base::colnames,safe,Pure computation
+base::rownames,safe,Pure computation
+utils::head,safe,Pure computation
+utils::tail,safe,Pure computation
+base::sort,safe,Pure computation
+base::order,safe,Pure computation
+base::which,safe,Pure computation
+base::which.min,safe,Pure computation
+base::which.max,safe,Pure computation
+base::unique,safe,Pure computation
+base::duplicated,safe,Pure computation
+base::table,safe,Pure computation
+base::merge,safe,Pure computation
+base::rbind,safe,Pure computation
+base::cbind,safe,Pure computation
+base::subset,safe,Pure computation
+base::transform,safe,Pure computation
+base::with,safe,Pure computation
+base::within,safe,Pure computation
+base::apply,safe,Pure computation
+base::sapply,safe,Pure computation
+base::lapply,safe,Pure computation
+base::tapply,safe,Pure computation
+base::mapply,safe,Pure computation
+base::vapply,safe,Pure computation
+base::Reduce,safe,Pure computation
+base::Filter,safe,Pure computation
+base::Map,safe,Pure computation
+base::data.frame,safe,Pure computation
+base::as.data.frame,safe,Pure computation
+base::list,safe,Pure computation
+base::c,safe,Pure computation
+base::seq,safe,Pure computation
+base::rep,safe,Pure computation
+base::paste,safe,Pure computation
+base::paste0,safe,Pure computation
+base::sprintf,safe,Pure computation
+base::grep,safe,Pure computation
+base::grepl,safe,Pure computation
+base::sub,safe,Pure computation
+base::gsub,safe,Pure computation
+base::nchar,safe,Pure computation
+base::toupper,safe,Pure computation
+base::tolower,safe,Pure computation
+base::trimws,safe,Pure computation
+base::is.na,safe,Pure computation
+base::is.null,safe,Pure computation
+base::is.numeric,safe,Pure computation
+base::is.character,safe,Pure computation
+base::as.numeric,safe,Pure computation
+base::as.character,safe,Pure computation
+base::as.integer,safe,Pure computation
+base::as.logical,safe,Pure computation
+base::as.factor,safe,Pure computation
+base::factor,safe,Pure computation
+base::levels,safe,Pure computation
+base::round,safe,Pure computation
+base::ceiling,safe,Pure computation
+base::floor,safe,Pure computation
+base::abs,safe,Pure computation
+base::sqrt,safe,Pure computation
+base::log,safe,Pure computation
+base::log2,safe,Pure computation
+base::log10,safe,Pure computation
+base::exp,safe,Pure computation
+base::cumsum,safe,Pure computation
+base::cumprod,safe,Pure computation
+base::cummax,safe,Pure computation
+base::cummin,safe,Pure computation
+base::diff,safe,Pure computation
+base::crossprod,safe,Pure computation
+base::tcrossprod,safe,Pure computation
+base::outer,safe,Pure computation
+base::solve,safe,Pure computation
+base::t,safe,Pure computation
+base::det,safe,Pure computation
+base::diag,safe,Pure computation
+base::eigen,safe,Pure computation
+base::svd,safe,Pure computation
+base::qr,safe,Pure computation
+base::chol,safe,Pure computation
+base::sample,safe,Pure computation (uses RNG but no side effects)
+base::set.seed,callable_with_caveats,Modifies RNG state
+base::print,safe,Pure output
+base::cat,safe,Pure output
+utils::str,safe,Pure output
+base::class,safe,Pure computation
+base::typeof,safe,Pure computation
+base::identical,safe,Pure computation
+base::all.equal,safe,Pure computation
+utils::read.csv,safe,File read only
+utils::read.csv2,safe,File read only
+utils::read.table,safe,File read only
+utils::read.delim,safe,File read only
+utils::head,safe,Pure computation
+utils::tail,safe,Pure computation
+utils::str,safe,Pure computation
+utils::data,safe,Load built-in dataset
+utils::example,callable_with_caveats,May execute arbitrary code
+utils::help,safe,Documentation lookup
+utils::install.packages,unsafe,Modifies system state
+utils::installed.packages,safe,Pure query
+utils::available.packages,safe,Network read only
+utils::write.csv,unsafe,File write
+utils::write.csv2,unsafe,File write
+utils::write.table,unsafe,File write
+dplyr::filter,callable_with_caveats,Uses NSE (non-standard evaluation)
+dplyr::select,callable_with_caveats,Uses NSE
+dplyr::mutate,callable_with_caveats,Uses NSE
+dplyr::arrange,callable_with_caveats,Uses NSE
+dplyr::group_by,callable_with_caveats,Uses NSE
+dplyr::ungroup,safe,Pure computation
+dplyr::summarise,callable_with_caveats,Uses NSE
+dplyr::summarize,callable_with_caveats,Uses NSE
+dplyr::rename,callable_with_caveats,Uses NSE
+dplyr::relocate,callable_with_caveats,Uses NSE
+dplyr::slice,callable_with_caveats,Uses NSE
+dplyr::slice_head,safe,Pure computation
+dplyr::slice_tail,safe,Pure computation
+dplyr::slice_min,callable_with_caveats,Uses NSE
+dplyr::slice_max,callable_with_caveats,Uses NSE
+dplyr::slice_sample,safe,Uses RNG but no side effects
+dplyr::distinct,callable_with_caveats,Uses NSE
+dplyr::count,callable_with_caveats,Uses NSE
+dplyr::tally,safe,Pure computation
+dplyr::pull,callable_with_caveats,Uses NSE
+dplyr::left_join,safe,Pure computation
+dplyr::right_join,safe,Pure computation
+dplyr::inner_join,safe,Pure computation
+dplyr::full_join,safe,Pure computation
+dplyr::anti_join,safe,Pure computation
+dplyr::semi_join,safe,Pure computation
+dplyr::bind_rows,safe,Pure computation
+dplyr::bind_cols,safe,Pure computation
+dplyr::n,safe,Pure computation
+dplyr::n_distinct,safe,Pure computation
+dplyr::if_else,safe,Pure computation
+dplyr::case_when,safe,Pure computation
+dplyr::between,safe,Pure computation
+dplyr::coalesce,safe,Pure computation
+dplyr::lag,safe,Pure computation
+dplyr::lead,safe,Pure computation
+dplyr::across,callable_with_caveats,Uses NSE
+dplyr::where,callable_with_caveats,Uses NSE
+dplyr::everything,safe,Tidy select helper
+dplyr::starts_with,safe,Tidy select helper
+dplyr::ends_with,safe,Tidy select helper
+dplyr::contains,safe,Tidy select helper
+dplyr::matches,safe,Tidy select helper
+tidyr::pivot_longer,callable_with_caveats,Uses NSE
+tidyr::pivot_wider,callable_with_caveats,Uses NSE
+tidyr::separate,callable_with_caveats,Uses NSE
+tidyr::unite,callable_with_caveats,Uses NSE
+tidyr::drop_na,safe,Pure computation
+tidyr::fill,safe,Pure computation
+tidyr::replace_na,safe,Pure computation
+tidyr::complete,callable_with_caveats,Uses NSE
+tidyr::nest,callable_with_caveats,Uses NSE
+tidyr::unnest,callable_with_caveats,Uses NSE
+ggplot2::ggplot,callable_with_caveats,Creates plot object (graphics side effect on print)
+ggplot2::aes,callable_with_caveats,Uses NSE
+ggplot2::geom_point,safe,Layer specification
+ggplot2::geom_line,safe,Layer specification
+ggplot2::geom_bar,safe,Layer specification
+ggplot2::geom_histogram,safe,Layer specification
+ggplot2::geom_boxplot,safe,Layer specification
+ggplot2::geom_smooth,safe,Layer specification
+ggplot2::geom_density,safe,Layer specification
+ggplot2::geom_tile,safe,Layer specification
+ggplot2::geom_text,safe,Layer specification
+ggplot2::geom_label,safe,Layer specification
+ggplot2::geom_col,safe,Layer specification
+ggplot2::geom_area,safe,Layer specification
+ggplot2::geom_violin,safe,Layer specification
+ggplot2::facet_wrap,safe,Facet specification
+ggplot2::facet_grid,safe,Facet specification
+ggplot2::labs,safe,Label specification
+ggplot2::xlab,safe,Label specification
+ggplot2::ylab,safe,Label specification
+ggplot2::ggtitle,safe,Label specification
+ggplot2::theme,safe,Theme specification
+ggplot2::theme_minimal,safe,Theme preset
+ggplot2::theme_bw,safe,Theme preset
+ggplot2::theme_classic,safe,Theme preset
+ggplot2::scale_x_continuous,safe,Scale specification
+ggplot2::scale_y_continuous,safe,Scale specification
+ggplot2::scale_color_manual,safe,Scale specification
+ggplot2::scale_fill_manual,safe,Scale specification
+ggplot2::coord_flip,safe,Coordinate specification
+ggplot2::ggsave,unsafe,File write
+lme4::lmer,safe,Pure computation
+lme4::glmer,safe,Pure computation
+lme4::nlmer,safe,Pure computation
+lme4::fixef,safe,Pure computation
+lme4::ranef,safe,Pure computation
+lme4::VarCorr,safe,Pure computation
+lme4::confint.merMod,safe,Pure computation
+lme4::isSingular,safe,Pure computation
+survival::coxph,safe,Pure computation
+survival::survfit,safe,Pure computation
+survival::survreg,safe,Pure computation
+survival::Surv,safe,Pure computation
+survival::cox.zph,safe,Pure computation
+survival::survdiff,safe,Pure computation
+survival::concordance,safe,Pure computation
+glmnet::glmnet,safe,Pure computation
+glmnet::cv.glmnet,safe,Pure computation
+glmnet::coef.glmnet,safe,Pure computation
+glmnet::predict.glmnet,safe,Pure computation
+caret::train,safe,Pure computation (may be slow)
+caret::trainControl,safe,Configuration
+caret::confusionMatrix,safe,Pure computation
+caret::varImp,safe,Pure computation
+caret::createDataPartition,safe,Uses RNG but no side effects
+caret::preProcess,safe,Pure computation
+sandwich::vcovHC,safe,Pure computation
+sandwich::vcovHAC,safe,Pure computation
+sandwich::vcovCL,safe,Pure computation
+sandwich::sandwich,safe,Pure computation
+car::Anova,safe,Pure computation
+car::vif,safe,Pure computation
+car::linearHypothesis,safe,Pure computation
+car::leveneTest,safe,Pure computation
+car::durbinWatsonTest,safe,Pure computation
+lmtest::coeftest,safe,Pure computation
+lmtest::bptest,safe,Pure computation
+lmtest::resettest,safe,Pure computation
+lmtest::waldtest,safe,Pure computation
+forecast::forecast,safe,Pure computation
+forecast::auto.arima,safe,Pure computation
+forecast::Arima,safe,Pure computation
+forecast::ets,safe,Pure computation
+forecast::accuracy,safe,Pure computation
+MASS::lm.ridge,safe,Pure computation
+MASS::rlm,safe,Pure computation
+MASS::polr,safe,Pure computation
+MASS::glm.nb,safe,Pure computation
+MASS::stepAIC,safe,Model selection
+MASS::boxcox,safe,Pure computation
+mgcv::gam,safe,Pure computation
+mgcv::bam,safe,Pure computation
+mgcv::s,safe,Smooth term specification
+mgcv::te,safe,Tensor product specification
+nlme::lme,safe,Pure computation
+nlme::nlme,safe,Pure computation
+nlme::gls,safe,Pure computation
+boot::boot,safe,Pure computation (resampling)
+boot::boot.ci,safe,Pure computation
+cluster::pam,safe,Pure computation
+cluster::clara,safe,Pure computation
+cluster::agnes,safe,Pure computation
+cluster::diana,safe,Pure computation
+cluster::silhouette,safe,Pure computation
+readr::read_csv,safe,File read only
+readr::read_tsv,safe,File read only
+readr::read_delim,safe,File read only
+readr::write_csv,unsafe,File write
+readr::write_tsv,unsafe,File write
+data.table::fread,safe,File read only
+data.table::fwrite,unsafe,File write
+broom::tidy,safe,Pure computation — formats model output as tibble
+broom::glance,safe,Pure computation — extracts model-level summary statistics
+broom::augment,safe,Pure computation — adds fitted values and residuals to data
+emmeans::emmeans,safe,Pure computation — computes estimated marginal means from model object
+emmeans::contrast,safe,Pure computation — computes contrasts between estimated marginal means
+emmeans::ref_grid,safe,Pure computation — constructs reference grid from a fitted model
+emmeans::emtrends,safe,Pure computation — estimates marginal trends (slopes) from a model
+emmeans::joint_tests,safe,Pure computation — omnibus F/chi-sq tests on EMMs
+emmeans::emmip,callable_with_caveats,Produces interaction plot (graphics side effect on print)
+fixest::feols,safe,Pure computation — OLS with fixed effects; no I/O or system modification
+fixest::feglm,safe,Pure computation — GLM with fixed effects
+fixest::fenegbin,safe,Pure computation — negative binomial with fixed effects
+fixest::etable,callable_with_caveats,Prints or writes regression table; file output possible via file= argument
+fixest::coefplot,callable_with_caveats,Generates coefficient plot (graphics side effect on print)
+fixest::iplot,callable_with_caveats,Generates interaction plot (graphics side effect on print)
+fixest::fitstat,safe,Pure computation — extracts fit statistics from fixest model
+fixest::se,safe,Pure computation — extracts standard errors from fixest model
+fixest::pvalue,safe,Pure computation — extracts p-values from fixest model
+purrr::map,safe,Pure computation — applies function to list/vector elements
+purrr::map2,safe,Pure computation — applies function to two parallel lists
+purrr::pmap,safe,Pure computation — applies function over list of argument lists
+purrr::map_dfr,safe,Pure computation — map returning row-bound data frame
+purrr::map_chr,safe,Pure computation — map returning character vector
+purrr::map_lgl,safe,Pure computation — map returning logical vector
+purrr::map_dbl,safe,Pure computation — map returning double vector
+purrr::map_int,safe,Pure computation — map returning integer vector
+purrr::keep,safe,Pure computation — filters list elements by predicate
+purrr::discard,safe,Pure computation — discards list elements matching predicate
+purrr::pluck,safe,Pure computation — extracts element at given index path
+purrr::possibly,safe,Pure computation — wraps function to return default on error
+purrr::safely,safe,Pure computation — wraps function to return result/error list
+purrr::reduce,safe,Pure computation — reduces list to single value by iterative application
+purrr::walk,callable_with_caveats,Calls function for side effects; may write files or print depending on .f
+stringr::str_detect,safe,Pure computation — returns logical vector of pattern matches
+stringr::str_extract,safe,Pure computation — extracts first regex match
+stringr::str_replace,safe,Pure computation — replaces first regex match
+stringr::str_split,safe,Pure computation — splits string on pattern
+stringr::str_sub,safe,Pure computation — extracts substring by position
+stringr::str_c,safe,Pure computation — concatenates strings
+stringr::str_trim,safe,Pure computation — strips whitespace from string ends
+stringr::str_pad,safe,Pure computation — pads string to specified width
+stringr::str_count,safe,Pure computation — counts pattern occurrences in string
+stringr::str_to_lower,safe,Pure computation — converts string to lowercase
+stringr::str_to_upper,safe,Pure computation — converts string to uppercase
+stringr::str_length,safe,Pure computation — returns string length
+stringr::str_replace_all,safe,Pure computation — replaces all regex matches
+stringr::str_extract_all,safe,Pure computation — extracts all regex matches
+forcats::fct_relevel,safe,Pure computation — reorders factor levels manually
+forcats::fct_reorder,safe,Pure computation — reorders factor levels by another variable
+forcats::fct_collapse,safe,Pure computation — collapses factor levels into groups
+forcats::fct_lump,safe,Pure computation — lumps infrequent levels into Other
+forcats::fct_recode,safe,Pure computation — renames factor levels
+forcats::fct_rev,safe,Pure computation — reverses factor level order
+forcats::fct_infreq,safe,Pure computation — reorders levels by frequency
+forcats::fct_drop,safe,Pure computation — drops unused factor levels
+forcats::fct_explicit_na,safe,Pure computation — makes NA an explicit factor level
+tibble::tibble,safe,Pure computation — constructs a tibble
+tibble::as_tibble,safe,Pure computation — coerces object to tibble
+tibble::tribble,safe,Pure computation — constructs tibble row-by-row
+tibble::add_row,safe,Pure computation — adds row(s) to tibble
+tibble::add_column,safe,Pure computation — adds column(s) to tibble
+tibble::rownames_to_column,safe,Pure computation — moves row names to a column
+tibble::column_to_rownames,safe,Pure computation — moves column to row names
+tibble::glimpse,safe,Pure computation — prints concise data overview
+haven::read_sav,safe,File read only — reads SPSS .sav file into tibble
+haven::read_dta,safe,File read only — reads Stata .dta file into tibble
+haven::read_sas,safe,File read only — reads SAS .sas7bdat file into tibble
+haven::read_xpt,safe,File read only — reads SAS transport .xpt file into tibble
+haven::write_sav,unsafe,File write — writes tibble to SPSS .sav format
+haven::write_dta,unsafe,File write — writes tibble to Stata .dta format
+haven::write_sas,unsafe,File write — writes tibble to SAS .sas7bdat format
+haven::as_factor,safe,Pure computation — converts haven-labelled columns to factors
+haven::zap_labels,safe,Pure computation — removes value labels from haven-labelled vector
+rpart::rpart,safe,Pure computation — fits recursive partitioning/decision tree model
+rpart::prune,safe,Pure computation — prunes rpart tree by complexity parameter
+rpart::printcp,safe,Pure computation — prints cross-validation error table
+rpart::plotcp,callable_with_caveats,Generates complexity parameter plot (graphics side effect)
+rpart::rpart.control,safe,Pure computation — constructs control parameters list
+nnet::nnet,safe,Pure computation — fits single-hidden-layer neural network
+nnet::multinom,safe,Pure computation — fits multinomial logistic regression
+e1071::svm,safe,Pure computation — fits support vector machine model
+e1071::tune,callable_with_caveats,Performs cross-validation grid search; may be slow and uses RNG
+e1071::naiveBayes,safe,Pure computation — fits Naive Bayes classifier
+e1071::tune.svm,callable_with_caveats,Performs SVM-specific cross-validation grid search; slow and uses RNG
+e1071::skewness,safe,Pure computation — computes skewness of numeric vector
+e1071::kurtosis,safe,Pure computation — computes kurtosis of numeric vector
+psych::describe,safe,Pure computation — descriptive statistics for data frame or matrix
+psych::fa,safe,Pure computation — factor analysis by various extraction methods
+psych::principal,safe,Pure computation — principal components analysis (PCA) via psych
+psych::alpha,safe,Pure computation — Cronbach's alpha and reliability statistics
+psych::corr.test,safe,Pure computation — correlation matrix with significance tests
+psych::factor.scores,safe,Pure computation — computes factor scores from fa/principal output
+psych::KMO,safe,Pure computation — Kaiser-Meyer-Olkin measure of sampling adequacy
+psych::scree,callable_with_caveats,Generates scree plot (graphics side effect on print)
+psych::polychoric,safe,Pure computation — polychoric correlations for ordinal data
+psych::tetrachoric,safe,Pure computation — tetrachoric correlations for binary data
+lavaan::sem,safe,Pure computation — fits structural equation model
+lavaan::cfa,safe,Pure computation — fits confirmatory factor analysis model
+lavaan::growth,safe,Pure computation — fits latent growth curve model
+lavaan::fitMeasures,safe,Pure computation — extracts fit indices from lavaan model
+lavaan::parameterEstimates,safe,Pure computation — extracts parameter table from lavaan model
+lavaan::standardizedSolution,safe,Pure computation — extracts standardized estimates from lavaan model
+lavaan::modindices,safe,Pure computation — computes modification indices for lavaan model
+lavaan::lavTestLRT,safe,Pure computation — likelihood ratio test between lavaan models
+lavaan::inspect,safe,Pure computation — extracts internal matrices from lavaan model
+vegan::diversity,safe,Pure computation — computes alpha diversity indices
+vegan::adonis2,safe,Pure computation — permutational MANOVA (PERMANOVA)
+vegan::rda,safe,Pure computation — redundancy analysis (RDA)
+vegan::cca,safe,Pure computation — canonical correspondence analysis (CCA)
+vegan::vegdist,safe,Pure computation — computes dissimilarity matrix from community data
+vegan::specnumber,safe,Pure computation — counts species richness per sample
+vegan::rarecurve,callable_with_caveats,Generates rarefaction curves plot (graphics side effect)
+vegan::decorana,safe,Pure computation — detrended correspondence analysis (DCA)
+vegan::anova.cca,safe,Pure computation — permutation tests for RDA/CCA models
+vegan::envfit,safe,Pure computation — fits environmental variables to ordination
+performance::check_model,callable_with_caveats,Generates diagnostic plots (graphics side effect on print)
+performance::model_performance,safe,Pure computation — computes performance metrics for model
+performance::compare_performance,safe,Pure computation — compares performance metrics across models
+performance::check_normality,safe,Pure computation — tests normality of model residuals
+performance::check_heteroscedasticity,safe,Pure computation — tests homoscedasticity of model residuals
+performance::r2,safe,Pure computation — computes R-squared variants for model
+performance::icc,safe,Pure computation — intraclass correlation coefficient for mixed models
+performance::check_collinearity,safe,Pure computation — checks for multicollinearity in model
+parameters::model_parameters,safe,Pure computation — extracts tidy parameter table from model
+parameters::standardize_parameters,safe,Pure computation — standardized parameter estimates
+parameters::bootstrap_parameters,callable_with_caveats,Bootstraps model parameters; uses RNG and may be slow
+parameters::p_value,safe,Pure computation — extracts p-values from model
+parameters::ci,safe,Pure computation — confidence intervals for model parameters
+parameters::standard_error,safe,Pure computation — standard errors for model parameters
+effectsize::cohens_d,safe,Pure computation — Cohen's d effect size for mean difference
+effectsize::eta_squared,safe,Pure computation — eta-squared effect size for ANOVA
+effectsize::cramers_v,safe,Pure computation — Cramer's V for contingency tables
+effectsize::interpret_r,safe,Pure computation — interprets correlation coefficient magnitude
+effectsize::omega_squared,safe,Pure computation — omega-squared effect size for ANOVA
+effectsize::cohens_f,safe,Pure computation — Cohen's f effect size
+datawizard::describe_distribution,safe,Pure computation — descriptive statistics for numeric variable
+datawizard::standardize,safe,Pure computation — z-score standardization of numeric columns
+datawizard::normalize,safe,Pure computation — 0-1 normalization of numeric columns
+datawizard::rescale,safe,Pure computation — rescales numeric variable to new range
+datawizard::data_filter,callable_with_caveats,Uses NSE for row filtering; otherwise pure computation
+datawizard::data_select,callable_with_caveats,Uses NSE for column selection; otherwise pure computation
+datawizard::data_rename,safe,Pure computation — renames columns by old/new name pairs
+datawizard::data_to_long,safe,Pure computation — pivots data to long format
+datawizard::data_to_wide,safe,Pure computation — pivots data to wide format
+insight::get_parameters,safe,Pure computation — extracts model parameter table
+insight::get_predicted,safe,Pure computation — extracts fitted/predicted values from model
+insight::find_formula,safe,Pure computation — retrieves model formula
+insight::find_response,safe,Pure computation — retrieves response variable name from model
+insight::find_predictors,safe,Pure computation — retrieves predictor variable names from model
+insight::get_data,safe,Pure computation — retrieves data used to fit model
+insight::model_info,safe,Pure computation — queries model family and type metadata
+insight::get_variance,safe,Pure computation — extracts variance components from model
+bayestestR::describe_posterior,safe,Pure computation — posterior summary statistics (mean, SD, HDI, ROPE)
+bayestestR::hdi,safe,Pure computation — highest density interval from posterior
+bayestestR::rope,safe,Pure computation — region of practical equivalence test
+bayestestR::p_direction,safe,Pure computation — probability of direction for posterior
+bayestestR::equivalence_test,safe,Pure computation — equivalence test against ROPE
+bayestestR::bf_parameters,safe,Pure computation — Bayes factors for individual parameters
+bayestestR::map_estimate,safe,Pure computation — maximum a posteriori estimate of posterior
+marginaleffects::avg_slopes,safe,Pure computation — unit-level marginal effects from model
+marginaleffects::predictions,safe,Pure computation — model-based predictions at observed/specified values
+marginaleffects::comparisons,safe,Pure computation — comparisons between predictor levels
+marginaleffects::slopes,safe,Pure computation — partial derivatives (marginal effects) from model
+marginaleffects::avg_comparisons,safe,Pure computation — average marginal comparisons across dataset
+marginaleffects::plot_predictions,callable_with_caveats,Generates predictions plot (graphics side effect on print)
+marginaleffects::avg_slopes,safe,Pure computation — average marginal slopes across dataset
+scales::comma,safe,Pure computation — formats numbers with comma separators
+scales::percent,safe,Pure computation — formats numbers as percentages
+scales::dollar,safe,Pure computation — formats numbers as dollar amounts
+scales::label_comma,safe,Pure computation — creates comma-formatting label function
+scales::label_percent,safe,Pure computation — creates percentage-formatting label function
+scales::rescale,safe,Pure computation — rescales numeric vector to new range
+scales::squish,safe,Pure computation — squishes values into specified range
+scales::number,safe,Pure computation — formats numbers with flexible options
+randomForest::randomForest,safe,Pure computation — fits random forest model (uses RNG; no I/O)
+randomForest::importance,safe,Pure computation — extracts variable importance from random forest
+randomForest::varImpPlot,callable_with_caveats,Generates variable importance plot (graphics side effect)
+randomForest::getTree,safe,Pure computation — extracts single tree from random forest object
+rstanarm::stan_glm,callable_with_caveats,Runs MCMC sampling (uses RNG; computationally intensive; may write temp files)
+rstanarm::stan_glmer,callable_with_caveats,Runs MCMC for mixed-effects model (RNG; slow; may write temp files)
+rstanarm::prior_summary,safe,Pure computation — prints prior specification summary
+rstanarm::posterior_predict,callable_with_caveats,Draws posterior predictive samples (uses RNG)
+rstanarm::posterior_interval,safe,Pure computation — credible intervals from posterior draws
+rstanarm::bayes_R2,safe,Pure computation — Bayesian R-squared from rstanarm model
+brms::brm,callable_with_caveats,Compiles and runs Stan MCMC (RNG; slow; writes Stan temp files)
+brms::prior,safe,Pure computation — constructs prior specification object
+brms::make_stancode,safe,Pure computation — generates Stan code without running model
+brms::make_standata,safe,Pure computation — prepares Stan data list without running model
+brms::conditional_effects,callable_with_caveats,Generates conditional effects plot (graphics side effect on print)
+brms::hypothesis,safe,Pure computation — tests hypotheses on posterior draws
+brms::pp_check,callable_with_caveats,Generates posterior predictive check plot (graphics side effect)
+py::sklearn.linear_model::LinearRegression,safe,Pure computation — OLS regression; no I/O or system modification
+py::sklearn.linear_model::LogisticRegression,safe,Pure computation — logistic regression classifier
+py::sklearn.linear_model::Ridge,safe,Pure computation — L2-regularized linear regression
+py::sklearn.linear_model::Lasso,safe,Pure computation — L1-regularized linear regression
+py::sklearn.linear_model::ElasticNet,safe,Pure computation — combined L1/L2 regularized regression
+py::sklearn.ensemble::RandomForestClassifier,safe,Pure computation — random forest for classification
+py::sklearn.ensemble::RandomForestRegressor,safe,Pure computation — random forest for regression
+py::sklearn.ensemble::GradientBoostingClassifier,safe,Pure computation — gradient boosting classifier
+py::sklearn.ensemble::GradientBoostingRegressor,safe,Pure computation — gradient boosting regressor
+py::sklearn.ensemble::AdaBoostClassifier,safe,Pure computation — AdaBoost classifier
+py::sklearn.tree::DecisionTreeClassifier,safe,Pure computation — decision tree classifier
+py::sklearn.tree::DecisionTreeRegressor,safe,Pure computation — decision tree regressor
+py::sklearn.svm::SVC,safe,Pure computation — support vector classifier
+py::sklearn.svm::SVR,safe,Pure computation — support vector regressor
+py::sklearn.svm::LinearSVC,safe,Pure computation — linear kernel SVM classifier
+py::sklearn.neighbors::KNeighborsClassifier,safe,Pure computation — k-nearest neighbors classifier
+py::sklearn.neighbors::KNeighborsRegressor,safe,Pure computation — k-nearest neighbors regressor
+py::sklearn.cluster::KMeans,safe,Pure computation — k-means clustering
+py::sklearn.cluster::DBSCAN,safe,Pure computation — density-based spatial clustering
+py::sklearn.cluster::AgglomerativeClustering,safe,Pure computation — hierarchical agglomerative clustering
+py::sklearn.decomposition::PCA,safe,Pure computation — principal component analysis
+py::sklearn.decomposition::TruncatedSVD,safe,Pure computation — truncated SVD for sparse matrices
+py::sklearn.decomposition::NMF,safe,Pure computation — non-negative matrix factorization
+py::sklearn.preprocessing::StandardScaler,safe,Pure computation — zero-mean unit-variance scaling
+py::sklearn.preprocessing::MinMaxScaler,safe,Pure computation — min-max feature scaling
+py::sklearn.preprocessing::LabelEncoder,safe,Pure computation — encodes target labels as integers
+py::sklearn.preprocessing::OneHotEncoder,safe,Pure computation — one-hot encoding of categorical features
+py::sklearn.metrics::accuracy_score,safe,Pure computation — classification accuracy
+py::sklearn.metrics::precision_score,safe,Pure computation — classification precision
+py::sklearn.metrics::recall_score,safe,Pure computation — classification recall
+py::sklearn.metrics::f1_score,safe,Pure computation — F1 score for classification
+py::sklearn.metrics::confusion_matrix,safe,Pure computation — confusion matrix
+py::sklearn.metrics::roc_auc_score,safe,Pure computation — ROC area under curve
+py::sklearn.metrics::mean_squared_error,safe,Pure computation — mean squared error
+py::sklearn.metrics::r2_score,safe,Pure computation — coefficient of determination
+py::sklearn.metrics::classification_report,safe,Pure computation — text report of classification metrics
+py::sklearn.metrics::mean_absolute_error,safe,Pure computation — mean absolute error
+py::sklearn.model_selection::train_test_split,safe,Pure computation — splits arrays into train and test sets
+py::sklearn.model_selection::cross_val_score,safe,Pure computation — evaluates model by cross-validation
+py::sklearn.model_selection::GridSearchCV,callable_with_caveats,Grid search with cross-validation; can be very slow with large param grids
+py::sklearn.model_selection::RandomizedSearchCV,callable_with_caveats,Randomized hyperparameter search; uses RNG and can be slow
+py::statsmodels.api::OLS,safe,Pure computation — ordinary least squares regression
+py::statsmodels.api::GLS,safe,Pure computation — generalized least squares regression
+py::statsmodels.api::WLS,safe,Pure computation — weighted least squares regression
+py::statsmodels.api::Logit,safe,Pure computation — logistic regression via MLE
+py::statsmodels.api::Probit,safe,Pure computation — probit regression via MLE
+py::statsmodels.formula.api::ols,safe,Pure computation — formula-based OLS regression
+py::statsmodels.formula.api::logit,safe,Pure computation — formula-based logistic regression
+py::statsmodels.formula.api::glm,safe,Pure computation — formula-based GLM
+py::scipy.stats::ttest_ind,safe,Pure computation — two-sample independent t-test
+py::scipy.stats::ttest_1samp,safe,Pure computation — one-sample t-test
+py::scipy.stats::mannwhitneyu,safe,Pure computation — Mann-Whitney U test
+py::scipy.stats::wilcoxon,safe,Pure computation — Wilcoxon signed-rank test
+py::scipy.stats::chi2_contingency,safe,Pure computation — chi-squared test of independence
+py::scipy.stats::pearsonr,safe,Pure computation — Pearson correlation coefficient and p-value
+py::scipy.stats::spearmanr,safe,Pure computation — Spearman rank correlation
+py::scipy.stats::kstest,safe,Pure computation — Kolmogorov-Smirnov goodness-of-fit test
+py::scipy.stats::shapiro,safe,Pure computation — Shapiro-Wilk normality test
+py::scipy.stats::normaltest,safe,Pure computation — D'Agostino-Pearson normality test
+py::scipy.stats::f_oneway,safe,Pure computation — one-way ANOVA F-test
+py::scipy.stats::kruskal,safe,Pure computation — Kruskal-Wallis H-test
+py::scipy.stats::linregress,safe,Pure computation — simple linear regression
+py::pandas::read_csv,safe,File read only — reads CSV file into DataFrame
+py::pandas::read_excel,safe,File read only — reads Excel file into DataFrame
+py::pandas::DataFrame,safe,Pure computation — constructs DataFrame from data
+py::pandas::Series,safe,Pure computation — constructs Series from data
+py::pandas::merge,safe,Pure computation — database-style join of two DataFrames
+py::pandas::concat,safe,Pure computation — concatenates DataFrames along axis
+py::pandas::pivot_table,safe,Pure computation — creates spreadsheet-style pivot table
+py::pandas::read_parquet,safe,File read only — reads Parquet file into DataFrame
+class::knn,safe,Pure computation — k-nearest neighbors classification
+gbm::gbm,callable_with_caveats,Gradient boosting — slow on large data and uses RNG
+gbm::gbm.perf,safe,Pure computation — optimal number of boosting iterations
+gbm::predict.gbm,safe,Pure computation — prediction from gradient boosting model
+gbm::summary.gbm,callable_with_caveats,Produces variable importance plot by default
+bayestestR::bayesfactor,safe,Pure computation — Bayes factor model comparison
+bayestestR::bayesfactor_models,safe,Pure computation — Bayes factor for model comparison
+tseries::adf.test,safe,Pure computation — Augmented Dickey-Fuller unit root test
+quantreg::rq,safe,Pure computation — quantile regression
+xgboost::xgboost,callable_with_caveats,Gradient boosting — slow on large data and uses RNG
+xgboost::xgb.train,callable_with_caveats,XGBoost training — slow and uses RNG
+haven::read_spss,safe,Pure computation — reads SPSS .sav/.por files

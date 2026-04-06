@@ -1,0 +1,301 @@
+// ============================================================================
+// StatTools — Core Type Definitions
+// ============================================================================
+
+import { writeFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { randomBytes as cryptoRandomBytes } from "node:crypto";
+
+// ----------------------------------------------------------------------------
+// Object Handle System
+// ----------------------------------------------------------------------------
+
+export type HandleType =
+  | "data"
+  | "model"
+  | "prediction"
+  | "test_result"
+  | "generic";
+
+export type PersistenceClass =
+  | "serializable"    // Safe for saveRDS/readRDS (data.frame, lm, htest, etc.)
+  | "ephemeral"       // Lost on worker recycle (connections, external pointers)
+  | "reconstructable"; // Phase 2: restore via stored call expression
+
+/** Whitelist of R classes known to survive saveRDS/readRDS safely. */
+export const SERIALIZABLE_R_CLASSES: ReadonlySet<string> = new Set([
+  "data.frame",
+  "tbl_df",
+  "data.table",
+  "matrix",
+  "array",
+  "list",
+  "numeric",
+  "integer",
+  "character",
+  "logical",
+  "complex",
+  "factor",
+  "Date",
+  "POSIXct",
+  "POSIXlt",
+  "lm",
+  "glm",
+  "nls",
+  "htest",
+  "anova",
+  "aov",
+  "summary.lm",
+  "summary.glm",
+  "lmerMod",
+  "glmerMod",
+  "coxph",
+  "survfit",
+  "survreg",
+  "prcomp",
+  "kmeans",
+  "ts",
+  "mts",
+  "formula",
+  "table",
+  "ftable",
+  "dendrogram",
+  "dist",
+  "density",
+]);
+
+export function getPersistenceClass(rClass: string): PersistenceClass {
+  if (SERIALIZABLE_R_CLASSES.has(rClass)) {
+    return "serializable";
+  }
+  return "ephemeral";
+}
+
+export type RuntimeType = "r" | "python";
+
+export type ObjectHandle = {
+  readonly id: string;
+  readonly type: HandleType;
+  readonly runtime: RuntimeType;
+  readonly rClass: string;
+  readonly persistenceClass: PersistenceClass;
+  readonly sessionId: string;
+  readonly workerId: string;
+  readonly createdBy: string;
+  readonly createdAt: number;
+  lastAccessedAt: number;
+  readonly sizeBytes: number;
+  readonly summary: string;
+  readonly schema?: Readonly<Record<string, string>>;
+};
+
+// ----------------------------------------------------------------------------
+// R Bridge Protocol (NDJSON over stdin/stdout)
+// ----------------------------------------------------------------------------
+
+export type RpcRequest = {
+  readonly id: number;
+  readonly method:
+    | "call"
+    | "call_method"
+    | "select_columns"
+    | "load_data"
+    | "schema"
+    | "inspect"
+    | "persist"
+    | "restore"
+    | "list_objects";
+  readonly params: Record<string, unknown>;
+};
+
+export type RpcResponse = {
+  readonly id: number;
+  readonly result?: unknown;
+  readonly error?: {
+    readonly code: number;
+    readonly message: string;
+    readonly traceback?: string;
+    readonly suggestion?: string;
+  };
+  readonly warnings?: readonly string[];
+  readonly objectsCreated?: readonly RpcObjectCreated[];
+  readonly persistFailed?: readonly string[];
+};
+
+export type RpcObjectCreated = {
+  readonly id: string;
+  readonly type: HandleType;
+  readonly rClass: string;
+  readonly summary: string;
+  readonly sizeBytes: number;
+  readonly schema?: Record<string, string>;
+};
+
+// ----------------------------------------------------------------------------
+// Session State (immutable updates)
+// ----------------------------------------------------------------------------
+
+export type SessionState = {
+  readonly sessionId: string;
+  readonly handles: ReadonlyMap<string, ObjectHandle>;
+  readonly resolvedFunctions: ReadonlySet<string>; // "pkg::fn" keys
+  readonly loadedPackages: ReadonlySet<string>;
+  readonly nextId: Readonly<Record<HandleType, number>>;
+};
+
+export function createSessionState(sessionId: string): SessionState {
+  return {
+    sessionId,
+    handles: new Map(),
+    resolvedFunctions: new Set(),
+    loadedPackages: new Set(),
+    nextId: { data: 0, model: 0, prediction: 0, test_result: 0, generic: 0 },
+  };
+}
+
+export function nextHandleId(
+  state: SessionState,
+  type: HandleType,
+): { id: string; nextId: Readonly<Record<HandleType, number>> } {
+  const counter = state.nextId[type] + 1;
+  const prefix =
+    type === "test_result" ? "test" : type === "prediction" ? "pred" : type;
+  return {
+    id: `${prefix}_${counter}`,
+    nextId: { ...state.nextId, [type]: counter },
+  };
+}
+
+// ----------------------------------------------------------------------------
+// R Worker
+// ----------------------------------------------------------------------------
+
+export type WorkerStatus = "idle" | "busy" | "recycling" | "dead";
+
+export type RWorkerState = {
+  readonly id: string;
+  readonly status: WorkerStatus;
+  readonly callCount: number;
+  readonly startedAt: number;
+  readonly sessionId: string;
+  readonly loadedPackages: ReadonlySet<string>;
+};
+
+export type WorkerPoolConfig = {
+  readonly maxWorkers: number;
+  readonly recycleAfterCalls: number;
+  readonly recycleAfterMemoryMB: number;
+  readonly recycleAfterMinutes: number;
+  readonly callTimeoutMs: number;
+  readonly rPath: string;
+};
+
+export const DEFAULT_POOL_CONFIG: WorkerPoolConfig = {
+  maxWorkers: 2, // 1 active + 1 standby
+  recycleAfterCalls: 100,
+  recycleAfterMemoryMB: 2048,
+  recycleAfterMinutes: 60,
+  callTimeoutMs: 30_000,
+  rPath: "Rscript",
+};
+
+// ----------------------------------------------------------------------------
+// Safety Classification
+// ----------------------------------------------------------------------------
+
+export type SafetyClass =
+  | "safe"
+  | "callable_with_caveats"
+  | "unsafe"
+  | "unclassified";
+
+// ----------------------------------------------------------------------------
+// Tool Result Envelope
+// ----------------------------------------------------------------------------
+
+export type StatToolResult = {
+  readonly content: ReadonlyArray<{ type: "text"; text: string }>;
+  readonly isError?: boolean;
+};
+
+export function successResult(data: unknown): StatToolResult {
+  const json = JSON.stringify(data, null, 2);
+
+  // If result exceeds 100KB, persist to disk and return preview
+  if (json.length > 100_000) {
+    try {
+      const dir = join(tmpdir(), "stattools", "results");
+      mkdirSync(dir, { recursive: true });
+      const filepath = join(dir, `result_${cryptoRandomBytes(6).toString("hex")}.json`);
+      writeFileSync(filepath, json, "utf-8");
+
+      const preview = json.slice(0, 2000);
+      const sizeKB = (json.length / 1024).toFixed(1);
+      return {
+        content: [{
+          type: "text" as const,
+          text: JSON.stringify({
+            _persisted: true,
+            message: `Result too large (${sizeKB}KB). Full output saved to: ${filepath}`,
+            preview_text: preview + "\n... (truncated)",
+            original_size_kb: parseFloat(sizeKB),
+            filepath,
+          }, null, 2),
+        }],
+      };
+    } catch {
+      // Fallback: return full result even if persistence fails
+    }
+  }
+
+  return {
+    content: [{ type: "text", text: json }],
+  };
+}
+
+export function errorResult(
+  message: string,
+  details?: Record<string, unknown>,
+): StatToolResult {
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify({ error: true, message, ...details }, null, 2),
+      },
+    ],
+    isError: true,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Reactive Store (from Claude Code's state/store.ts pattern)
+// ----------------------------------------------------------------------------
+
+export type Store<T> = {
+  getState: () => T;
+  setState: (updater: (prev: T) => T) => void;
+  subscribe: (listener: () => void) => () => void;
+};
+
+export function createStore<T>(initialState: T): Store<T> {
+  let state = initialState;
+  const listeners = new Set<() => void>();
+
+  return {
+    getState: () => state,
+    setState: (updater: (prev: T) => T) => {
+      const next = updater(state);
+      if (Object.is(next, state)) return;
+      state = next;
+      for (const listener of listeners) listener();
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}

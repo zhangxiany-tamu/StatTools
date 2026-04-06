@@ -1,0 +1,1004 @@
+{
+  "_description": "Search quality benchmark for StatTools. Categories: regression, testing, wrangling, survival, mixed, timeseries, bayesian, ml, visualization, io, python, diagnostics. Pass rate = queries where all expected_top3 functions appear in top 3 results. Queries marked requires_install=true are excluded from CI gates.",
+  "queries": [
+    {
+      "query": "linear regression",
+      "expected_top3": [
+        "stats::lm"
+      ],
+      "note": "Most basic statistical model — curated alias must fire",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "logistic regression binary outcome",
+      "expected_top3": [
+        "stats::glm"
+      ],
+      "note": "GLM with family=binomial is the canonical answer",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "polynomial regression quadratic terms",
+      "expected_top3": [
+        "stats::lm"
+      ],
+      "note": "Polynomial terms are added via lm() with poly() or I(); lm is the entry point",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "ridge regression L2 penalty",
+      "expected_top3": [
+        "glmnet::glmnet"
+      ],
+      "note": "glmnet with alpha=0 for ridge; MASS::lm.ridge is also valid",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "lasso regression L1 penalty variable selection",
+      "expected_top3": [
+        "glmnet::glmnet"
+      ],
+      "note": "glmnet with alpha=1 for lasso — curated alias must fire",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "elastic net penalized regression",
+      "expected_top3": [
+        "glmnet::glmnet"
+      ],
+      "note": "glmnet with 0 < alpha < 1 — curated alias must fire",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "cross validated penalized regression tuning lambda",
+      "expected_top3": [
+        "glmnet::cv.glmnet"
+      ],
+      "note": "cv.glmnet selects optimal lambda via cross-validation",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "quantile regression median regression",
+      "expected_top3": [
+        "quantreg::rq"
+      ],
+      "note": "Quantile regression — rq not rlm",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "fixed effects panel data regression",
+      "expected_top3": [
+        "fixest::feols"
+      ],
+      "note": "fixest is the modern fixed-effects workhorse",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "ordinal logistic regression ordered outcome",
+      "expected_top3": [
+        "MASS::polr"
+      ],
+      "note": "Proportional odds logistic regression",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "multinomial logistic regression multiple categories",
+      "expected_top3": [
+        "nnet::multinom"
+      ],
+      "note": "Multinomial log-linear model via neural net",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "robust regression resistant to outliers",
+      "expected_top3": [
+        "MASS::rlm"
+      ],
+      "note": "M-estimation via MASS::rlm",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "weighted least squares regression",
+      "expected_top3": [
+        "stats::lm"
+      ],
+      "note": "lm() accepts a weights argument for WLS",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "Poisson regression count data",
+      "expected_top3": [
+        "stats::glm"
+      ],
+      "note": "GLM with family=poisson",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "negative binomial regression overdispersion",
+      "expected_top3": [
+        "MASS::glm.nb"
+      ],
+      "note": "Negative binomial GLM from MASS",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "probit regression latent variable",
+      "expected_top3": [
+        "stats::glm"
+      ],
+      "note": "GLM with family=binomial and link=probit",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "stepwise model selection AIC",
+      "expected_top3": [
+        "stats::step"
+      ],
+      "note": "stats::step performs stepwise AIC-based selection",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "generalized additive model smooth terms",
+      "expected_top3": [
+        "mgcv::gam"
+      ],
+      "note": "GAMs via mgcv — the de facto R package",
+      "category": "regression",
+      "requires_install": false
+    },
+    {
+      "query": "two sample t test compare means",
+      "expected_top3": [
+        "stats::t.test"
+      ],
+      "note": "Most common parametric test — name variant must match",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "chi squared test independence contingency table",
+      "expected_top3": [
+        "stats::chisq.test"
+      ],
+      "note": "Goodness-of-fit or independence test",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Mann Whitney U test nonparametric two groups",
+      "expected_top3": [
+        "stats::wilcox.test"
+      ],
+      "note": "wilcox.test handles both Wilcoxon and Mann-Whitney",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Wilcoxon signed rank test paired",
+      "expected_top3": [
+        "stats::wilcox.test"
+      ],
+      "note": "Paired nonparametric test — same function, paired=TRUE",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Fisher exact test small sample count data",
+      "expected_top3": [
+        "stats::fisher.test"
+      ],
+      "note": "Exact test for 2x2 tables",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "one way ANOVA compare group means",
+      "expected_top3": [
+        "stats::aov"
+      ],
+      "note": "Standard ANOVA via stats::aov",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Kruskal Wallis nonparametric ANOVA",
+      "expected_top3": [
+        "stats::kruskal.test"
+      ],
+      "note": "Nonparametric alternative to one-way ANOVA",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Friedman test nonparametric repeated measures",
+      "expected_top3": [
+        "stats::friedman.test"
+      ],
+      "note": "Nonparametric two-way test by ranks",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Bartlett test equality of variances",
+      "expected_top3": [
+        "stats::bartlett.test"
+      ],
+      "note": "Tests homogeneity of variances (normal assumption)",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "Levene test homogeneity of variance",
+      "expected_top3": [
+        "car::leveneTest"
+      ],
+      "note": "Robust to non-normality unlike Bartlett",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "McNemar test paired proportions matched",
+      "expected_top3": [
+        "stats::mcnemar.test"
+      ],
+      "note": "Tests paired nominal outcomes",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "test difference in proportions two groups",
+      "expected_top3": [
+        "stats::prop.test"
+      ],
+      "note": "Two-proportion z-test",
+      "category": "testing",
+      "requires_install": false
+    },
+    {
+      "query": "filter rows by condition subset data frame",
+      "expected_top3": [
+        "dplyr::filter"
+      ],
+      "note": "DISAMBIGUATION: dplyr::filter must rank above stats::filter (time series)",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "sort data frame by column ascending descending",
+      "expected_top3": [
+        "dplyr::arrange"
+      ],
+      "note": "dplyr::arrange requires safety override to be classified",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "group by and summarize aggregate statistics",
+      "expected_top3": [
+        "dplyr::summarise"
+      ],
+      "note": "Core dplyr group_by + summarise workflow",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "pivot wider reshape long to wide format",
+      "expected_top3": [
+        "tidyr::pivot_wider"
+      ],
+      "note": "tidyr reshape: long to wide",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "pivot longer melt wide to long format",
+      "expected_top3": [
+        "tidyr::pivot_longer"
+      ],
+      "note": "tidyr reshape: wide to long",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "left join merge two data frames by key",
+      "expected_top3": [
+        "dplyr::left_join"
+      ],
+      "note": "SQL-style join",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "select columns subset variables from data frame",
+      "expected_top3": [
+        "dplyr::select"
+      ],
+      "note": "Column selection via dplyr::select",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "rename columns in data frame",
+      "expected_top3": [
+        "dplyr::rename"
+      ],
+      "note": "dplyr::rename preserves all columns",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "create new column computed variable mutate",
+      "expected_top3": [
+        "dplyr::mutate"
+      ],
+      "note": "Add computed column to data frame",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "get distinct unique rows deduplicate",
+      "expected_top3": [
+        "dplyr::distinct"
+      ],
+      "note": "Remove duplicate rows",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "count occurrences frequency table",
+      "expected_top3": [
+        "dplyr::count"
+      ],
+      "note": "Count by group",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "string manipulation pattern replace regex",
+      "expected_top3": [
+        "stringr::str_replace"
+      ],
+      "note": "stringr wraps regex operations consistently",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
+      "query": "survival analysis Kaplan Meier estimate",
+      "expected_top3": [
+        "survival::survfit"
+      ],
+      "note": "KM curve via survfit — curated alias must fire",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "cox proportional hazards regression survival",
+      "expected_top3": [
+        "survival::coxph"
+      ],
+      "note": "Semi-parametric survival model — curated alias must fire",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "log rank test compare survival curves",
+      "expected_top3": [
+        "survival::survdiff"
+      ],
+      "note": "survdiff performs the log-rank test",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "create survival object time event indicator",
+      "expected_top3": [
+        "survival::Surv"
+      ],
+      "note": "Surv() object is the entry point for all survival analyses",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "parametric survival model Weibull exponential",
+      "expected_top3": [
+        "survival::survreg"
+      ],
+      "note": "Accelerated failure time model",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "test proportional hazards assumption Cox model",
+      "expected_top3": [
+        "survival::cox.zph"
+      ],
+      "note": "Schoenfeld residual test for PH assumption",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "concordance statistic C-index discrimination survival",
+      "expected_top3": [
+        "survival::concordance"
+      ],
+      "note": "Harrell's C-index",
+      "category": "survival",
+      "requires_install": false
+    },
+    {
+      "query": "mixed effects model random intercept longitudinal",
+      "expected_top3": [
+        "lme4::lmer"
+      ],
+      "note": "Linear mixed effects model — curated alias must fire",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "random slope model varying coefficient",
+      "expected_top3": [
+        "lme4::lmer"
+      ],
+      "note": "lmer supports random slope via (1 + x | group) syntax",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "generalized linear mixed model binary outcome",
+      "expected_top3": [
+        "lme4::glmer"
+      ],
+      "note": "GLMM for non-Gaussian outcomes",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "nested random effects hierarchical model",
+      "expected_top3": [
+        "lme4::lmer"
+      ],
+      "note": "Nested structure via (1 | school/class) syntax",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "crossed random effects subjects items",
+      "expected_top3": [
+        "lme4::lmer"
+      ],
+      "note": "Multiple independent random effects",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "linear mixed model serial correlation nlme",
+      "expected_top3": [
+        "nlme::lme"
+      ],
+      "note": "nlme::lme models correlation structures",
+      "category": "mixed",
+      "requires_install": false
+    },
+    {
+      "query": "time series forecast predict future values",
+      "expected_top3": [
+        "forecast::forecast"
+      ],
+      "note": "Generic forecast function from the forecast package",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "ARIMA model fit autoregressive integrated moving average",
+      "expected_top3": [
+        "forecast::auto.arima"
+      ],
+      "note": "auto.arima selects p,d,q automatically",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "exponential smoothing state space model Holt Winters",
+      "expected_top3": [
+        "forecast::ets"
+      ],
+      "note": "ETS model via forecast package",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "seasonal decomposition trend seasonality remainder",
+      "expected_top3": [
+        "stats::stl"
+      ],
+      "note": "STL decomposition: Seasonal and Trend decomposition using Loess",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "autocorrelation function lag plot ACF",
+      "expected_top3": [
+        "stats::acf"
+      ],
+      "note": "ACF and PACF for model identification",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "unit root test stationarity Augmented Dickey Fuller",
+      "expected_top3": [
+        "tseries::adf.test"
+      ],
+      "note": "ADF test is in tseries package",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "Ljung Box test white noise residuals autocorrelation",
+      "expected_top3": [
+        "stats::Box.test"
+      ],
+      "note": "Tests for residual autocorrelation",
+      "category": "timeseries",
+      "requires_install": false
+    },
+    {
+      "query": "Bayesian linear regression posterior inference",
+      "expected_top3": [
+        "rstanarm::stan_glm"
+      ],
+      "note": "Bayesian GLM via Stan — curated alias must fire; requires_install because rstanarm compiles Stan",
+      "category": "bayesian",
+      "requires_install": true
+    },
+    {
+      "query": "Bayesian generalized linear model Stan MCMC",
+      "expected_top3": [
+        "brms::brm"
+      ],
+      "note": "brms provides a formula interface to Stan",
+      "category": "bayesian",
+      "requires_install": true
+    },
+    {
+      "query": "posterior distribution credible interval summary",
+      "expected_top3": [
+        "bayestestR::describe_posterior"
+      ],
+      "note": "bayestestR utilities for posterior summaries",
+      "category": "bayesian",
+      "requires_install": false
+    },
+    {
+      "query": "highest density interval credible interval HDI",
+      "expected_top3": [
+        "bayestestR::hdi"
+      ],
+      "note": "HDI as alternative to equal-tailed credible interval",
+      "category": "bayesian",
+      "requires_install": false
+    },
+    {
+      "query": "Bayes factor model comparison hypothesis test",
+      "expected_top3": [
+        "bayestestR::bayesfactor_models"
+      ],
+      "note": "bayesfactor_models is the correct function for model comparison",
+      "category": "bayesian",
+      "requires_install": false
+    },
+    {
+      "query": "region of practical equivalence ROPE equivalence test",
+      "expected_top3": [
+        "bayestestR::rope"
+      ],
+      "note": "ROPE test for Bayesian equivalence",
+      "category": "bayesian",
+      "requires_install": false
+    },
+    {
+      "query": "random forest classification regression ensemble",
+      "expected_top3": [
+        "randomForest::randomForest"
+      ],
+      "note": "Breiman's random forest implementation",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "support vector machine classification kernel",
+      "expected_top3": [
+        "e1071::svm"
+      ],
+      "note": "SVM via e1071 (libsvm wrapper)",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "decision tree classification regression rpart",
+      "expected_top3": [
+        "rpart::rpart"
+      ],
+      "note": "Recursive partitioning — CART algorithm",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "k nearest neighbors classification predict",
+      "expected_top3": [
+        "class::knn"
+      ],
+      "note": "k-NN classification",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "gradient boosting XGBoost ensemble trees",
+      "expected_top3": [
+        "xgboost::xgboost"
+      ],
+      "note": "XGBoost is installed and correct for this query",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "naive Bayes text classification probabilistic",
+      "expected_top3": [
+        "e1071::naiveBayes"
+      ],
+      "note": "Gaussian naive Bayes via e1071",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "neural network single hidden layer feed forward",
+      "expected_top3": [
+        "nnet::nnet"
+      ],
+      "note": "Single-hidden-layer neural net in base R",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "k means clustering unsupervised partition",
+      "expected_top3": [
+        "stats::kmeans"
+      ],
+      "note": "Lloyd's algorithm in base R",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "principal component analysis dimensionality reduction",
+      "expected_top3": [
+        "stats::prcomp"
+      ],
+      "note": "PCA — curated alias must fire; prcomp preferred over princomp",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "k fold cross validation model evaluation",
+      "expected_top3": [
+        "caret::trainControl"
+      ],
+      "note": "Cross-validation setup in caret",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "train test split holdout evaluation",
+      "expected_top3": [
+        "caret::createDataPartition"
+      ],
+      "note": "Data splitting for train/test",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "variable importance feature importance predictors",
+      "expected_top3": [
+        "caret::varImp"
+      ],
+      "note": "Variable importance extraction",
+      "category": "ml",
+      "requires_install": false
+    },
+    {
+      "query": "scatter plot two continuous variables",
+      "expected_top3": [
+        "ggplot2::geom_point"
+      ],
+      "note": "Core ggplot2 geom for scatterplots",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "bar chart categorical frequency plot",
+      "expected_top3": [
+        "ggplot2::geom_bar"
+      ],
+      "note": "Frequency bar chart",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "histogram distribution binned counts",
+      "expected_top3": [
+        "ggplot2::geom_histogram"
+      ],
+      "note": "Distribution visualization",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "box plot quartile outlier distribution comparison",
+      "expected_top3": [
+        "ggplot2::geom_boxplot"
+      ],
+      "note": "Box-and-whisker plot",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "line plot time series trend over time",
+      "expected_top3": [
+        "ggplot2::geom_line"
+      ],
+      "note": "Connected line plot for sequential data",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "heatmap tile plot correlation matrix",
+      "expected_top3": [
+        "ggplot2::geom_tile"
+      ],
+      "note": "2D tile/heatmap via geom_tile",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "density plot kernel density estimate smooth distribution",
+      "expected_top3": [
+        "ggplot2::geom_density"
+      ],
+      "note": "KDE visualization layer",
+      "category": "visualization",
+      "requires_install": false
+    },
+    {
+      "query": "read csv file import tabular data",
+      "expected_top3": [
+        "utils::read.csv"
+      ],
+      "note": "Base R CSV import",
+      "category": "io",
+      "requires_install": false
+    },
+    {
+      "query": "read Excel spreadsheet xlsx import",
+      "expected_top3": [
+        "readxl::read_excel"
+      ],
+      "note": "readxl::read_excel; may not be installed but is the canonical answer",
+      "category": "io",
+      "requires_install": true
+    },
+    {
+      "query": "read SPSS file foreign haven import",
+      "expected_top3": [
+        "haven::read_sav"
+      ],
+      "note": "SPSS .sav reader",
+      "category": "io",
+      "requires_install": false
+    },
+    {
+      "query": "read Stata dta file import",
+      "expected_top3": [
+        "haven::read_dta"
+      ],
+      "note": "haven::read_dta for Stata .dta files",
+      "category": "io",
+      "requires_install": false
+    },
+    {
+      "query": "read parquet columnar file fast import",
+      "expected_top3": [
+        "arrow::read_parquet"
+      ],
+      "note": "arrow::read_parquet is canonical; arrow may not be installed",
+      "category": "io",
+      "requires_install": true
+    },
+    {
+      "query": "fast CSV import large file data.table",
+      "expected_top3": [
+        "data.table::fread"
+      ],
+      "note": "fread is the fastest CSV reader in R",
+      "category": "io",
+      "requires_install": false
+    },
+    {
+      "query": "sklearn linear regression Python fit predict",
+      "expected_top3": [
+        "py::sklearn.linear_model::LinearRegression"
+      ],
+      "note": "scikit-learn linear regression class",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn random forest classifier Python ensemble",
+      "expected_top3": [
+        "py::sklearn.ensemble::RandomForestClassifier"
+      ],
+      "note": "scikit-learn random forest for classification",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn PCA dimensionality reduction Python",
+      "expected_top3": [
+        "py::sklearn.decomposition::PCA"
+      ],
+      "note": "scikit-learn PCA transformer",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn standard scaler normalize features Python",
+      "expected_top3": [
+        "py::sklearn.preprocessing::StandardScaler"
+      ],
+      "note": "Z-score standardization of features",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "scipy t test independent samples Python",
+      "expected_top3": [
+        "py::scipy.stats::ttest_ind"
+      ],
+      "note": "scipy.stats two-sample t-test",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "statsmodels OLS ordinary least squares Python regression",
+      "expected_top3": [
+        "py::statsmodels.api::OLS"
+      ],
+      "note": "statsmodels OLS with formula interface",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "pandas read csv Python dataframe import",
+      "expected_top3": [
+        "py::pandas::read_csv"
+      ],
+      "note": "pandas CSV reader returning DataFrame",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn cross validation score evaluate model Python",
+      "expected_top3": [
+        "py::sklearn.model_selection::cross_val_score"
+      ],
+      "note": "k-fold cross validation scoring",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn confusion matrix classification metrics Python",
+      "expected_top3": [
+        "py::sklearn.metrics::confusion_matrix"
+      ],
+      "note": "Confusion matrix for classifier evaluation",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn train test split holdout Python",
+      "expected_top3": [
+        "py::sklearn.model_selection::train_test_split"
+      ],
+      "note": "Random train/test partition",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "sklearn pipeline chain preprocessing model Python",
+      "expected_top3": [
+        "py::sklearn.pipeline::Pipeline"
+      ],
+      "note": "Sequential pipeline of transformers and estimator",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "statsmodels logistic regression Python binary",
+      "expected_top3": [
+        "py::statsmodels.api::Logit"
+      ],
+      "note": "statsmodels Logit model",
+      "category": "python",
+      "requires_install": true
+    },
+    {
+      "query": "check model assumptions diagnostics residuals",
+      "expected_top3": [
+        "performance::check_model"
+      ],
+      "note": "easystats performance package visual diagnostics",
+      "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "test normality Shapiro Wilk",
+      "expected_top3": [
+        "stats::shapiro.test"
+      ],
+      "note": "Gold standard normality test for n < 5000",
+      "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "heteroscedasticity test non constant variance Breusch Pagan",
+      "expected_top3": [
+        "lmtest::bptest"
+      ],
+      "note": "Breusch-Pagan test from lmtest",
+      "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "multicollinearity variance inflation factor VIF",
+      "expected_top3": [
+        "car::vif"
+      ],
+      "note": "VIF for detecting multicollinearity",
+      "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "effect size Cohen d standardized mean difference",
+      "expected_top3": [
+        "effectsize::cohens_d"
+      ],
+      "note": "easystats effectsize package",
+      "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "robust standard errors heteroskedasticity consistent",
+      "expected_top3": [
+        "sandwich::vcovHC"
+      ],
+      "note": "HC covariance estimator — curated alias must fire",
+      "category": "diagnostics",
+      "requires_install": false
+    }
+  ]
+}
