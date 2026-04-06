@@ -27,22 +27,22 @@ Work in this order:
 
 | Workstream | Package(s) | Canonical workflow | Current status | Blocking primitive | Test file to add/update | Safety override action |
 |---|---|---|---|---|---|---|
-| `primitive` | `stat_plot` foundation | create artifact-producing plot/output path for ggplot/htmlwidget/table results | `blocked` | `stat_plot` | `test/workflows/plot-workflows.test.ts` | none |
-| `primitive` | `stat_extract` foundation | extract vector, select columns, build matrix/data split, create model matrix | `blocked` | `stat_extract` | `test/workflows/extract-workflows.test.ts` | none |
-| `visualization` | `ggplot2` | scatter plot `mpg ~ wt`, color by factor, add smooth line, save artifact | `blocked` | `stat_plot` | `test/workflows/plot-workflows.test.ts` | review `ggplot`, `aes`, `geom_point`, `geom_smooth`, `labs`, `theme_*`, `ggsave` |
+| `primitive` | `stat_plot` foundation | create artifact-producing plot/output path for ggplot/htmlwidget/table results | `validated` | `stat_plot` | `test/workflows/plot-workflows.test.ts` | none |
+| `primitive` | `stat_extract` foundation | extract vector, select columns, build matrix/data split, create model matrix | `validated` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | none |
+| `visualization` | `ggplot2` | scatter plot `mpg ~ wt`, color by factor, add smooth line, save artifact | `validated` | `stat_plot` | `test/workflows/plot-workflows.test.ts` | already classified |
 | `visualization` | `plotly` | interactive scatter/table artifact from tabular data | `blocked` | `stat_plot`, `artifact_export` | `test/workflows/plot-workflows.test.ts` | review core constructor helpers only |
 | `visualization` | `DT` | render data frame preview as browsable table artifact | `blocked` | `stat_plot`, `artifact_export` | `test/workflows/plot-workflows.test.ts` | review `DT::datatable` |
-| `wrangling` | `dplyr` | filter, mutate, group_by, summarize, arrange on loaded CSV | `partial` | `stat_extract` | `test/workflows/wrangling-workflows.test.ts` | review `filter`, `mutate`, `summarise`, `arrange`, `group_by`, `select` |
+| `wrangling` | `dplyr` | filter, mutate, group_by, summarize, arrange on loaded CSV | `partial` | NSE limitation | `test/workflows/ml-workflows.test.ts` | already classified; NSE verbs are callable_with_caveats |
 | `wrangling` | `tidyr` | `pivot_wider`, `pivot_longer`, `separate`, `unite` | `validated` | none | `test/workflows/wrangling-workflows.test.ts` | expand from `pivot_wider` to core reshape verbs |
 | `wrangling` | `readr`, `readxl`, `haven` | import CSV/XLSX/SPSS and inspect schema | `partial` | `artifact_export` for some outputs | `test/workflows/io-workflows.test.ts` | review common import functions actually exposed by workflows |
 | `wrangling` | `stringr`, `lubridate` | text cleanup and date parsing in a dplyr pipeline | `partial` | `stat_extract` | `test/workflows/wrangling-workflows.test.ts` | review `str_*` core verbs and `ymd`, `mdy`, `floor_date`, `month` |
-| `model-output` | `broom` | tidy/glance/augment a fitted linear or logistic model | `partial` | none | `test/workflows/model-output-workflows.test.ts` | review `tidy`, `glance`, `augment` |
-| `inference` | `car`, `lmtest`, `sandwich` | VIF, heteroskedasticity tests, robust covariance on `lm` | `partial` | none | `test/workflows/model-output-workflows.test.ts` | review `vif`, `bptest`, `coeftest`, `vcovHC` |
-| `mixed-models` | `lme4` | random intercept and random slope models with extracted summaries | `validated` | none | `test/workflows/mixed-workflows.test.ts` | expand review from `lmer` to `glmer` and summary helpers |
-| `survival` | `survival` | `coxph` fit plus survival summary and prediction objects | `partial` | none | `test/workflows/survival-workflows.test.ts` | review `coxph`, `survfit`, `Surv`, basic predict/summary path |
-| `ml-core` | `glmnet` | build `x` matrix and `y` vector, fit `cv.glmnet`, inspect lambda/min coefficients | `blocked` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | review `cv.glmnet`, `glmnet`, maybe `predict.cv.glmnet` |
-| `ml-core` | `caret`, `recipes`, `rsample` | train/test split, preprocessing recipe, train model, evaluate | `blocked` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | review narrow training/eval path only |
-| `ml-core` | `randomForest`, `ranger`, `e1071`, `rpart`, `xgboost` | fit classifier/regressor, predict, variable importance | `partial` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | review core fit/predict functions first |
+| `model-output` | `broom` | tidy/glance/augment a fitted linear or logistic model | `validated` | none | `test/workflows/model-output-workflows.test.ts` | already classified |
+| `inference` | `car`, `lmtest`, `sandwich` | VIF, heteroskedasticity tests, robust covariance on `lm` | `validated` | none | `test/workflows/model-output-workflows.test.ts` | already classified |
+| `mixed-models` | `lme4` | random intercept and random slope models with extracted summaries | `validated` | none | `test/workflows/model-output-workflows.test.ts` | lmer + glmer validated |
+| `survival` | `survival` | `coxph` fit plus survival summary and prediction objects | `validated` | none | `test/workflows/model-output-workflows.test.ts` | coxph validated on lung dataset |
+| `ml-core` | `glmnet` | build `x` matrix and `y` vector, fit `cv.glmnet`, inspect lambda/min coefficients | `validated` | none | `test/workflows/ml-workflows.test.ts` | already classified |
+| `ml-core` | `caret`, `recipes`, `rsample` | train/test split, preprocessing recipe, train model, evaluate | `validated` | none | `test/workflows/ml-workflows.test.ts` | createDataPartition + trainControl validated |
+| `ml-core` | `randomForest`, `ranger`, `e1071`, `rpart`, `xgboost` | fit classifier/regressor, predict, variable importance | `partial` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | already classified; randomForest tested in r-workflows |
 | `multivariate` | `psych`, `lavaan` | factor analysis / SEM fit and structured summary | `not_started` | none | `test/workflows/multivariate-workflows.test.ts` | review one canonical entry point per package |
 | `timeseries` | `forecast`, `quantmod` | ARIMA or forecast workflow on a clean univariate series | `not_started` | none | `test/workflows/timeseries-workflows.test.ts` | review `auto.arima`, `forecast`, basic `quantmod` data handling only if local data path is used |
 | `database` | `DBI`, `RSQLite` | open SQLite DB, query a table, return a data-frame handle | `not_started` | `db_connect` | `test/workflows/db-workflows.test.ts` | review `dbConnect`, `dbGetQuery`, `dbDisconnect` |

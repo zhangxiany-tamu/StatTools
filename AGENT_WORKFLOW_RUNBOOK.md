@@ -18,13 +18,10 @@ Validated successfully through the real Claude Code CLI path:
 - mixed-effects modeling with `lme4::lmer`
 - Welch two-sample t-test
 - data reshaping with `tidyr::pivot_wider`
+- `ggplot2` visualization (via `stat_plot` expression)
+- `glmnet` model selection (via `stat_extract` for X/y + `stat_call`)
 
-Validated as current product limitations:
-
-- `ggplot2` visualization workflows
-- `glmnet` model-selection workflows
-
-Those failures are useful. They show where the current tool surface still needs work.
+Previously blocked workflows (ggplot2, glmnet) are now functional via `stat_plot` and `stat_extract` tools added in Phase 6.
 
 ## Prerequisites
 
@@ -255,41 +252,41 @@ Observed result in validation:
 ### E. ggplot Visualization
 
 ```text
-Use only the StatTools MCP tools. Load /absolute/path/to/stattools/test/fixtures/data/mtcars_sample.csv and create a ggplot scatter plot of mpg vs wt colored by cyl, with a fitted line. If it fails, explain exactly why the current StatTools tool surface cannot complete the task.
+Use only the StatTools MCP tools. Load /absolute/path/to/stattools/test/fixtures/data/mtcars_sample.csv and create a ggplot scatter plot of mpg vs wt colored by cyl, with a fitted line. Use stat_plot with an expression string.
 ```
 
-Current expected outcome:
+Expected outcome:
 
-- search and resolve may succeed
-- the full workflow should fail for real product-surface reasons
+- loads CSV successfully
+- uses `stat_plot` with ggplot2 expression string
+- produces a durable PNG file at `data/plots/`
 
-Observed failure mode:
-
-- `aes()` cannot be passed as a real quosure through JSON args
-- ggplot objects are not JSON-serializable
-- there is no `+` layer-composition primitive
-- there is no plot artifact/save tool
-
-This is a known limitation, not an agent mistake.
+Example `stat_plot` call:
+```json
+{ "expression": "library(ggplot2); ggplot(data_1, aes(x=wt, y=mpg, color=factor(cyl))) + geom_point() + geom_smooth(method=\"lm\")" }
+```
 
 ### F. glmnet Model Selection
 
 ```text
-Use only the StatTools MCP tools. Load /absolute/path/to/stattools/test/fixtures/data/mtcars_sample.csv and try to fit a glmnet model for mpg using wt, hp, and cyl with cross-validation. If the workflow cannot be completed, explain the missing StatTools primitives that block it.
+Use only the StatTools MCP tools. Load /absolute/path/to/stattools/test/fixtures/data/mtcars_sample.csv and fit a glmnet model for mpg using wt, hp, and cyl with cross-validation. Use stat_extract to build the X matrix and y vector.
 ```
 
-Current expected outcome:
+Expected outcome:
 
-- search and resolve may succeed
-- the workflow should expose the current preprocessing gap
+- loads CSV successfully
+- uses `stat_extract` to extract y vector and X matrix
+- resolves and calls `glmnet::cv.glmnet`
+- returns lambda selection results
 
-Observed failure mode:
-
-- no clean way to extract `y` as a standalone vector
-- no first-class way to build `x` as a predictor matrix
-- formula-style preprocessing for `model.matrix` is not usable enough through the current tool surface
-
-This is also a known limitation.
+Example workflow:
+```
+stat_load_data({ file_path: "data.csv", name: "d" })
+stat_extract({ handle: "d", columns: ["mpg"], assign_to: "y" })
+stat_extract({ handle: "d", columns: ["wt", "hp", "cyl"], as_matrix: true, assign_to: "X" })
+stat_resolve({ package: "glmnet", function: "cv.glmnet" })
+stat_call({ package: "glmnet", function: "cv.glmnet", args: { x: "X", y: "y" } })
+```
 
 ## 6. How To Judge The Run
 
@@ -343,11 +340,12 @@ Use only StatTools MCP tools. For each workflow, report:
 Do not write raw R or Python scripts unless the workflow is impossible through the current StatTools tool surface and you are explicitly explaining why.
 ```
 
-## 9. Current Product Gaps Exposed By Real Client Validation
+## 9. Current Product Gaps
 
-The real Claude Code workflow runs showed two concrete next-step gaps:
+Previously blocked workflows (ggplot2, glmnet) are now resolved via `stat_plot` and `stat_extract`.
 
-- plotting/output artifacts for `ggplot2`
-- matrix/vector preprocessing primitives for packages like `glmnet`
-
-Those are better next targets than adding more generic infrastructure.
+Remaining known gaps:
+- dplyr NSE verbs (filter, mutate with expressions) work via resolve but need careful argument passing
+- `data()` loads R datasets to globalenv, not the session environment — use `stat_load_data` for CSV files instead
+- Interactive visualization (plotly, DT) not yet supported
+- Report generation (rmarkdown, officer) not yet supported
