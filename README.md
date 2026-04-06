@@ -173,7 +173,7 @@ npm run validate     # Full setup validation
 ## Alpha Status: What Works / What Doesn't
 
 **What works reliably:**
-- Search: 100% top-3 pass rate on 111 benchmark queries (regression, testing, wrangling, survival, mixed models, time series, ML, visualization, I/O, diagnostics)
+- Search: reaches 100% top-3 on 97 benchmark queries with an expanded index; fresh-clone performance is ~90% and depends on which R packages are installed locally
 - Core R workflows: OLS, logistic, t-test, ANOVA, correlation, random forest, PCA, k-means, mixed effects, robust SE, broom tidy, VIF, stepwise selection — all validated end-to-end
 - Data loading: CSV/TSV/RDS into R session with column schema and preview
 - Handle system: models and data persist in session across multiple tool calls
