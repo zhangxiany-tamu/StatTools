@@ -4,10 +4,29 @@
 // Render a plot to a file and return the path.
 // Supports: ggplot objects, base R plot expressions, stored plot handles.
 
+import { mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type { WorkerPool } from "../engine/workerPool.js";
 import type { SessionStore } from "../engine/session.js";
 import { successResult, errorResult, type StatToolResult } from "../types.js";
 import { logUsage, startTimer } from "../util/usageLogger.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+function findProjectRoot(startDir: string): string {
+  let dir = startDir;
+  for (let i = 0; i < 10; i++) {
+    if (existsSync(resolve(dir, "package.json"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+const PLOT_DIR = resolve(findProjectRoot(__dirname), "data", "plots");
 
 export const STAT_PLOT_SCHEMA = {
   type: "object" as const,
@@ -82,6 +101,9 @@ export async function executeStatPlot(
     }
   }
 
+  // Ensure durable plot directory exists
+  mkdirSync(PLOT_DIR, { recursive: true });
+
   let response;
   try {
     response = await workerPool.call("render_plot", {
@@ -90,6 +112,7 @@ export async function executeStatPlot(
       format: format || "png",
       width: width || 800,
       height: height || 600,
+      output_dir: PLOT_DIR,
     });
   } catch (err) {
     return errorResult(`Plot rendering failed: ${(err as Error).message}`);

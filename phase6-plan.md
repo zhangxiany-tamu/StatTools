@@ -9,6 +9,8 @@ Phases 1-5 built the infrastructure: 8 MCP tools, 93k indexed functions, 647 saf
 Do not add more infrastructure. Validate what exists, then expand based on evidence.
 
 For package-priority planning across the CRAN ecosystem, see [TOP500_COVERAGE_MATRIX.md](./TOP500_COVERAGE_MATRIX.md).
+For the concrete next implementation queue, see [P0_IMPLEMENTATION_BACKLOG.md](./P0_IMPLEMENTATION_BACKLOG.md).
+For a minimal handoff to Claude Code, see [CLAUDE_CODE_NEXT_STEPS.md](./CLAUDE_CODE_NEXT_STEPS.md).
 
 ## Step 1: Run Real Workflows (20-30 tasks)
 

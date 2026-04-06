@@ -489,8 +489,8 @@ dispatch_render_plot <- function(id, params) {
     return(error_response(id, 2L, "Provide either 'object' (handle ID) or 'expression' (R code that produces a plot)"))
   }
 
-  # Create output path
-  out_dir <- file.path(tempdir(), "stattools", "plots")
+  # Create output path — use output_dir from params if provided, else tempdir
+  out_dir <- params$output_dir %||% file.path(tempdir(), "stattools", "plots")
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   out_file <- file.path(out_dir, paste0("plot_", format(Sys.time(), "%Y%m%d_%H%M%S"), "_", sample(1000:9999, 1), ".", file_format))
 
