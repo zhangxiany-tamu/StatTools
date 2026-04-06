@@ -134,9 +134,13 @@ Functions are classified into tiers:
 
 ## Search Quality
 
-Benchmark: 111 queries across 12 categories. Current pass rate: 100% top-3 (97/97 installable queries). MRR: 0.746.
+Benchmark: 111 queries across 12 categories.
 
-All 12 categories at 100%: regression, testing, wrangling, survival, mixed models, time series, ML, visualization, diagnostics, I/O, Bayesian, Python (when indexed).
+**Fresh clone** (after `build-index` only): ~48k functions, ~570 classified. Benchmark pass rate depends on which packages are installed locally and whether tarball extraction has been run. Expect ~90% on a standard R installation.
+
+**Expanded index** (after `extract-tarballs --top 500`): ~94k functions, ~670 classified. 100% top-3 on 97/97 installable queries (MRR: 0.746) — tested on a machine with 708 installed R packages including rstanarm, brms, bayestestR, and the full easystats suite.
+
+The headline 100% number requires both a rich local R library and tarball extraction. Your mileage will vary based on which packages are installed.
 
 ## Environment Variables
 

@@ -82,6 +82,7 @@ describe("SearchEngine", () => {
 
   describe("benchmark", () => {
     let benchmark: Benchmark;
+    let cachedResults: BenchmarkResult[] | null = null;
 
     beforeAll(() => {
       benchmark = JSON.parse(
@@ -90,6 +91,7 @@ describe("SearchEngine", () => {
     });
 
     const runBenchmark = (): BenchmarkResult[] => {
+      if (cachedResults) return cachedResults;
       const results: BenchmarkResult[] = [];
 
       for (const q of benchmark.queries) {
@@ -131,6 +133,7 @@ describe("SearchEngine", () => {
         });
       }
 
+      cachedResults = results;
       return results;
     };
 
