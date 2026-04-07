@@ -27,7 +27,7 @@ const DB_PATH = resolve(PROJECT_ROOT, "data", "stattools.db");
 
 if (!existsSync(DB_PATH)) {
   console.error(
-    `Database not found: ${DB_PATH}\nRun 'npx tsx scripts/build-index.ts' first to build the search index.`,
+    `Database not found: ${DB_PATH}\nRun 'npm run build-index' first to build the search index.`,
   );
   process.exit(1);
 }
