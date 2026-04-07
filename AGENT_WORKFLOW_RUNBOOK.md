@@ -93,7 +93,9 @@ mcp__stattools__stat_method,\
 mcp__stattools__stat_load_data,\
 mcp__stattools__stat_session,\
 mcp__stattools__stat_describe,\
-mcp__stattools__stat_install \
+mcp__stattools__stat_install,\
+mcp__stattools__stat_extract,\
+mcp__stattools__stat_plot \
   --output-format json \
   "YOUR PROMPT HERE"
 ```
@@ -293,8 +295,8 @@ stat_call({ package: "glmnet", function: "cv.glmnet", args: { x: "X", y: "y" } }
 Treat these as successful validations:
 
 - the agent uses `stat_load_data`, `stat_search`, `stat_resolve`, `stat_call`, and `stat_session` coherently
-- the agent completes OLS, mixed-effects, t-test, and reshape workflows without manual coding
-- the agent correctly explains why `ggplot2` and `glmnet` workflows currently fail
+- the agent completes OLS, mixed-effects, t-test, reshape, ggplot2, and glmnet workflows without manual coding
+- ggplot2 uses `stat_plot` with expression strings; glmnet uses `stat_extract` for X/y matrices
 
 Treat these as bugs:
 

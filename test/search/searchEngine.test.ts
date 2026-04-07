@@ -147,13 +147,16 @@ describe("SearchEngine", () => {
       const total = installable.length;
       const passRate = passed / total;
 
-      console.log(`\n=== Search Benchmark (installed only): ${passed}/${total} (${(passRate * 100).toFixed(0)}%) ===`);
-      for (const r of allResults) {
-        const isSkipped = benchmark.queries.find((q) => q.query === r.query)?.requires_install;
-        const icon = r.passed ? "✓" : isSkipped ? "⊘" : "✗";
-        console.log(
-          `  ${icon} "${r.query}" → [${r.gotTop3.join(", ")}]${r.passed ? "" : isSkipped ? " (skipped: not installed)" : ` (expected: ${r.expected})`}`,
-        );
+      console.log(`\n=== Search Benchmark: ${passed}/${total} (${(passRate * 100).toFixed(0)}%) ===`);
+      // Only print failures to avoid overwhelming vitest worker IPC
+      const failures = allResults.filter(
+        (r) => !r.passed && !benchmark.queries.find((q) => q.query === r.query)?.requires_install,
+      );
+      if (failures.length > 0) {
+        console.log("Failures:");
+        for (const r of failures) {
+          console.log(`  ✗ "${r.query}" → [${r.gotTop3.join(", ")}] (expected: ${r.expected})`);
+        }
       }
 
       // Dev gate: ≥40%. Current: 100% (95/95).

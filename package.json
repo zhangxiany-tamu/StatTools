@@ -15,6 +15,7 @@
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "test": "vitest run",
+    "test:benchmark": "vitest run --pool=vmThreads --config vitest.benchmark.config.ts",
     "test:watch": "vitest",
     "build-index": "tsx scripts/build-index.ts",
     "extract-tarballs": "tsx scripts/extract-tarballs.ts",
