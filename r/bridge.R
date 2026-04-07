@@ -583,7 +583,8 @@ resolve_refs <- function(args, id = -1L) {
     if (is.character(val) && length(val) == 1 &&
         nm %in% c("data", "object", "model", "newdata", "x", "y") &&
         !(val %in% session_objects) &&
-        !file.exists(val)) {
+        !file.exists(val) &&
+        !grepl("[~=+\n]", val)) {  # Skip strings that look like formulas/syntax, not refs
       available <- paste(session_objects, collapse = ", ")
       return(list(
         is_ref_error = TRUE,

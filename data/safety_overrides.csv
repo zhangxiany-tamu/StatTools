@@ -646,3 +646,13 @@ quantreg::rq,safe,Pure computation — quantile regression
 xgboost::xgboost,callable_with_caveats,Gradient boosting — slow on large data and uses RNG
 xgboost::xgb.train,callable_with_caveats,XGBoost training — slow and uses RNG
 haven::read_spss,safe,Pure computation — reads SPSS .sav/.por files
+DBI::dbConnect,callable_with_caveats,Opens database connection — resource management caveat
+DBI::dbDisconnect,safe,Closes database connection
+DBI::dbGetQuery,safe,Pure read query — returns data frame
+DBI::dbListTables,safe,Lists table names — read only
+DBI::dbWriteTable,unsafe,Writes data to database — modifies external state
+DBI::dbReadTable,safe,Reads entire table — returns data frame
+DBI::dbSendQuery,callable_with_caveats,Sends arbitrary SQL — may modify data
+DBI::dbCreateTable,unsafe,Creates table in database
+DBI::dbRemoveTable,unsafe,Removes table from database
+RSQLite::SQLite,safe,Creates SQLite driver object — no side effects

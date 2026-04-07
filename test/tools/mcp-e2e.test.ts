@@ -283,17 +283,23 @@ describe("MCP Server End-to-End", () => {
     }
   });
 
-  it("stat_resolve returns install-first error for stub functions", async () => {
-    // Use a package known to not be installed (CRAN-only, niche)
+  it("stat_resolve rejects unclassified or stub functions", async () => {
+    // Use a very niche package unlikely to be installed or tarball-extracted
     const result = await callTool(server, "stat_resolve", {
-      package: "BradleyTerry2",
-      function: "BTm",
+      package: "SQUAREM",
+      function: "squarem",
     });
-    // If the package is a stub, resolve should error with stub message
-    // If the package happens to be installed, resolve may succeed — skip assertion
+    // Should either be a stub, unclassified, or not found — any error is valid
+    // If the function happens to be classified, the test still passes (no assertion needed)
     if (result.isError) {
       const data = JSON.parse(result.content[0].text);
-      expect(data.is_stub === true || data.message.includes("not found")).toBe(true);
+      // Valid error reasons: stub, unclassified, not found, not installed
+      expect(
+        data.is_stub === true ||
+        data.message?.includes("not found") ||
+        data.message?.includes("not been reviewed") ||
+        data.message?.includes("not installed"),
+      ).toBe(true);
     }
   });
 

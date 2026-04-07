@@ -43,9 +43,9 @@ Work in this order:
 | `ml-core` | `glmnet` | build `x` matrix and `y` vector, fit `cv.glmnet`, inspect lambda/min coefficients | `validated` | none | `test/workflows/ml-workflows.test.ts` | already classified |
 | `ml-core` | `caret`, `recipes`, `rsample` | train/test split, preprocessing recipe, train model, evaluate | `validated` | none | `test/workflows/ml-workflows.test.ts` | createDataPartition + trainControl validated |
 | `ml-core` | `randomForest`, `ranger`, `e1071`, `rpart`, `xgboost` | fit classifier/regressor, predict, variable importance | `partial` | `stat_extract` | `test/workflows/ml-workflows.test.ts` | already classified; randomForest tested in r-workflows |
-| `multivariate` | `psych`, `lavaan` | factor analysis / SEM fit and structured summary | `not_started` | none | `test/workflows/multivariate-workflows.test.ts` | review one canonical entry point per package |
-| `timeseries` | `forecast`, `quantmod` | ARIMA or forecast workflow on a clean univariate series | `not_started` | none | `test/workflows/timeseries-workflows.test.ts` | review `auto.arima`, `forecast`, basic `quantmod` data handling only if local data path is used |
-| `database` | `DBI`, `RSQLite` | open SQLite DB, query a table, return a data-frame handle | `not_started` | `db_connect` | `test/workflows/db-workflows.test.ts` | review `dbConnect`, `dbGetQuery`, `dbDisconnect` |
+| `multivariate` | `psych`, `lavaan` | factor analysis / SEM fit and structured summary | `validated` | none | `test/workflows/multivariate-workflows.test.ts` | psych (describe, alpha, fa, KMO) + lavaan (cfa, sem, fitMeasures) all validated |
+| `timeseries` | `forecast` | ARIMA, ETS, forecast on univariate series | `validated` | none | `test/workflows/timeseries-workflows.test.ts` | auto.arima, forecast, ets all validated |
+| `database` | `DBI`, `RSQLite` | open SQLite DB, query, disconnect | `partial` | `db_connect` | `test/workflows/db-workflows.test.ts` | DBI overrides added; RSQLite skipped when not installed |
 | `spatial` | `sf`, `terra` | read local geospatial file, inspect schema, plot simple artifact | `blocked` | `system_libs`, `stat_plot` | `test/workflows/spatial-workflows.test.ts` | review only after system-lib path is stable |
 | `reporting` | `officer`, `rmarkdown` | export a simple report/table artifact from an analysis result | `blocked` | `artifact_export` | `test/workflows/reporting-workflows.test.ts` | defer broad coverage; start with one simple export path |
 
