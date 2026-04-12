@@ -38,11 +38,13 @@ const allowedRoots = process.env.STATTOOLS_DATA_ROOTS
   : [process.cwd()];
 
 const rPath = process.env.R_PATH || "Rscript";
+const pythonPath = process.env.PYTHON_PATH || "python3";
 
 startServer({
   dbPath: DB_PATH,
   allowedDataRoots: allowedRoots,
   rPath,
+  pythonPath,
 }).catch((err) => {
   console.error("Failed to start StatTools server:", err);
   process.exit(1);

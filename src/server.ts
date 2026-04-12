@@ -108,6 +108,12 @@ export async function createStatToolsServer(
       pythonPath: config.pythonPath || "python3",
     });
     await pythonWorker.start();
+    const pythonStatus = pythonWorker.getStatus();
+    if (!pythonStatus.healthy) {
+      console.error(
+        `[StatTools] Python runtime is available at ${pythonStatus.path} but missing modules: ${pythonStatus.missingModules.join(", ") || "(unknown)"}`,
+      );
+    }
   } catch {
     console.error("[StatTools] Python worker not available — Python tools disabled");
     pythonWorker = null;
@@ -261,6 +267,7 @@ export async function createStatToolsServer(
           workerPool,
           sessionStore,
           installManager,
+          pythonWorker?.getStatus(),
         );
         break;
 

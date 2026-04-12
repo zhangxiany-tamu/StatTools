@@ -8,7 +8,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { resolve, dirname } from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { RpcRequest, RpcResponse } from "../types.js";
+import type { PythonRuntimeStatus, RpcRequest, RpcResponse } from "../types.js";
 import { NdjsonCodec, encodeNdjson } from "./protocol.js";
 
 function findProjectRoot(startDir: string): string {
@@ -32,6 +32,13 @@ type PendingRequest = {
   timer: ReturnType<typeof setTimeout>;
 };
 
+type PythonHealthcheckResult = {
+  python_version?: string;
+  available_modules?: string[];
+  missing_modules?: string[];
+  healthy?: boolean;
+};
+
 export type PythonWorkerConfig = {
   pythonPath: string;
   timeoutMs: number;
@@ -51,13 +58,25 @@ export class PythonWorker {
   private config: PythonWorkerConfig;
   private _started = false;
   private _intentionalStop = false;
+  private runtimeStatus: PythonRuntimeStatus;
 
   constructor(config?: Partial<PythonWorkerConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+    this.runtimeStatus = {
+      enabled: false,
+      healthy: false,
+      path: this.config.pythonPath,
+      availableModules: [],
+      missingModules: [],
+    };
   }
 
   get isRunning(): boolean {
     return this.proc !== null && !this.proc.killed && this._started;
+  }
+
+  getStatus(): PythonRuntimeStatus {
+    return this.runtimeStatus;
   }
 
   async start(): Promise<void> {
@@ -116,7 +135,31 @@ export class PythonWorker {
       // Python starts faster than R — shorter startup wait
       const startupTimer = setTimeout(() => {
         this._started = true;
-        resolveStart();
+        this.call("healthcheck", {})
+          .then((response) => {
+            const health = (response.result || {}) as PythonHealthcheckResult;
+            this.runtimeStatus = {
+              enabled: true,
+              healthy: response.error == null && health.healthy === true,
+              path: this.config.pythonPath,
+              pythonVersion: health.python_version,
+              availableModules: health.available_modules || [],
+              missingModules: health.missing_modules || [],
+              error: response.error?.message,
+            };
+            resolveStart();
+          })
+          .catch((err) => {
+            this.runtimeStatus = {
+              enabled: false,
+              healthy: false,
+              path: this.config.pythonPath,
+              availableModules: [],
+              missingModules: [],
+              error: `Healthcheck failed: ${(err as Error).message}`,
+            };
+            rejectStart(new Error(`Python startup healthcheck failed: ${(err as Error).message}`));
+          });
       }, 300);
 
       proc.on("exit", () => clearTimeout(startupTimer));
@@ -158,6 +201,13 @@ export class PythonWorker {
     this.codec?.reset();
     this.codec = null;
     this._started = false;
+    this.runtimeStatus = {
+      enabled: false,
+      healthy: false,
+      path: this.config.pythonPath,
+      availableModules: [],
+      missingModules: [],
+    };
 
     return new Promise<void>((resolve) => {
       const killTimer = setTimeout(() => {
@@ -185,6 +235,14 @@ export class PythonWorker {
     this.codec?.reset();
     this.codec = null;
     this._started = false;
+    this.runtimeStatus = {
+      enabled: false,
+      healthy: false,
+      path: this.config.pythonPath,
+      availableModules: [],
+      missingModules: [],
+      error: error.message,
+    };
     this.config.onCrash?.(error);
   }
 }

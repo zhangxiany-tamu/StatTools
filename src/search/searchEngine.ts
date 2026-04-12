@@ -243,6 +243,7 @@ export class SearchEngine {
 
     // Sort by combined score (higher = better)
     enriched.sort((a, b) => b.score - a.score);
+    let ranked = enriched;
 
     // Promote name-variant matches from well-known packages only.
     // This prevents false positives like base::norm for "normality test"
@@ -273,10 +274,10 @@ export class SearchEngine {
       }
 
       if (nameVariantIds.size > 0) {
-        const promoted = enriched
+        const promoted = ranked
           .filter((r) => nameVariantIds.has(r.functionId))
           .sort((a, b) => b.score - a.score); // Sort promoted by score (popularity wins)
-        const rest = enriched.filter((r) => !nameVariantIds.has(r.functionId));
+        const rest = ranked.filter((r) => !nameVariantIds.has(r.functionId));
         const seen = new Set<string>();
         const final: SearchResult[] = [];
         for (const r of [...promoted, ...rest]) {
@@ -285,11 +286,12 @@ export class SearchEngine {
             final.push(r);
           }
         }
-        return final.slice(0, maxResults);
+        ranked = final;
       }
     }
 
-    return enriched.slice(0, maxResults);
+    ranked = promoteCanonicalResults(ranked, query);
+    return ranked.slice(0, maxResults);
   }
 
   /** Check if a specific function exists in the index. */
@@ -587,8 +589,12 @@ const CURATED_ALIASES: Record<string, string[]> = {
   "one way anova": ["aov"],
   "fisher exact": ["fisher.test"],
   "proportion test": ["prop.test"],
+  "two proportion test": ["prop.test"],
+  "difference in proportions": ["prop.test"],
+  "difference in proportions two groups": ["prop.test"],
   "levene test": ["leveneTest"],
   "variance test": ["var.test", "bartlett.test"],
+  "bartlett test": ["bartlett.test"],
   "kruskal wallis": ["kruskal.test"],
 
   // ---- Bayesian ----
@@ -653,6 +659,8 @@ const CURATED_ALIASES: Record<string, string[]> = {
   "model diagnostics": ["check_model", "model_performance"],
   "model parameters": ["model_parameters", "standardize_parameters"],
   "effect size": ["cohens_d", "eta_squared", "cramers_v"],
+  "variance inflation factor": ["vif"],
+  "vif": ["vif"],
   "robust standard errors": ["vcovHC", "vcovHAC"],
   "heteroskedasticity": ["vcovHC"],
 
@@ -705,6 +713,155 @@ const CURATED_ALIASES: Record<string, string[]> = {
   "sklearn pipeline": ["Pipeline"],
   "statsmodels ols": ["OLS", "ols"],
   "scipy t test": ["ttest_ind", "ttest_1samp"],
+};
+
+// Exact function IDs to promote for high-value intents.
+// These run after FTS recall and name/alias promotion, so they only fire when
+// the intended canonical function is already in the candidate set.
+const CANONICAL_RESULTS: Record<string, string[]> = {
+  // Regression / modeling
+  "linear regression": ["stats::lm"],
+  "polynomial regression": ["stats::lm"],
+  "logistic regression": ["stats::glm"],
+  "logistic regression binary outcome": ["stats::glm"],
+  "poisson regression count data": ["stats::glm"],
+  "probit regression latent variable": ["stats::glm"],
+  "ridge regression": ["glmnet::glmnet"],
+  "ridge regression l2 penalty": ["glmnet::glmnet"],
+  "lasso regression": ["glmnet::glmnet"],
+  "lasso regression l1 penalty variable selection": ["glmnet::glmnet"],
+  "elastic net": ["glmnet::glmnet"],
+  "elastic net penalized regression": ["glmnet::glmnet"],
+  "cross validated penalized regression": ["glmnet::cv.glmnet"],
+  "cross validated penalized regression tuning lambda": ["glmnet::cv.glmnet"],
+  "quantile regression": ["quantreg::rq"],
+  "quantile regression median regression": ["quantreg::rq"],
+  "fixed effects panel data regression": ["fixest::feols"],
+  "ordinal logistic regression ordered outcome": ["MASS::polr"],
+  "multinomial logistic regression multiple categories": ["nnet::multinom"],
+  "robust regression resistant to outliers": ["MASS::rlm"],
+  "weighted least squares regression": ["stats::lm"],
+  "negative binomial regression overdispersion": ["MASS::glm.nb"],
+  "stepwise model selection": ["stats::step"],
+  "stepwise model selection aic": ["stats::step"],
+  "generalized additive model smooth terms": ["mgcv::gam"],
+
+  // Mixed / survival
+  "mixed effects model random intercept longitudinal": ["lme4::lmer"],
+  "mixed effects": ["lme4::lmer"],
+  "random slope model varying coefficient": ["lme4::lmer"],
+  "generalized linear mixed": ["lme4::glmer"],
+  "generalized linear mixed model binary outcome": ["lme4::glmer"],
+  "nested random effects hierarchical model": ["lme4::lmer"],
+  "crossed random effects subjects items": ["lme4::lmer"],
+  "linear mixed model serial correlation nlme": ["nlme::lme"],
+  "survival analysis": ["survival::survfit"],
+  "kaplan meier": ["survival::survfit"],
+  "survival analysis kaplan meier estimate": ["survival::survfit"],
+  "cox proportional hazards": ["survival::coxph"],
+  "cox proportional hazards regression survival": ["survival::coxph"],
+  "cox regression": ["survival::coxph"],
+  "create survival object": ["survival::Surv"],
+  "create survival object time event indicator": ["survival::Surv"],
+  "log rank test": ["survival::survdiff"],
+  "log rank test compare survival curves": ["survival::survdiff"],
+  "parametric survival": ["survival::survreg"],
+  "parametric survival model weibull exponential": ["survival::survreg"],
+
+  // Testing / diagnostics
+  "t test": ["stats::t.test"],
+  "two sample t test compare means": ["stats::t.test"],
+  "chi squared test": ["stats::chisq.test"],
+  "chi squared test independence contingency table": ["stats::chisq.test"],
+  "mann whitney u test nonparametric two groups": ["stats::wilcox.test"],
+  "wilcoxon signed rank test paired": ["stats::wilcox.test"],
+  "fisher exact": ["stats::fisher.test"],
+  "fisher exact test small sample count data": ["stats::fisher.test"],
+  "one way anova compare group means": ["stats::aov"],
+  "kruskal wallis": ["stats::kruskal.test"],
+  "kruskal wallis nonparametric anova": ["stats::kruskal.test"],
+  "friedman test nonparametric repeated measures": ["stats::friedman.test"],
+  "bartlett test": ["stats::bartlett.test"],
+  "bartlett test equality of variances": ["stats::bartlett.test"],
+  "levene test homogeneity of variance": ["car::leveneTest"],
+  "mcnemar test paired proportions matched": ["stats::mcnemar.test"],
+  "test difference in proportions two groups": ["stats::prop.test"],
+  "heteroskedasticity": ["lmtest::bptest", "sandwich::vcovHC"],
+  "breusch pagan": ["lmtest::bptest"],
+  "heteroscedasticity test non constant variance breusch pagan": ["lmtest::bptest"],
+  "robust standard errors": ["sandwich::vcovHC"],
+  "robust standard errors heteroskedasticity consistent": ["sandwich::vcovHC"],
+  "concordance statistic": ["survival::concordance"],
+  "check model assumptions diagnostics residuals": ["performance::check_model"],
+  "test normality shapiro wilk": ["stats::shapiro.test"],
+  "variance inflation factor": ["car::vif"],
+  "multicollinearity variance inflation factor vif": ["car::vif"],
+  "effect size cohen d standardized mean difference": ["effectsize::cohens_d"],
+
+  // Wrangling / IO
+  "filter rows": ["dplyr::filter"],
+  "filter rows by condition subset data frame": ["dplyr::filter"],
+  "sort data": ["dplyr::arrange"],
+  "sort data frame": ["dplyr::arrange"],
+  "sort data frame by column ascending descending": ["dplyr::arrange"],
+  "group by and summarize aggregate statistics": ["dplyr::summarise"],
+  "pivot wider": ["tidyr::pivot_wider"],
+  "pivot wider reshape long to wide format": ["tidyr::pivot_wider"],
+  "pivot longer": ["tidyr::pivot_longer"],
+  "pivot longer melt wide to long format": ["tidyr::pivot_longer"],
+  "left join merge two data frames by key": ["dplyr::left_join"],
+  "select columns subset variables from data frame": ["dplyr::select"],
+  "rename columns in data frame": ["dplyr::rename"],
+  "create new column computed variable mutate": ["dplyr::mutate"],
+  "get distinct unique rows deduplicate": ["dplyr::distinct"],
+  "count occurrences frequency table": ["dplyr::count"],
+  "read csv": ["readr::read_csv"],
+  "read excel": ["readxl::read_excel"],
+  "fast csv import": ["data.table::fread"],
+  "fast csv import large file data table": ["data.table::fread"],
+  "string manipulation pattern replace regex": ["stringr::str_replace"],
+
+  // Visualization
+  "scatter plot": ["ggplot2::geom_point", "ggplot2::ggplot"],
+  "histogram": ["ggplot2::geom_histogram", "ggplot2::ggplot"],
+  "bar chart": ["ggplot2::geom_bar", "ggplot2::ggplot"],
+  "line plot": ["ggplot2::geom_line", "ggplot2::ggplot"],
+  "density plot": ["ggplot2::geom_density", "ggplot2::ggplot"],
+
+  // ML / Bayesian
+  "random forest": ["randomForest::randomForest"],
+  "decision tree": ["rpart::rpart"],
+  "support vector machine": ["e1071::svm"],
+  "naive bayes": ["e1071::naiveBayes"],
+  "xgboost": ["xgboost::xgboost"],
+  "bayesian regression": ["rstanarm::stan_glm", "brms::brm"],
+  "posterior distribution": ["bayestestR::describe_posterior"],
+  "credible interval": ["bayestestR::hdi"],
+  "bayes factor": ["bayestestR::bayesfactor_models"],
+  "rope": ["bayestestR::rope"],
+
+  // Model output
+  "tidy model": ["broom::tidy", "broom::glance", "broom::augment"],
+  "model summary": ["broom::glance", "broom::tidy"],
+  "marginal means": ["emmeans::emmeans"],
+  "marginal effects": ["marginaleffects::avg_comparisons", "marginaleffects::marginaleffects"],
+  "model diagnostics": ["performance::check_model"],
+  "model parameters": ["parameters::model_parameters"],
+  "effect size": ["effectsize::cohens_d"],
+
+  // Time series
+  "time series forecast": ["forecast::forecast"],
+  "time series forecast predict future values": ["forecast::forecast"],
+  "arima": ["forecast::auto.arima"],
+  "arima model fit autoregressive integrated moving average": ["forecast::auto.arima"],
+  "exponential smoothing": ["forecast::ets"],
+  "exponential smoothing state space model holt winters": ["forecast::ets"],
+  "seasonal decomposition trend seasonality remainder": ["stats::stl"],
+  "autocorrelation function lag plot acf": ["stats::acf"],
+  "stationarity test": ["tseries::adf.test"],
+  "unit root test": ["tseries::adf.test"],
+  "unit root test stationarity augmented dickey fuller": ["tseries::adf.test"],
+  "ljung box test white noise residuals autocorrelation": ["stats::Box.test"],
 };
 
 /** Generate possible R function names from a natural language query.
@@ -825,6 +982,49 @@ function generateNameVariants(query: string): { all: string[]; curated: Set<stri
 
   const all = [...variants].filter((v) => v.length >= 2);
   return { all, curated };
+}
+
+function normalizeIntent(query: string): string {
+  return query.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function getCanonicalResultIds(query: string): string[] {
+  const normalized = normalizeIntent(query);
+  if (!normalized) return [];
+
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (const [pattern, exactIds] of Object.entries(CANONICAL_RESULTS)) {
+    if (!normalized.includes(pattern) && !pattern.includes(normalized)) continue;
+    for (const id of exactIds) {
+      if (!seen.has(id)) {
+        seen.add(id);
+        ids.push(id);
+      }
+    }
+  }
+  return ids;
+}
+
+function promoteCanonicalResults(results: SearchResult[], query: string): SearchResult[] {
+  const canonicalIds = getCanonicalResultIds(query);
+  if (canonicalIds.length === 0) return results;
+
+  const byId = new Map(results.map((r) => [r.functionId, r]));
+  const promoted: SearchResult[] = [];
+  const seen = new Set<string>();
+
+  for (const id of canonicalIds) {
+    const match = byId.get(id);
+    if (match && !seen.has(match.functionId)) {
+      promoted.push(match);
+      seen.add(match.functionId);
+    }
+  }
+
+  if (promoted.length === 0) return results;
+  const rest = results.filter((r) => !seen.has(r.functionId));
+  return [...promoted, ...rest];
 }
 
 /** Check if fnName could be an abbreviation of the query terms.

@@ -6,6 +6,7 @@
 import type { WorkerPool } from "../engine/workerPool.js";
 import type { SessionStore } from "../engine/session.js";
 import type { InstallManager } from "./statInstall.js";
+import type { PythonRuntimeStatus } from "../types.js";
 import { successResult, errorResult, type StatToolResult } from "../types.js";
 
 export const STAT_SESSION_SCHEMA = {
@@ -29,6 +30,7 @@ export function executeStatSession(
   workerPool: WorkerPool,
   sessionStore: SessionStore,
   installManager?: InstallManager,
+  pythonStatus?: PythonRuntimeStatus,
 ): StatToolResult {
   const state = sessionStore.getState();
   const poolStatus = workerPool.getStatus();
@@ -95,6 +97,13 @@ export function executeStatSession(
       active_worker_id: poolStatus.activeWorkerId,
       call_count: poolStatus.activeCallCount,
       standby_ready: poolStatus.standbyReady,
+    },
+    python: pythonStatus || {
+      enabled: false,
+      healthy: false,
+      path: process.env.PYTHON_PATH || "python3",
+      availableModules: [],
+      missingModules: [],
     },
     install_jobs: installJobs,
     install_jobs_count: installJobs.length,

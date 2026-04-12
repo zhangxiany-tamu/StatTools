@@ -6,9 +6,11 @@
 // metadata from man/*.Rd files, and merges into stattools.db.
 //
 // Usage:
-//   npx tsx scripts/extract-tarballs.ts              # Top 500 (default)
-//   npx tsx scripts/extract-tarballs.ts --top 10     # Top 10 (test)
-//   npx tsx scripts/extract-tarballs.ts --package X  # Single package
+//   tsx scripts/extract-tarballs.ts                           # Top 500 (default)
+//   tsx scripts/extract-tarballs.ts --top 10                  # Top 10 (test)
+//   tsx scripts/extract-tarballs.ts --package X               # Single package
+//   tsx scripts/extract-tarballs.ts --package-list FILE       # Explicit target list
+//   tsx scripts/extract-tarballs.ts --package-list FILE --offset 500 --limit 1000
 // ============================================================================
 
 import Database from "better-sqlite3";
@@ -46,6 +48,9 @@ const CRAN_BASE = "https://cran.r-project.org/src/contrib";
 const args = process.argv.slice(2);
 const topN = parseInt(args.find((a, i) => args[i - 1] === "--top") || "500", 10);
 const singlePackage = args.find((a, i) => args[i - 1] === "--package") || null;
+const packageListPath = args.find((a, i) => args[i - 1] === "--package-list") || null;
+const packageListOffset = parseInt(args.find((a, i) => args[i - 1] === "--offset") || "0", 10);
+const packageListLimit = parseInt(args.find((a, i) => args[i - 1] === "--limit") || "0", 10);
 
 // ---- Manifest ---------------------------------------------------------------
 
@@ -77,6 +82,13 @@ function saveManifest(manifest: Manifest): void {
 
 type TargetPackage = { name: string; version: string; downloads: number };
 
+function loadPackageList(path: string): string[] {
+  return readFileSync(path, "utf-8")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"));
+}
+
 function selectTargetPackages(db: Database.Database): TargetPackage[] {
   if (singlePackage) {
     const row = db.prepare(
@@ -87,6 +99,35 @@ function selectTargetPackages(db: Database.Database): TargetPackage[] {
       return [];
     }
     return [{ name: row.name, version: row.version, downloads: row.downloads_monthly }];
+  }
+
+  if (packageListPath) {
+    const packages = loadPackageList(resolve(PROJECT_ROOT, packageListPath));
+    const sliced = packageListLimit > 0
+      ? packages.slice(packageListOffset, packageListOffset + packageListLimit)
+      : packages.slice(packageListOffset);
+
+    const stmt = db.prepare(
+      "SELECT p.name, p.version, p.downloads_monthly FROM packages p WHERE p.name = ?",
+    );
+    const targets: TargetPackage[] = [];
+    for (const pkgName of sliced) {
+      const row = stmt.get(pkgName) as {
+        name: string;
+        version: string;
+        downloads_monthly: number;
+      } | undefined;
+      if (!row || !row.version) {
+        console.warn(`Skipping ${pkgName}: not found or missing version`);
+        continue;
+      }
+      targets.push({
+        name: row.name,
+        version: row.version,
+        downloads: row.downloads_monthly || 0,
+      });
+    }
+    return targets;
   }
 
   const rows = db.prepare(`

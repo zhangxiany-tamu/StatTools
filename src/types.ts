@@ -99,6 +99,7 @@ export type RpcRequest = {
   readonly method:
     | "call"
     | "call_method"
+    | "healthcheck"
     | "select_columns"
     | "extract_columns"
     | "render_plot"
@@ -121,6 +122,7 @@ export type RpcResponse = {
     readonly suggestion?: string;
   };
   readonly warnings?: readonly string[];
+  readonly stdout?: readonly string[];
   readonly objectsCreated?: readonly RpcObjectCreated[];
   readonly persistFailed?: readonly string[];
 };
@@ -132,6 +134,16 @@ export type RpcObjectCreated = {
   readonly summary: string;
   readonly sizeBytes: number;
   readonly schema?: Record<string, string>;
+};
+
+export type PythonRuntimeStatus = {
+  readonly enabled: boolean;
+  readonly healthy: boolean;
+  readonly path: string;
+  readonly pythonVersion?: string;
+  readonly availableModules: readonly string[];
+  readonly missingModules: readonly string[];
+  readonly error?: string;
 };
 
 // ----------------------------------------------------------------------------

@@ -4,7 +4,7 @@ MCP server that lets AI agents discover and call R and Python statistical functi
 
 ## What It Does
 
-- **Search** 67k+ functions out of the box, ~94k after tarball extraction: `"mixed effects model"` finds `lme4::lmer`
+- **Search** ~48k functions on a fresh clone after `build-index`, and ~336k after the full Phase 7 + 7b tarball waves: `"mixed effects model"` finds `lme4::lmer`
 - **Validate** before executing: `stat_resolve` checks safety, generates parameter schema
 - **Execute** with structured JSON input/output: no R syntax, no script files, no console parsing
 - **Track** session state: data handles, model handles, resolved functions
@@ -18,7 +18,7 @@ Agent (Claude Code / Cursor / custom)
   | MCP protocol (stdio)
   v
 TypeScript MCP Server
-  |-- SQLite FTS5 search index (67k+ base, ~94k after tarball extraction)
+  |-- SQLite FTS5 search index (~48k fresh-clone baseline, ~336k after the Phase 7 + 7b tarball waves)
   |-- R Worker Pool (persistent subprocess, hot-standby, recycle/crash recovery)
   |-- Python Worker (persistent subprocess, sklearn/statsmodels/scipy/pandas)
   +-- Session state (handles, resolved functions, install jobs)
@@ -130,7 +130,7 @@ Functions are classified into tiers:
 | `unsafe` | Blocked. File writes, network, system modification. |
 | `unclassified` | Blocked by default. Discoverable but not callable. |
 
-647 safety overrides in CSV (~670 classified in the built DB including Python defaults). Unclassified functions are blocked — extend coverage by adding entries to `data/safety_overrides.csv`.
+1,846 safety overrides in CSV (~1,870 classified in the built DB including Python defaults). Unclassified functions are blocked — extend coverage by adding entries to `data/safety_overrides.csv`.
 
 ## Search Quality
 
@@ -138,7 +138,7 @@ Benchmark: 111 queries across 12 categories.
 
 **Fresh clone** (after `build-index` only): ~48k functions, ~570 classified. Benchmark pass rate depends on which packages are installed locally and whether tarball extraction has been run. Expect ~90% on a standard R installation.
 
-**Expanded index** (after `extract-tarballs --top 500`): ~94k functions, ~670 classified. 100% top-3 on 97/97 installable queries (MRR: 0.746) — tested on a machine with 708 installed R packages including rstanarm, brms, bayestestR, and the full easystats suite.
+**Expanded index** (after the full Phase 7 + 7b tarball waves + ranking/callability updates): ~336k functions, ~1.9k classified. 100% top-3 and 87% top-1 on 97/97 installable queries (MRR: 0.926) — tested on a machine with a rich local R library including the easystats suite.
 
 The headline 100% number requires both a rich local R library and tarball extraction. Your mileage will vary based on which packages are installed.
 
@@ -157,7 +157,7 @@ After build + index, verify everything works:
 npm run validate     # Checks Node, R, build, index, server, and runs a real workflow
 ```
 
-This runs 12 checks including starting the MCP server and executing a complete search → resolve → load → call → session workflow.
+This runs 14 checks including safety-override integrity, starting the MCP server, inspecting Python runtime health, and executing a complete search → resolve → load → call → session workflow.
 
 For real external-client validation through Claude Code CLI, including exact prompts for OLS, mixed-effects, reshape, `ggplot2`, and `glmnet`, see [AGENT_WORKFLOW_RUNBOOK.md](./AGENT_WORKFLOW_RUNBOOK.md).
 
@@ -165,34 +165,38 @@ For real external-client validation through Claude Code CLI, including exact pro
 
 ```bash
 nvm use              # Enforce Node 22.x
-npm test             # Run the full test suite
+npm test             # Run the hermetic default test suite
+npm run test:tarball-live  # Optional live CRAN tarball smoke test
+npm run test:benchmark     # Run the heavy 111-query benchmark separately
 npm run test:watch   # Watch mode
 npm run build        # Compile TypeScript
 npm run build-index  # Rebuild search index
+npm run apply-safety-overrides  # Sync safety_overrides.csv into the current DB
+npm run check-safety-overrides  # Fail if safety_overrides.csv has orphan or duplicate IDs
 npm run validate     # Full setup validation
 ```
 
 ## Alpha Status: What Works / What Doesn't
 
 **What works reliably:**
-- Search: ~90% top-3 on a fresh clone. Can reach 100% after tarball extraction and with a rich local R library (see Search Quality section above for details)
+- Search: ~90% top-3 on a fresh clone. On the fully expanded Phase 7 + 7b index, the benchmark is 100% top-3 and 87% top-1 on 97/97 installable queries (see Search Quality section above for details)
 - Core R workflows: OLS, logistic, t-test, ANOVA, correlation, random forest, PCA, k-means, mixed effects, robust SE, broom tidy, VIF, stepwise selection — all validated end-to-end
 - Data loading: CSV/TSV/RDS into R session with column schema and preview
+- Verbose R functions: console output is captured/suppressed so it does not pollute the NDJSON channel or trigger parse warnings
 - Handle system: models and data persist in session across multiple tool calls
 - Install + auto-reindex: `stat_install` installs packages and makes them immediately searchable
 - Worker stability: hot-standby pool, crash recovery, handle persistence across recycles
 
 **What works with caveats:**
-- Python workflows: `stat_method` (fit/predict/transform) works but requires sklearn/scipy/statsmodels/pandas installed on the host Python. Tests are skipped when unavailable.
-- Python data loading: `stat_load_data(runtime="python")` routes to pandas but requires the Python worker to start successfully.
+- Python workflows: `stat_method` (fit/predict/transform) works when `PYTHON_PATH` points to a healthy Python env. `stat_session` now reports Python runtime health, and `npm run validate` checks it when `PYTHON_PATH` is configured.
+- Python data loading: `stat_load_data(runtime="python")` uses the same Python health path as `stat_method`. If pandas/sklearn/scipy/statsmodels are missing, `stat_session` shows exactly which modules are unavailable.
 - Bayesian: rstanarm/brms workflows are searchable but slow (MCMC compilation) and classified as `callable_with_caveats`.
-- R functions that print to stdout (like `step()`) produce NDJSON parse warnings in stderr but still return valid results.
 
 **What doesn't work yet:**
-- Only ~650 of 93k functions are classified as callable. The rest are discoverable but blocked by the fail-closed safety model. Extend coverage by adding entries to `data/safety_overrides.csv`.
-- ~22k packages are still stubs (no function-level metadata). Run `npm run extract-tarballs -- --top 1000` to extract more.
-- The tarball extraction test (`tarballExtraction.test.ts`) requires network access to CRAN. `npm test` is not fully hermetic.
-- Top-1 search accuracy is 54% (agents sometimes need to scan 2-3 results).
+- Only ~1.9k of ~336k functions are classified as callable. The rest are discoverable but blocked by the fail-closed safety model. Extend coverage by adding entries to `data/safety_overrides.csv`.
+- ~14.9k packages are still stubs (no function-level metadata). The committed `data/tarball_targets_phase7.txt` list now covers 8,500 priority packages after the Phase 7b extension.
+- Tarball expansion itself is still network-bound and incremental. The default `npm test` suite is hermetic, but `npm run test:tarball-live` still depends on live CRAN access by design.
+- Top-1 search accuracy is much better than before, but still weaker than top-3 in some categories like ML and IO. Agents usually find the right answer in the first 1-3 results rather than always on rank 1.
 - No multi-tenant support — single-user local server only.
 
 **Known environment requirements:**

@@ -117,9 +117,10 @@ dispatch_call <- function(id, params) {
   args <- resolve_refs(args, id)
   if (is.list(args) && isTRUE(args$is_ref_error)) return(args$response)
 
-  # Convert formula strings
+  # Convert formula-like strings
   for (nm in names(args)) {
-    if (nm == "formula" || grepl("formula", nm, ignore.case = TRUE)) {
+    if (nm %in% c("formula", "fixed", "random") ||
+        grepl("formula", nm, ignore.case = TRUE)) {
       if (is.character(args[[nm]])) {
         args[[nm]] <- tryCatch(
           as.formula(args[[nm]], env = .ss),
@@ -144,14 +145,25 @@ dispatch_call <- function(id, params) {
 
   # Execute with warning capture
   warnings_list <- character(0)
+  stdout_list <- character(0)
   result <- tryCatch(
-    withCallingHandlers(
-      do.call(f, args),
-      warning = function(w) {
-        warnings_list <<- c(warnings_list, conditionMessage(w))
-        invokeRestart("muffleWarning")
-      }
-    ),
+    {
+      value <- NULL
+      output <- capture.output(
+        {
+          value <- withCallingHandlers(
+            do.call(f, args),
+            warning = function(w) {
+              warnings_list <<- c(warnings_list, conditionMessage(w))
+              invokeRestart("muffleWarning")
+            }
+          )
+        },
+        type = "output"
+      )
+      stdout_list <<- output
+      value
+    },
     error = function(e) {
       return(error_response(id, 1L, conditionMessage(e),
         suggestion = generate_suggestion(e, pkg, fn, args),
@@ -178,6 +190,7 @@ dispatch_call <- function(id, params) {
 
   resp <- list(id = id, result = formatted)
   if (length(warnings_list) > 0) resp$warnings <- warnings_list
+  if (length(stdout_list) > 0) resp$stdout <- stdout_list
   if (length(objects_created) > 0) resp$objectsCreated <- objects_created
   resp
 }
@@ -581,7 +594,7 @@ resolve_refs <- function(args, id = -1L) {
     # If arg is still a string and looks like it was meant to be a ref
     # (matches a registered ID pattern or the parameter name suggests it)
     if (is.character(val) && length(val) == 1 &&
-        nm %in% c("data", "object", "model", "newdata", "x", "y") &&
+        nm %in% c("data", "object", "newdata") &&
         !(val %in% session_objects) &&
         !file.exists(val) &&
         !grepl("[~=+\n]", val)) {  # Skip strings that look like formulas/syntax, not refs

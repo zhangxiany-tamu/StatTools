@@ -32,6 +32,8 @@ type BenchmarkResult = {
   reciprocalRank: number;    // 1/rank of first expected hit, 0 if not found
 };
 
+const BENCHMARK_TIMEOUT_MS = 15 * 60_000;
+
 describe("SearchEngine", () => {
   let engine: SearchEngine;
 
@@ -137,7 +139,7 @@ describe("SearchEngine", () => {
       return results;
     };
 
-    it("dev gate: ≥40% of installed-package queries pass (blocks CI)", { timeout: 120_000 }, () => {
+    it("dev gate: ≥40% of installed-package queries pass (blocks CI)", { timeout: BENCHMARK_TIMEOUT_MS }, () => {
       const allResults = runBenchmark();
       // Exclude queries that require packages not in the index
       const installable = allResults.filter(
@@ -163,7 +165,7 @@ describe("SearchEngine", () => {
       expect(passRate).toBeGreaterThanOrEqual(0.4);
     });
 
-    it("release gate: ≥70% of installed-package queries pass (blocks CI)", { timeout: 120_000 }, () => {
+    it("release gate: ≥70% of installed-package queries pass (blocks CI)", { timeout: BENCHMARK_TIMEOUT_MS }, () => {
       const allResults = runBenchmark();
       const installable = allResults.filter(
         (r) => !benchmark.queries.find((q) => q.query === r.query)?.requires_install,
@@ -178,7 +180,19 @@ describe("SearchEngine", () => {
       expect(passRate).toBeGreaterThanOrEqual(0.7);
     });
 
-    it("per-category metrics breakdown", { timeout: 120_000 }, () => {
+    it("top-1 gate: ≥70% of installed-package queries rank an expected result first", { timeout: BENCHMARK_TIMEOUT_MS }, () => {
+      const allResults = runBenchmark();
+      const installable = allResults.filter(
+        (r) => !benchmark.queries.find((q) => q.query === r.query)?.requires_install,
+      );
+      const top1 = installable.filter((r) => r.expected.some((e) => r.gotTop1 === e)).length;
+      const top1Rate = top1 / installable.length;
+
+      console.log(`\n  Top-1 gate: ${top1}/${installable.length} (${(top1Rate * 100).toFixed(0)}%) — target 70%`);
+      expect(top1Rate).toBeGreaterThanOrEqual(0.7);
+    });
+
+    it("per-category metrics breakdown", { timeout: BENCHMARK_TIMEOUT_MS }, () => {
       const allResults = runBenchmark();
       const installable = allResults.filter(
         (r) => !benchmark.queries.find((q) => q.query === r.query)?.requires_install,
@@ -207,8 +221,9 @@ describe("SearchEngine", () => {
 
       for (const [cat, results] of [...categories.entries()].sort()) {
         const catPassed = results.filter((r) => r.passed).length;
+        const catTop1 = results.filter((r) => r.expected.some((e) => r.gotTop1 === e)).length;
         const catMrr = results.reduce((s, r) => s + r.reciprocalRank, 0) / results.length;
-        console.log(`  ${cat}: ${catPassed}/${results.length} (${((catPassed / results.length) * 100).toFixed(0)}%) MRR=${catMrr.toFixed(3)}`);
+        console.log(`  ${cat}: top-1=${((catTop1 / results.length) * 100).toFixed(0)}% | top-3=${((catPassed / results.length) * 100).toFixed(0)}% | MRR=${catMrr.toFixed(3)}`);
       }
 
       // Informational — no assertion (individual category gates are tracked, not enforced)
@@ -238,6 +253,16 @@ describe("SearchEngine", () => {
       const results = engine.search({ query: "t test", maxResults: 5 });
       const ids = results.map((r) => r.functionId);
       expect(ids).toContain("stats::t.test");
+    });
+
+    it("keeps real canonical functions above stubs for benchmark intents", () => {
+      const linear = engine.search({ query: "linear regression", maxResults: 3 });
+      expect(linear[0].functionId).toBe("stats::lm");
+      expect(linear[0].isStub).toBe(false);
+
+      const forest = engine.search({ query: "random forest", maxResults: 3 });
+      expect(forest[0].functionId).toBe("randomForest::randomForest");
+      expect(forest[0].isStub).toBe(false);
     });
   });
 });

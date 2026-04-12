@@ -16,9 +16,12 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:benchmark": "vitest run --pool=vmThreads --config vitest.benchmark.config.ts",
+    "test:tarball-live": "vitest run test/search/tarballExtraction.live.test.ts",
     "test:watch": "vitest",
     "build-index": "tsx scripts/build-index.ts",
     "extract-tarballs": "tsx scripts/extract-tarballs.ts",
+    "apply-safety-overrides": "tsx scripts/apply-safety-overrides.ts",
+    "check-safety-overrides": "node --import tsx/esm scripts/check-safety-overrides.ts",
     "validate": "tsx scripts/validate-setup.ts"
   },
   "dependencies": {

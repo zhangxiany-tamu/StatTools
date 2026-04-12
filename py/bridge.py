@@ -97,6 +97,7 @@ def dispatch(req: dict) -> dict:
     handlers = {
         "call": dispatch_call,
         "call_method": dispatch_call_method,
+        "healthcheck": dispatch_healthcheck,
         "select_columns": dispatch_select_columns,
         "load_data": dispatch_load_data,
         "inspect": dispatch_inspect,
@@ -113,6 +114,31 @@ def dispatch(req: dict) -> dict:
     except Exception as e:
         return error_response(req_id, 1, str(e),
                               tb=traceback.format_exc()[-500:])
+
+# ---- Method: healthcheck -----------------------------------------------------
+
+def dispatch_healthcheck(req_id: int, params: dict) -> dict:
+    required_modules = ["pandas", "sklearn", "scipy", "statsmodels"]
+    available = []
+    missing = []
+
+    for mod in required_modules:
+        try:
+            importlib.import_module(mod)
+            available.append(mod)
+        except Exception:
+            missing.append(mod)
+
+    return {
+        "id": req_id,
+        "result": {
+            "python_version": sys.version.split()[0],
+            "required_modules": required_modules,
+            "available_modules": available,
+            "missing_modules": missing,
+            "healthy": len(missing) == 0,
+        }
+    }
 
 # ---- Method: call -----------------------------------------------------------
 

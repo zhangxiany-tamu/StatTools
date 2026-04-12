@@ -321,4 +321,46 @@ describe("WorkerPool", () => {
     // File should exist on disk
     expect(existsSync(parsed.filepath)).toBe(true);
   });
+
+  it("verbose R functions do not trigger NDJSON parse errors", async () => {
+    ensureTestCsv();
+    const session = createSessionStore("test_step_stdout");
+    pool = new WorkerPool(session);
+    const ndjsonErrors: string[] = [];
+    const origConsoleError = console.error;
+    console.error = (...args: unknown[]) => {
+      const msg = args.join(" ");
+      if (msg.includes("NDJSON parse error")) ndjsonErrors.push(msg);
+    };
+
+    try {
+      await pool.start();
+
+      const loadResp = await pool.call("load_data", {
+        file_path: TEST_CSV,
+        name: "data_1",
+      });
+      expect(loadResp.error).toBeUndefined();
+
+      const lmResp = await pool.call("call", {
+        package: "stats",
+        function: "lm",
+        args: { formula: "mpg ~ wt + hp", data: "data_1" },
+      });
+      expect(lmResp.error).toBeUndefined();
+      const modelId = lmResp.objectsCreated?.[0]?.id;
+      expect(modelId).toBeTruthy();
+
+      const stepResp = await pool.call("call", {
+        package: "stats",
+        function: "step",
+        args: { object: modelId, trace: 1 },
+      });
+
+      expect(stepResp.error).toBeUndefined();
+      expect(ndjsonErrors).toHaveLength(0);
+    } finally {
+      console.error = origConsoleError;
+    }
+  });
 });

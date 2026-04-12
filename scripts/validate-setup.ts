@@ -10,6 +10,7 @@
 
 import { createStatToolsServer, type ServerConfig } from "../src/server.js";
 import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { checkSafetyOverrides } from "../src/util/safetyOverrideCheck.js";
 import { resolve, dirname } from "node:path";
 import { existsSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -30,6 +31,8 @@ function findProjectRoot(startDir: string): string {
 
 const PROJECT_ROOT = findProjectRoot(__dirname);
 const DB_PATH = resolve(PROJECT_ROOT, "data", "stattools.db");
+const SAFETY_CSV_PATH = resolve(PROJECT_ROOT, "data", "safety_overrides.csv");
+const PYTHON_PATH = process.env.PYTHON_PATH || "python3";
 
 async function callTool(
   server: Server,
@@ -103,7 +106,16 @@ async function main() {
   db.close();
   check("Functions indexed", fnCount > 10000, `${fnCount} functions (${stubCount} stubs, ${overrideCount} classified)`);
 
-  // 7. Start server and run a workflow
+  // 7. Safety overrides match DB
+  const safetyCheck = checkSafetyOverrides(DB_PATH, SAFETY_CSV_PATH);
+  const safetyOk = safetyCheck.duplicateIds.length === 0 && safetyCheck.missingIds.length === 0;
+  check(
+    "Safety overrides match DB",
+    safetyOk,
+    `${safetyCheck.csvRows} CSV rows, ${safetyCheck.missingIds.length} missing, ${safetyCheck.duplicateIds.length} duplicates`,
+  );
+
+  // 8. Start server and run a workflow
   console.log("\n  Starting MCP server...");
   const csvPath = "/tmp/stattools_validate.csv";
   writeFileSync(csvPath, "x,y,group\n1,2,a\n2,4,a\n3,6,b\n4,8,b\n5,10,a\n");
@@ -111,7 +123,12 @@ async function main() {
   let server: Server | null = null;
   let cleanup: (() => Promise<void>) | null = null;
   try {
-    const config: ServerConfig = { dbPath: DB_PATH, allowedDataRoots: ["/tmp"], rPath: "Rscript" };
+    const config: ServerConfig = {
+      dbPath: DB_PATH,
+      allowedDataRoots: ["/tmp"],
+      rPath: "Rscript",
+      pythonPath: PYTHON_PATH,
+    };
     const result = await createStatToolsServer(config);
     server = result.server;
     cleanup = result.cleanup;
@@ -121,7 +138,7 @@ async function main() {
     process.exit(1);
   }
 
-  // 8. stat_search
+  // 9. stat_search
   try {
     const r = await callTool(server!, "stat_search", { query: "linear regression" });
     const data = parse(r);
@@ -131,7 +148,7 @@ async function main() {
     check("stat_search", false, (err as Error).message);
   }
 
-  // 9. stat_resolve
+  // 10. stat_resolve
   try {
     const r = await callTool(server!, "stat_resolve", { package: "stats", function: "lm" });
     const data = parse(r);
@@ -140,7 +157,7 @@ async function main() {
     check("stat_resolve", false, (err as Error).message);
   }
 
-  // 10. stat_load_data
+  // 11. stat_load_data
   try {
     const r = await callTool(server!, "stat_load_data", { file_path: csvPath, name: "test_data" });
     const data = parse(r);
@@ -149,7 +166,7 @@ async function main() {
     check("stat_load_data", false, (err as Error).message);
   }
 
-  // 11. stat_call (lm)
+  // 12. stat_call (lm)
   try {
     const r = await callTool(server!, "stat_call", { package: "stats", function: "lm", args: { formula: "y ~ x", data: "test_data" } });
     const data = parse(r);
@@ -159,11 +176,26 @@ async function main() {
     check("stat_call", false, (err as Error).message);
   }
 
-  // 12. stat_session
+  // 13. stat_session + Python runtime diagnostics
   try {
     const r = await callTool(server!, "stat_session", {});
     const data = parse(r);
     check("stat_session shows state", data.handle_count > 0, `${data.handle_count} handles, ${data.resolved_count} resolved`);
+
+    const python = data.python;
+    const pythonConfigured = Boolean(process.env.PYTHON_PATH);
+    if (python) {
+      const version = python.pythonVersion ? ` ${python.pythonVersion}` : "";
+      const missing = python.missingModules?.length > 0
+        ? `missing: ${python.missingModules.join(", ")}`
+        : "all core modules available";
+      const pass = pythonConfigured ? python.healthy === true : true;
+      check("Python runtime status", pass, `${python.path}${version} — ${missing}${pythonConfigured && !pass ? " (configured via PYTHON_PATH)" : ""}`);
+    } else {
+      check("Python runtime status", !pythonConfigured, pythonConfigured
+        ? `no status returned for configured PYTHON_PATH=${PYTHON_PATH}`
+        : `not configured (using default ${PYTHON_PATH})`);
+    }
   } catch (err) {
     check("stat_session", false, (err as Error).message);
   }

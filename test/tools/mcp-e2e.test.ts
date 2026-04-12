@@ -92,6 +92,17 @@ describe("MCP Server End-to-End", () => {
     expect(names).toContain("stat_method");
   });
 
+  it("stat_session reports Python runtime health", async () => {
+    const result = await callTool(server, "stat_session", {});
+    expect(result.isError).toBeFalsy();
+    const data = JSON.parse(result.content[0].text);
+    expect(data.python).toBeDefined();
+    expect(typeof data.python.path).toBe("string");
+    expect(Array.isArray(data.python.availableModules)).toBe(true);
+    expect(Array.isArray(data.python.missingModules)).toBe(true);
+    expect(typeof data.python.healthy).toBe("boolean");
+  });
+
   it("full flow: search → resolve → load → call → session", async () => {
     // 1. Search for linear regression
     const searchResult = await callTool(server, "stat_search", {

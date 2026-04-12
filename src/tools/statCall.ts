@@ -137,6 +137,10 @@ export async function executeStatCall(
     result.warnings = response.warnings;
   }
 
+  if (response.stdout && response.stdout.length > 0) {
+    result.stdout = response.stdout;
+  }
+
   if (response.objectsCreated && response.objectsCreated.length > 0) {
     result.objects_created = response.objectsCreated.map((o) => ({
       id: o.id,

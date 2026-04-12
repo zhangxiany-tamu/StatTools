@@ -168,8 +168,10 @@ describe("Install → Reindex → Resolve (full MCP path)", () => {
 
     // 5. stat_search should also find it (not as a stub)
     const searchResult = await callTool(ts.server, "stat_search", {
-      query: "broom tidy model",
-      maxResults: 10,
+      // Use a more specific query and a wider result window now that the index
+      // includes extensive tarball-extracted metadata.
+      query: "broom tidy model coefficients",
+      maxResults: 50,
     });
     const searchData = JSON.parse(searchResult.content[0].text);
     const found = searchData.results.find(
