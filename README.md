@@ -130,7 +130,7 @@ Functions are classified into tiers:
 | `unsafe` | Blocked. File writes, network, system modification. |
 | `unclassified` | Blocked by default. Discoverable but not callable. |
 
-1,846 safety overrides in CSV (~1,870 classified in the built DB including Python defaults). Unclassified functions are blocked — extend coverage by adding entries to `data/safety_overrides.csv`.
+2,024 safety overrides in CSV (~2,048 classified in the built DB including Python defaults). Unclassified functions are blocked — extend coverage by adding entries to `data/safety_overrides.csv`.
 
 ## Search Quality
 
@@ -138,7 +138,7 @@ Benchmark: 111 queries across 12 categories.
 
 **Fresh clone** (after `build-index` only): ~48k functions, ~570 classified. Benchmark pass rate depends on which packages are installed locally and whether tarball extraction has been run. Expect ~90% on a standard R installation.
 
-**Expanded index** (after the full Phase 7 + 7b tarball waves + ranking/callability updates): ~336k functions, ~1.9k classified. 100% top-3 and 87% top-1 on 97/97 installable queries (MRR: 0.926) — tested on a machine with a rich local R library including the easystats suite.
+**Expanded index** (after the full Phase 7 + 7b tarball waves + ranking/callability updates): ~336k functions, ~2.0k classified. 100% top-3 and 93% top-1 on 97/97 installable queries (MRR: 0.962) — tested on a machine with a rich local R library including the easystats suite. ML, IO, visualization, mixed-models, wrangling, and diagnostics categories are at 100% top-1; weaker categories (testing, bayesian) sit at 83%.
 
 The headline 100% number requires both a rich local R library and tarball extraction. Your mileage will vary based on which packages are installed.
 
@@ -176,27 +176,34 @@ npm run check-safety-overrides  # Fail if safety_overrides.csv has orphan or dup
 npm run validate     # Full setup validation
 ```
 
-## Alpha Status: What Works / What Doesn't
+## Status: Beta for Tier A workflows (v0.2.0)
+
+Phase 6 closed with a four-round agent eval going from 80% → 84% → 92% → **98% weighted pass rate** on a 25-task representative workflow set. The single remaining non-pass is an upstream R-package bug. See [phase6-retrospective.md](./phase6-retrospective.md) for the full story.
 
 **What works reliably:**
-- Search: ~90% top-3 on a fresh clone. On the fully expanded Phase 7 + 7b index, the benchmark is 100% top-3 and 87% top-1 on 97/97 installable queries (see Search Quality section above for details)
-- Core R workflows: OLS, logistic, t-test, ANOVA, correlation, random forest, PCA, k-means, mixed effects, robust SE, broom tidy, VIF, stepwise selection — all validated end-to-end
-- Data loading: CSV/TSV/RDS into R session with column schema and preview
-- Verbose R functions: console output is captured/suppressed so it does not pollute the NDJSON channel or trigger parse warnings
-- Handle system: models and data persist in session across multiple tool calls
-- Install + auto-reindex: `stat_install` installs packages and makes them immediately searchable
-- Worker stability: hot-standby pool, crash recovery, handle persistence across recycles
+- Search: ~90% top-3 on a fresh clone. On the fully expanded Phase 7 + 7b index, the benchmark is 100% top-3 and 93% top-1 on 99 installable queries (MRR 0.963).
+- Core R workflows: OLS, logistic, t-test, ANOVA, correlation, random forest, PCA, k-means, mixed effects (lme4 random intercept/slope/GLMM), survival (Kaplan-Meier, Cox PH, Weibull), robust SE, broom tidy, VIF, stepwise selection, time series (auto.arima, STL, forecast), Bayesian regression (rstanarm), polynomial regression with model comparison, fixest panel regression — all validated end-to-end through agent evals.
+- Data loading: CSV/TSV/RDS via `file_path`, **built-in R datasets via `dataset` (mtcars, iris, sleepstudy, lung, cbpp, Grunfeld, AirPassengers, ...)**, pandas DataFrame via `runtime="python"`. Handles register identically.
+- NSE-heavy verbs (dplyr, tidyr, ggplot2::aes): `stat_call`'s `expressions` and `dot_expressions` fields take R expression strings, parsed via `rlang::parse_expr` and forwarded as quosures. dplyr data-mask pronouns like `n()` and tidyselect helpers like `everything()` / `-Species` resolve correctly. `stat_resolve` returns an `nse_hint` field for ~15 known NSE functions with worked examples.
+- Multi-object dispatch (`anova(m1, m2)`, `AIC(m1, m2)`): `stat_call`'s `dot_args` field resolves session handle IDs as positional `...` args.
+- Class coercion (factor/ts/matrix): `stat_call`'s `coerce` field accepts whitelisted specs (`factor`, `ts(frequency=N)`, etc.) and applies them before the call. `stat_resolve`'s `class_hint` field tells you when to use it.
+- Python workflows: structured errors with `python_state` (`spawn_failed` / `modules_missing` / `crashed` / `healthy`), `python_path`, `missing_modules`, `recent_stderr`, and `hint` — no separate `stat_session` round trip required.
+- Verbose R functions: console output is captured/suppressed so it does not pollute the NDJSON channel.
+- Handle system: models and data persist in session across calls.
+- Install + auto-reindex: `stat_install` installs and makes packages immediately searchable.
+- Worker stability: hot-standby pool, crash recovery, handle persistence across recycles.
 
 **What works with caveats:**
-- Python workflows: `stat_method` (fit/predict/transform) works when `PYTHON_PATH` points to a healthy Python env. `stat_session` now reports Python runtime health, and `npm run validate` checks it when `PYTHON_PATH` is configured.
-- Python data loading: `stat_load_data(runtime="python")` uses the same Python health path as `stat_method`. If pandas/sklearn/scipy/statsmodels are missing, `stat_session` shows exactly which modules are unavailable.
-- Bayesian: rstanarm/brms workflows are searchable but slow (MCMC compilation) and classified as `callable_with_caveats`.
+- Python install path: the server uses whatever `python3` / `PYTHON_PATH` resolves to at startup. If you `pip install` into a different interpreter, the server won't see the modules. Install into the binary `stat_session` reports under `python.path`, or set `PYTHON_PATH` explicitly.
+- Bayesian: rstanarm/brms are slow (MCMC compilation) and classified as `callable_with_caveats`. `bayestestR::hdi(stanreg_model)` currently throws a names-length error on rstanarm fits (upstream bug) — use `bayestestR::describe_posterior(model, ci_method="HDI")` instead.
+- `lm(weights = ...)`: the `weights` arg is captured via `model.frame`, not the rlang/dplyr NSE machinery. `expressions={"weights": "1/hp"}` is rejected. Workaround: extract the column with `stat_extract` and pass the resulting numeric vector handle.
+- S3 dispatch on first positional arg (`randomForest`, `survival::Surv`, etc.): when both `formula` and `x` are passed, R silently falls through to `.default` (matrix mode). Workaround: use matrix form (`x=`, `y=`) with `coerce={y:"factor"}` for classification, or pass the formula as the first positional arg.
 
 **What doesn't work yet:**
-- Only ~1.9k of ~336k functions are classified as callable. The rest are discoverable but blocked by the fail-closed safety model. Extend coverage by adding entries to `data/safety_overrides.csv`.
-- ~14.9k packages are still stubs (no function-level metadata). The committed `data/tarball_targets_phase7.txt` list now covers 8,500 priority packages after the Phase 7b extension.
-- Tarball expansion itself is still network-bound and incremental. The default `npm test` suite is hermetic, but `npm run test:tarball-live` still depends on live CRAN access by design.
-- Top-1 search accuracy is much better than before, but still weaker than top-3 in some categories like ML and IO. Agents usually find the right answer in the first 1-3 results rather than always on rank 1.
+- Only ~2.0k of ~336k functions are classified as callable. The rest are discoverable but blocked by the fail-closed safety model. Extend coverage by adding entries to `data/safety_overrides.csv`.
+- ~14.9k packages are still stubs (no function-level metadata). `data/tarball_targets_phase7.txt` covers 8,500 priority packages.
+- Tarball expansion is network-bound and incremental. `npm test` is hermetic; `npm run test:tarball-live` requires live CRAN access.
+- Top-1 search accuracy is 93%; weakest in `testing` and `bayesian` categories at 83%. Top-3 remains 100%.
 - No multi-tenant support — single-user local server only.
 
 **Known environment requirements:**

@@ -136,13 +136,21 @@ export type RpcObjectCreated = {
   readonly schema?: Record<string, string>;
 };
 
+export type PythonRuntimeState =
+  | "not_configured"   // Worker was never created (e.g. server explicitly disabled Python)
+  | "starting"         // Worker created, start() not yet resolved
+  | "spawn_failed"     // Process could not be launched (executable missing, permission denied, ...)
+  | "modules_missing"  // Process running, healthcheck reported missing required modules
+  | "crashed"          // Process was running but exited unexpectedly
+  | "healthy";         // Process running and all required modules importable
+
 export type PythonRuntimeStatus = {
-  readonly enabled: boolean;
-  readonly healthy: boolean;
+  readonly state: PythonRuntimeState;
   readonly path: string;
   readonly pythonVersion?: string;
   readonly availableModules: readonly string[];
   readonly missingModules: readonly string[];
+  readonly recentStderr: readonly string[];
   readonly error?: string;
 };
 

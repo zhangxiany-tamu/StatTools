@@ -1,6 +1,6 @@
 {
   "name": "stattools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "MCP server exposing CRAN R packages as agent-callable tools",
   "main": "dist/index.js",

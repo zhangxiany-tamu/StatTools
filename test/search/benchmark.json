@@ -6,7 +6,7 @@
       "expected_top3": [
         "stats::lm"
       ],
-      "note": "Most basic statistical model — curated alias must fire",
+      "note": "Most basic statistical model \u2014 curated alias must fire",
       "category": "regression",
       "requires_install": false
     },
@@ -42,7 +42,7 @@
       "expected_top3": [
         "glmnet::glmnet"
       ],
-      "note": "glmnet with alpha=1 for lasso — curated alias must fire",
+      "note": "glmnet with alpha=1 for lasso \u2014 curated alias must fire",
       "category": "regression",
       "requires_install": false
     },
@@ -51,7 +51,7 @@
       "expected_top3": [
         "glmnet::glmnet"
       ],
-      "note": "glmnet with 0 < alpha < 1 — curated alias must fire",
+      "note": "glmnet with 0 < alpha < 1 \u2014 curated alias must fire",
       "category": "regression",
       "requires_install": false
     },
@@ -69,7 +69,7 @@
       "expected_top3": [
         "quantreg::rq"
       ],
-      "note": "Quantile regression — rq not rlm",
+      "note": "Quantile regression \u2014 rq not rlm",
       "category": "regression",
       "requires_install": false
     },
@@ -159,7 +159,7 @@
       "expected_top3": [
         "mgcv::gam"
       ],
-      "note": "GAMs via mgcv — the de facto R package",
+      "note": "GAMs via mgcv \u2014 the de facto R package",
       "category": "regression",
       "requires_install": false
     },
@@ -168,7 +168,7 @@
       "expected_top3": [
         "stats::t.test"
       ],
-      "note": "Most common parametric test — name variant must match",
+      "note": "Most common parametric test \u2014 name variant must match",
       "category": "testing",
       "requires_install": false
     },
@@ -195,7 +195,7 @@
       "expected_top3": [
         "stats::wilcox.test"
       ],
-      "note": "Paired nonparametric test — same function, paired=TRUE",
+      "note": "Paired nonparametric test \u2014 same function, paired=TRUE",
       "category": "testing",
       "requires_install": false
     },
@@ -317,6 +317,16 @@
       "requires_install": false
     },
     {
+      "query": "reshape wide to long pivot",
+      "expected_top3": [
+        "tidyr::pivot_longer",
+        "tidyr::pivot_wider"
+      ],
+      "note": "Eval-derived: agent used this verbatim query; previously misranked datawizard::data_to_long",
+      "category": "wrangling",
+      "requires_install": false
+    },
+    {
       "query": "left join merge two data frames by key",
       "expected_top3": [
         "dplyr::left_join"
@@ -384,7 +394,7 @@
       "expected_top3": [
         "survival::survfit"
       ],
-      "note": "KM curve via survfit — curated alias must fire",
+      "note": "KM curve via survfit \u2014 curated alias must fire",
       "category": "survival",
       "requires_install": false
     },
@@ -393,7 +403,7 @@
       "expected_top3": [
         "survival::coxph"
       ],
-      "note": "Semi-parametric survival model — curated alias must fire",
+      "note": "Semi-parametric survival model \u2014 curated alias must fire",
       "category": "survival",
       "requires_install": false
     },
@@ -447,7 +457,7 @@
       "expected_top3": [
         "lme4::lmer"
       ],
-      "note": "Linear mixed effects model — curated alias must fire",
+      "note": "Linear mixed effects model \u2014 curated alias must fire",
       "category": "mixed",
       "requires_install": false
     },
@@ -564,7 +574,7 @@
       "expected_top3": [
         "rstanarm::stan_glm"
       ],
-      "note": "Bayesian regression via rstanarm — query made specific to disambiguate from posterior summary",
+      "note": "Bayesian regression via rstanarm \u2014 query made specific to disambiguate from posterior summary",
       "category": "bayesian",
       "requires_install": false
     },
@@ -636,7 +646,7 @@
       "expected_top3": [
         "rpart::rpart"
       ],
-      "note": "Recursive partitioning — CART algorithm",
+      "note": "Recursive partitioning \u2014 CART algorithm",
       "category": "ml",
       "requires_install": false
     },
@@ -690,7 +700,7 @@
       "expected_top3": [
         "stats::prcomp"
       ],
-      "note": "PCA — curated alias must fire; prcomp preferred over princomp",
+      "note": "PCA \u2014 curated alias must fire; prcomp preferred over princomp",
       "category": "ml",
       "requires_install": false
     },
@@ -996,8 +1006,17 @@
       "expected_top3": [
         "sandwich::vcovHC"
       ],
-      "note": "HC covariance estimator — curated alias must fire",
+      "note": "HC covariance estimator \u2014 curated alias must fire",
       "category": "diagnostics",
+      "requires_install": false
+    },
+    {
+      "query": "compare nested models",
+      "expected_top3": [
+        "stats::anova"
+      ],
+      "note": "Eval-derived: agent used this query for nested-model comparison; previously not surfaced",
+      "category": "regression",
       "requires_install": false
     }
   ]

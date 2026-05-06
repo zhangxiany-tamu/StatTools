@@ -189,8 +189,8 @@ async function main() {
       const missing = python.missingModules?.length > 0
         ? `missing: ${python.missingModules.join(", ")}`
         : "all core modules available";
-      const pass = pythonConfigured ? python.healthy === true : true;
-      check("Python runtime status", pass, `${python.path}${version} — ${missing}${pythonConfigured && !pass ? " (configured via PYTHON_PATH)" : ""}`);
+      const pass = pythonConfigured ? python.state === "healthy" : true;
+      check("Python runtime status", pass, `${python.path}${version} — state=${python.state} — ${missing}${pythonConfigured && !pass ? " (configured via PYTHON_PATH)" : ""}`);
     } else {
       check("Python runtime status", !pythonConfigured, pythonConfigured
         ? `no status returned for configured PYTHON_PATH=${PYTHON_PATH}`

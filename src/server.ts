@@ -101,22 +101,31 @@ export async function createStatToolsServer(
 
   await workerPool.start();
 
-  // Python worker (optional — starts if python3 is available)
-  let pythonWorker: PythonWorker | null = null;
-  try {
-    pythonWorker = new PythonWorker({
-      pythonPath: config.pythonPath || "python3",
-    });
-    await pythonWorker.start();
-    const pythonStatus = pythonWorker.getStatus();
-    if (!pythonStatus.healthy) {
+  // Python worker — always created. start() never throws; final state is
+  // exposed via getStatus().state so tools can return structured diagnostics
+  // instead of generic "not available" errors.
+  const pythonWorker = new PythonWorker({
+    pythonPath: config.pythonPath || "python3",
+  });
+  await pythonWorker.start();
+  const pythonStatus = pythonWorker.getStatus();
+  switch (pythonStatus.state) {
+    case "spawn_failed":
       console.error(
-        `[StatTools] Python runtime is available at ${pythonStatus.path} but missing modules: ${pythonStatus.missingModules.join(", ") || "(unknown)"}`,
+        `[StatTools] Python spawn failed at ${pythonStatus.path}: ${pythonStatus.error ?? "unknown error"} — Python tools disabled`,
       );
-    }
-  } catch {
-    console.error("[StatTools] Python worker not available — Python tools disabled");
-    pythonWorker = null;
+      break;
+    case "modules_missing":
+      console.error(
+        `[StatTools] Python at ${pythonStatus.path} is reachable but missing modules: ${pythonStatus.missingModules.join(", ") || "(unknown)"} — install with pip then restart the server`,
+      );
+      break;
+    case "healthy":
+      break;
+    default:
+      console.error(
+        `[StatTools] Python worker in unexpected state '${pythonStatus.state}' at ${pythonStatus.path}`,
+      );
   }
 
   // Path policy — resolved once per server instance, not global
@@ -169,13 +178,13 @@ export async function createStatToolsServer(
       {
         name: "stat_call",
         description:
-          "Execute a resolved R function with structured arguments. The function must have been validated via stat_resolve first. Returns structured JSON results (coefficients, p-values, etc.), not raw R console output.",
+          "Execute a resolved R function with structured arguments. The function must have been validated via stat_resolve first. Returns structured JSON results (coefficients, p-values, etc.), not raw R console output. For NSE-heavy functions (dplyr verbs, tidyr pivots, ggplot2::aes), use the `expressions` and `dot_expressions` fields to pass R expression strings — see stat_resolve's `nse_hint` for guidance.",
         inputSchema: STAT_CALL_SCHEMA,
       },
       {
         name: "stat_load_data",
         description:
-          "Load a CSV, TSV, or RDS file into the session. Returns a handle ID (e.g. 'data_1') with column schema and preview. Default runtime is R; set runtime='python' to load as a pandas DataFrame for sklearn/statsmodels workflows.",
+          "Load data into the session. Two modes: (1) `file_path` for CSV/TSV/RDS files; (2) `dataset` for built-in R datasets like 'mtcars', 'iris', 'AirPassengers' — pass `package` for non-default packages (e.g. 'sleepstudy'/'cbpp' from lme4, 'lung' from survival). Returns a handle ID with column schema and preview. Default runtime is R; set runtime='python' to load a file as a pandas DataFrame.",
         inputSchema: STAT_LOAD_DATA_SCHEMA,
       },
       {

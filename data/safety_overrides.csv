@@ -1,53 +1,176 @@
 function_id,safety_class,reason
+DBI::ANSI,safe,Read-only DBI helper
+DBI::Id,safe,Read-only DBI helper
+DBI::SQL,safe,Read-only DBI helper
+DBI::SQLKeywords,safe,Read-only DBI helper
+DBI::dbAppendTable,unsafe,Writes or mutates database state
+DBI::dbBegin,callable_with_caveats,Validated DBI workflow with stateful connection handling
+DBI::dbCanConnect,safe,Read-only DBI helper
+DBI::dbClearResult,callable_with_caveats,Validated DBI workflow with stateful connection handling
+DBI::dbColumnInfo,safe,Read-only DBI helper
+DBI::dbCommit,callable_with_caveats,Validated DBI workflow with stateful connection handling
+DBI::dbConnect,callable_with_caveats,Opens database connection — resource management caveat
+DBI::dbCreateTable,unsafe,Creates table in database
+DBI::dbDataType,safe,Read-only DBI helper
+DBI::dbDisconnect,safe,Closes database connection
+DBI::dbExecute,unsafe,Writes or mutates database state
+DBI::dbExistsTable,safe,Read-only DBI helper
+DBI::dbFetch,callable_with_caveats,Streaming DB read helper
+DBI::dbGetConnectArgs,safe,Read-only DBI helper
+DBI::dbGetException,safe,Read-only DBI helper
+DBI::dbGetInfo,safe,Read-only DBI helper
+DBI::dbGetQuery,safe,Pure read query — returns data frame
+DBI::dbGetRowCount,safe,Read-only DBI helper
+DBI::dbGetRowsAffected,safe,Read-only DBI helper
+DBI::dbHasCompleted,safe,Read-only DBI helper
+DBI::dbIsReadOnly,safe,Read-only DBI helper
+DBI::dbIsValid,safe,Read-only DBI helper
+DBI::dbListFields,safe,Read-only DBI helper
+DBI::dbListObjects,safe,Read-only DBI helper
+DBI::dbListResults,safe,Read-only DBI helper
+DBI::dbListTables,safe,Lists table names — read only
+DBI::dbQuoteIdentifier,safe,Read-only DBI helper
+DBI::dbQuoteLiteral,safe,Read-only DBI helper
+DBI::dbQuoteString,safe,Read-only DBI helper
+DBI::dbReadTable,safe,Reads entire table — returns data frame
+DBI::dbRemoveTable,unsafe,Removes table from database
+DBI::dbRollback,callable_with_caveats,Validated DBI workflow with stateful connection handling
+DBI::dbSendQuery,callable_with_caveats,Sends arbitrary SQL — may modify data
+DBI::dbWriteTable,unsafe,Writes data to database — modifies external state
+MASS::boxcox,safe,Pure computation
+MASS::glm.nb,safe,Pure computation
+MASS::lm.ridge,safe,Pure computation
+MASS::polr,safe,Pure computation
+MASS::rlm,safe,Pure computation
+MASS::stepAIC,safe,Model selection
+RSQLite::Id,safe,Read-only SQLite helper
+RSQLite::SQLKeywords,safe,Read-only SQLite helper
+RSQLite::SQLite,safe,Creates SQLite driver object — no side effects
+RSQLite::dbAppendTable,unsafe,Writes or mutates database state
+RSQLite::dbBegin,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbBeginTransaction,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbCanConnect,safe,Read-only SQLite helper
+RSQLite::dbClearResult,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbColumnInfo,safe,Read-only SQLite helper
+RSQLite::dbCommit,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbConnect,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbCreateTable,unsafe,Writes or mutates database state
+RSQLite::dbDataType,safe,Read-only SQLite helper
+RSQLite::dbDisconnect,safe,Read-only SQLite helper
+RSQLite::dbExecute,unsafe,Writes or mutates database state
+RSQLite::dbExistsTable,safe,Read-only SQLite helper
+RSQLite::dbFetch,callable_with_caveats,Streaming SQLite read helper
+RSQLite::dbGetInfo,safe,Read-only SQLite helper
+RSQLite::dbGetQuery,safe,Read-only SQLite helper
+RSQLite::dbIsReadOnly,safe,Read-only SQLite helper
+RSQLite::dbIsValid,safe,Read-only SQLite helper
+RSQLite::dbListFields,safe,Read-only SQLite helper
+RSQLite::dbListTables,safe,Read-only SQLite helper
+RSQLite::dbQuoteIdentifier,safe,Read-only SQLite helper
+RSQLite::dbQuoteString,safe,Read-only SQLite helper
+RSQLite::dbReadTable,safe,Read-only SQLite helper
+RSQLite::dbRemoveTable,unsafe,Writes or mutates database state
+RSQLite::dbRollback,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+RSQLite::dbSendQuery,callable_with_caveats,Validated SQLite workflow with stateful connection handling
+base::Filter,safe,Pure computation
+base::Map,safe,Pure computation
+base::NCOL,safe,Linear algebra primitive
+base::NROW,safe,Linear algebra primitive
+base::Negate,callable_with_caveats,Higher-order function or reflection helper - purity depends on callback
+base::Reduce,safe,Pure computation
 base::abs,safe,Pure computation
+base::acos,safe,Pure math computation
+base::all,safe,Pure vector operation
 base::all.equal,safe,Pure computation
+base::any,safe,Pure vector operation
 base::apply,safe,Pure computation
+base::array,safe,Linear algebra primitive
 base::as.character,safe,Pure computation
 base::as.data.frame,safe,Pure computation
+base::as.double,safe,Pure type coercion
 base::as.factor,safe,Pure computation
 base::as.integer,safe,Pure computation
+base::as.list,safe,Pure type coercion
 base::as.logical,safe,Pure computation
+base::as.matrix,safe,Pure type coercion
 base::as.numeric,safe,Pure computation
+base::as.vector,safe,Pure type coercion
+base::asin,safe,Pure math computation
+base::atan,safe,Pure math computation
+base::atan2,safe,Pure math computation
+base::beta,safe,Pure math computation
+base::by,callable_with_caveats,Higher-order function or reflection helper - purity depends on callback
 base::c,safe,Pure computation
 base::cat,safe,Pure output
 base::cbind,safe,Pure computation
 base::ceiling,safe,Pure computation
 base::chol,safe,Pure computation
+base::choose,safe,Pure math computation
 base::class,safe,Pure computation
+base::colMeans,safe,Pure vector operation
+base::colSums,safe,Pure vector operation
 base::colnames,safe,Pure computation
+base::cos,safe,Pure math computation
+base::cosh,safe,Pure math computation
 base::crossprod,safe,Pure computation
 base::cummax,safe,Pure computation
 base::cummin,safe,Pure computation
 base::cumprod,safe,Pure computation
 base::cumsum,safe,Pure computation
 base::data.frame,safe,Pure computation
+base::data.matrix,safe,Pure conversion of data frame to matrix
 base::det,safe,Pure computation
 base::diag,safe,Pure computation
 base::diff,safe,Pure computation
+base::digamma,safe,Pure math computation
 base::dim,safe,Pure computation
+base::do.call,callable_with_caveats,Higher-order function or reflection helper - purity depends on callback
 base::duplicated,safe,Pure computation
 base::eigen,safe,Pure computation
 base::exp,safe,Pure computation
+base::expm1,safe,Pure math computation
 base::factor,safe,Pure computation
-base::Filter,safe,Pure computation
+base::factorial,safe,Pure math computation
 base::floor,safe,Pure computation
+base::gamma,safe,Pure math computation
 base::grep,safe,Pure computation
 base::grepl,safe,Pure computation
 base::gsub,safe,Pure computation
 base::identical,safe,Pure computation
+base::identity,safe,Higher-order function or reflection helper - purity depends on callback
+base::intersect,safe,Pure vector operation
 base::is.character,safe,Pure computation
+base::is.data.frame,safe,Read-only type predicate
+base::is.double,safe,Read-only type predicate
+base::is.element,safe,Pure vector operation
+base::is.factor,safe,Read-only type predicate
+base::is.finite,safe,Read-only type predicate
+base::is.infinite,safe,Read-only type predicate
+base::is.integer,safe,Read-only type predicate
+base::is.list,safe,Read-only type predicate
+base::is.logical,safe,Read-only type predicate
+base::is.matrix,safe,Read-only type predicate
 base::is.na,safe,Pure computation
+base::is.nan,safe,Read-only type predicate
 base::is.null,safe,Pure computation
 base::is.numeric,safe,Pure computation
+base::is.vector,safe,Read-only type predicate
+base::isFALSE,safe,Pure vector operation
+base::isTRUE,safe,Pure vector operation
 base::lapply,safe,Pure computation
+base::lbeta,safe,Pure math computation
 base::length,safe,Pure computation
 base::levels,safe,Pure computation
+base::lgamma,safe,Pure math computation
 base::list,safe,Pure computation
 base::log,safe,Pure computation
 base::log10,safe,Pure computation
+base::log1p,safe,Pure math computation
 base::log2,safe,Pure computation
-base::Map,safe,Pure computation
 base::mapply,safe,Pure computation
+base::match.arg,safe,Higher-order function or reflection helper - purity depends on callback
+base::match.call,safe,Higher-order function or reflection helper - purity depends on callback
+base::matrix,safe,Linear algebra primitive
 base::max,safe,Pure computation
 base::mean,safe,Pure computation
 base::merge,safe,Pure computation
@@ -60,18 +183,32 @@ base::order,safe,Pure computation
 base::outer,safe,Pure computation
 base::paste,safe,Pure computation
 base::paste0,safe,Pure computation
+base::pmax,safe,Pure math computation
+base::pmin,safe,Pure math computation
 base::print,safe,Pure output
+base::prod,safe,Pure math computation
 base::qr,safe,Pure computation
 base::range,safe,Pure computation
+base::rank,safe,Pure vector operation
 base::rbind,safe,Pure computation
-base::Reduce,safe,Pure computation
 base::rep,safe,Pure computation
+base::rep_len,safe,Pure vector operation
+base::rev,safe,Pure vector operation
 base::round,safe,Pure computation
+base::rowMeans,safe,Pure vector operation
+base::rowSums,safe,Pure vector operation
 base::rownames,safe,Pure computation
 base::sample,safe,Pure computation (uses RNG but no side effects)
 base::sapply,safe,Pure computation
 base::seq,safe,Pure computation
+base::seq_along,safe,Pure vector operation
+base::seq_len,safe,Pure vector operation
 base::set.seed,callable_with_caveats,Modifies RNG state
+base::setdiff,safe,Pure vector operation
+base::sign,safe,Pure math computation
+base::signif,safe,Pure math computation
+base::sin,safe,Pure math computation
+base::sinh,safe,Pure math computation
 base::solve,safe,Pure computation
 base::sort,safe,Pure computation
 base::sprintf,safe,Pure computation
@@ -83,13 +220,17 @@ base::summary,safe,Pure computation
 base::svd,safe,Pure computation
 base::t,safe,Pure computation
 base::table,safe,Pure computation
+base::tan,safe,Pure math computation
+base::tanh,safe,Pure math computation
 base::tapply,safe,Pure computation
 base::tcrossprod,safe,Pure computation
 base::tolower,safe,Pure computation
 base::toupper,safe,Pure computation
 base::transform,safe,Pure computation
 base::trimws,safe,Pure computation
+base::trunc,safe,Pure math computation
 base::typeof,safe,Pure computation
+base::union,safe,Pure vector operation
 base::unique,safe,Pure computation
 base::vapply,safe,Pure computation
 base::which,safe,Pure computation
@@ -97,6 +238,7 @@ base::which.max,safe,Pure computation
 base::which.min,safe,Pure computation
 base::with,safe,Pure computation
 base::within,safe,Pure computation
+base::xor,safe,Pure vector operation
 bayestestR::area_under_curve,safe,Pure Bayesian summary helper
 bayestestR::auc,safe,Pure Bayesian summary helper
 bayestestR::bayesfactor,safe,Pure computation — Bayes factor model comparison
@@ -202,9 +344,14 @@ broom::augment,safe,Pure computation — adds fitted values and residuals to dat
 broom::glance,safe,Pure computation — extracts model-level summary statistics
 broom::tidy,safe,Pure computation — formats model output as tibble
 car::Anova,safe,Pure computation
+car::boxCox,safe,Pure statistical test or diagnostic
+car::deltaMethod,safe,Pure statistical test or diagnostic
 car::durbinWatsonTest,safe,Pure computation
 car::leveneTest,safe,Pure computation
 car::linearHypothesis,safe,Pure computation
+car::ncvTest,safe,Pure statistical test or diagnostic
+car::outlierTest,safe,Pure statistical test or diagnostic
+car::powerTransform,safe,Pure statistical test or diagnostic
 car::vif,safe,Pure computation
 caret::confusionMatrix,safe,Pure computation
 caret::createDataPartition,safe,Uses RNG but no side effects
@@ -226,11 +373,12 @@ data.table::%inrange%,safe,Pure in-memory data.table helper
 data.table::%like%,safe,Pure in-memory data.table helper
 data.table::%notin%,safe,Pure in-memory data.table helper
 data.table::%plike%,safe,Pure in-memory data.table helper
+data.table::CJ,safe,Pure in-memory data.table helper
+data.table::SJ,safe,Pure in-memory data.table helper
 data.table::as.data.table,safe,Pure in-memory data.table helper
 data.table::between,safe,Pure in-memory data.table helper
 data.table::chmatch,safe,Pure in-memory data.table helper
 data.table::chorder,safe,Pure in-memory data.table helper
-data.table::CJ,safe,Pure in-memory data.table helper
 data.table::copy,safe,Pure in-memory data.table helper
 data.table::data.table,safe,Pure in-memory data.table helper
 data.table::fcase,safe,Pure in-memory data.table helper
@@ -241,6 +389,10 @@ data.table::frank,safe,Pure in-memory data.table helper
 data.table::frankv,safe,Pure in-memory data.table helper
 data.table::fread,safe,File read only
 data.table::fwrite,unsafe,File write
+data.table::haskey,safe,Pure data.table accessor / transform
+data.table::indices,safe,Pure data.table accessor / transform
+data.table::is.data.table,safe,Pure data.table accessor / transform
+data.table::key,safe,Pure data.table accessor / transform
 data.table::last,safe,Pure in-memory data.table helper
 data.table::like,safe,Pure in-memory data.table helper
 data.table::patterns,safe,Pure in-memory data.table helper
@@ -251,7 +403,7 @@ data.table::rowid,safe,Pure in-memory data.table helper
 data.table::rowidv,safe,Pure in-memory data.table helper
 data.table::setDTthreads,safe,Pure in-memory data.table helper
 data.table::shift,safe,Pure in-memory data.table helper
-data.table::SJ,safe,Pure in-memory data.table helper
+data.table::tables,safe,Pure data.table accessor / transform
 data.table::transpose,safe,Pure in-memory data.table helper
 data.table::uniqueN,safe,Pure in-memory data.table helper
 datawizard::data_filter,callable_with_caveats,Uses NSE for row filtering; otherwise pure computation
@@ -263,46 +415,10 @@ datawizard::describe_distribution,safe,Pure computation — descriptive statisti
 datawizard::normalize,safe,Pure computation — 0-1 normalization of numeric columns
 datawizard::rescale,safe,Pure computation — rescales numeric variable to new range
 datawizard::standardize,safe,Pure computation — z-score standardization of numeric columns
-DBI::ANSI,safe,Read-only DBI helper
-DBI::dbAppendTable,unsafe,Writes or mutates database state
-DBI::dbBegin,callable_with_caveats,Validated DBI workflow with stateful connection handling
-DBI::dbCanConnect,safe,Read-only DBI helper
-DBI::dbClearResult,callable_with_caveats,Validated DBI workflow with stateful connection handling
-DBI::dbColumnInfo,safe,Read-only DBI helper
-DBI::dbCommit,callable_with_caveats,Validated DBI workflow with stateful connection handling
-DBI::dbConnect,callable_with_caveats,Opens database connection — resource management caveat
-DBI::dbCreateTable,unsafe,Creates table in database
-DBI::dbDataType,safe,Read-only DBI helper
-DBI::dbDisconnect,safe,Closes database connection
-DBI::dbExecute,unsafe,Writes or mutates database state
-DBI::dbExistsTable,safe,Read-only DBI helper
-DBI::dbFetch,callable_with_caveats,Streaming DB read helper
-DBI::dbGetConnectArgs,safe,Read-only DBI helper
-DBI::dbGetException,safe,Read-only DBI helper
-DBI::dbGetInfo,safe,Read-only DBI helper
-DBI::dbGetQuery,safe,Pure read query — returns data frame
-DBI::dbGetRowCount,safe,Read-only DBI helper
-DBI::dbGetRowsAffected,safe,Read-only DBI helper
-DBI::dbHasCompleted,safe,Read-only DBI helper
-DBI::dbIsReadOnly,safe,Read-only DBI helper
-DBI::dbIsValid,safe,Read-only DBI helper
-DBI::dbListFields,safe,Read-only DBI helper
-DBI::dbListObjects,safe,Read-only DBI helper
-DBI::dbListResults,safe,Read-only DBI helper
-DBI::dbListTables,safe,Lists table names — read only
-DBI::dbQuoteIdentifier,safe,Read-only DBI helper
-DBI::dbQuoteLiteral,safe,Read-only DBI helper
-DBI::dbQuoteString,safe,Read-only DBI helper
-DBI::dbReadTable,safe,Reads entire table — returns data frame
-DBI::dbRemoveTable,unsafe,Removes table from database
-DBI::dbRollback,callable_with_caveats,Validated DBI workflow with stateful connection handling
-DBI::dbSendQuery,callable_with_caveats,Sends arbitrary SQL — may modify data
-DBI::dbWriteTable,unsafe,Writes data to database — modifies external state
-DBI::Id,safe,Read-only DBI helper
-DBI::SQL,safe,Read-only DBI helper
-DBI::SQLKeywords,safe,Read-only DBI helper
 dplyr::across,callable_with_caveats,Uses NSE
+dplyr::all_of,safe,Pure column selector or row helper
 dplyr::anti_join,safe,Pure computation
+dplyr::any_of,safe,Pure column selector or row helper
 dplyr::arrange,callable_with_caveats,Uses NSE
 dplyr::between,safe,Pure computation
 dplyr::bind_cols,safe,Pure computation
@@ -311,25 +427,37 @@ dplyr::case_when,safe,Pure computation
 dplyr::coalesce,safe,Pure computation
 dplyr::contains,safe,Tidy select helper
 dplyr::count,callable_with_caveats,Uses NSE
+dplyr::cume_dist,safe,Pure column selector or row helper
+dplyr::dense_rank,safe,Pure column selector or row helper
 dplyr::distinct,callable_with_caveats,Uses NSE
 dplyr::ends_with,safe,Tidy select helper
 dplyr::everything,safe,Tidy select helper
 dplyr::filter,callable_with_caveats,Uses NSE (non-standard evaluation)
+dplyr::first,safe,Pure column selector or row helper
 dplyr::full_join,safe,Pure computation
 dplyr::group_by,callable_with_caveats,Uses NSE
 dplyr::if_else,safe,Pure computation
 dplyr::inner_join,safe,Pure computation
 dplyr::lag,safe,Pure computation
+dplyr::last,safe,Pure column selector or row helper
+dplyr::last_col,safe,Pure column selector or row helper
 dplyr::lead,safe,Pure computation
 dplyr::left_join,safe,Pure computation
 dplyr::matches,safe,Tidy select helper
+dplyr::min_rank,safe,Pure column selector or row helper
 dplyr::mutate,callable_with_caveats,Uses NSE
 dplyr::n,safe,Pure computation
 dplyr::n_distinct,safe,Pure computation
+dplyr::near,safe,Pure column selector or row helper
+dplyr::nth,safe,Pure column selector or row helper
+dplyr::ntile,safe,Pure column selector or row helper
+dplyr::num_range,safe,Pure column selector or row helper
+dplyr::percent_rank,safe,Pure column selector or row helper
 dplyr::pull,callable_with_caveats,Uses NSE
 dplyr::relocate,callable_with_caveats,Uses NSE
 dplyr::rename,callable_with_caveats,Uses NSE
 dplyr::right_join,safe,Pure computation
+dplyr::row_number,safe,Pure column selector or row helper
 dplyr::select,callable_with_caveats,Uses NSE
 dplyr::semi_join,safe,Pure computation
 dplyr::slice,callable_with_caveats,Uses NSE
@@ -355,6 +483,14 @@ e1071::svm,safe,Pure computation — fits support vector machine model
 e1071::tune,callable_with_caveats,Performs cross-validation grid search; may be slow and uses RNG
 e1071::tune.control,safe,Pure ML summary helper
 e1071::tune.svm,callable_with_caveats,Performs SVM-specific cross-validation grid search; slow and uses RNG
+effectsize::F_to_d,safe,Pure effect size computation
+effectsize::F_to_epsilon2,safe,Pure effect size computation
+effectsize::F_to_eta2,safe,Pure effect size computation
+effectsize::F_to_eta2_adj,safe,Pure effect size computation
+effectsize::F_to_f,safe,Pure effect size computation
+effectsize::F_to_f2,safe,Pure effect size computation
+effectsize::F_to_omega2,safe,Pure effect size computation
+effectsize::F_to_r,safe,Pure effect size computation
 effectsize::arr,safe,Pure effect size computation
 effectsize::arr_to_logoddsratio,safe,Pure effect size computation
 effectsize::arr_to_nnt,safe,Pure effect size computation
@@ -404,15 +540,7 @@ effectsize::eta2_to_f2,safe,Pure effect size computation
 effectsize::eta_squared,safe,Pure computation — eta-squared effect size for ANOVA
 effectsize::eta_squared_posterior,safe,Pure effect size computation
 effectsize::f2_to_eta2,safe,Pure effect size computation
-effectsize::F_to_d,safe,Pure effect size computation
-effectsize::F_to_epsilon2,safe,Pure effect size computation
-effectsize::F_to_eta2,safe,Pure effect size computation
 effectsize::f_to_eta2,safe,Pure effect size computation
-effectsize::F_to_eta2_adj,safe,Pure effect size computation
-effectsize::F_to_f,safe,Pure effect size computation
-effectsize::F_to_f2,safe,Pure effect size computation
-effectsize::F_to_omega2,safe,Pure effect size computation
-effectsize::F_to_r,safe,Pure effect size computation
 effectsize::fei,safe,Pure effect size computation
 effectsize::fei_to_w,safe,Pure effect size computation
 effectsize::format_standardize,safe,Pure effect size computation
@@ -580,22 +708,24 @@ forcats::fct_shift,safe,Pure factor transformation helper
 forcats::fct_shuffle,safe,Pure factor transformation helper
 forcats::fct_unify,safe,Pure factor transformation helper
 forcats::fct_unique,safe,Pure factor transformation helper
-forecast::accuracy,safe,Pure computation
 forecast::Acf,safe,Pure forecasting helper
 forecast::Arima,safe,Pure computation
-forecast::auto.arima,safe,Pure computation
-forecast::bats,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::BoxCox,safe,Pure forecasting helper
 forecast::BoxCox.lambda,safe,Pure forecasting helper
+forecast::InvBoxCox,safe,Pure forecast helper / transform
+forecast::Pacf,safe,Pure forecasting helper
+forecast::accuracy,safe,Pure computation
+forecast::auto.arima,safe,Pure computation
+forecast::bats,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::ets,safe,Pure computation
 forecast::findfrequency,safe,Pure forecasting helper
 forecast::forecast,safe,Pure computation
 forecast::meanf,callable_with_caveats,Validated forecasting workflow; computation may be expensive
+forecast::msts,safe,Pure forecast helper / transform
 forecast::naive,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::ndiffs,safe,Pure forecasting helper
 forecast::nnetar,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::nsdiffs,safe,Pure forecasting helper
-forecast::Pacf,safe,Pure forecasting helper
 forecast::rwf,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::snaive,callable_with_caveats,Validated forecasting workflow; computation may be expensive
 forecast::tbats,callable_with_caveats,Validated forecasting workflow; computation may be expensive
@@ -635,7 +765,9 @@ ggplot2::theme_classic,safe,Theme preset
 ggplot2::theme_minimal,safe,Theme preset
 ggplot2::xlab,safe,Label specification
 ggplot2::ylab,safe,Label specification
+glmnet::assess.glmnet,safe,Pure glmnet evaluation helper
 glmnet::coef.glmnet,safe,Pure computation
+glmnet::confusion.glmnet,safe,Pure glmnet evaluation helper
 glmnet::cv.glmnet,safe,Pure computation
 glmnet::glmnet,safe,Pure computation
 glmnet::predict.glmnet,safe,Pure computation
@@ -671,9 +803,9 @@ janitor::clean_names.sf,safe,Pure data cleaning helper
 janitor::clean_names.tbl_lazy,safe,Pure data cleaning helper
 janitor::compare_df_cols,safe,Pure data cleaning helper
 janitor::compare_df_cols_same,safe,Pure data cleaning helper
+janitor::convert_to_NA,safe,Pure data cleaning helper
 janitor::convert_to_date,safe,Pure data cleaning helper
 janitor::convert_to_datetime,safe,Pure data cleaning helper
-janitor::convert_to_NA,safe,Pure data cleaning helper
 janitor::crosstab,safe,Pure data cleaning helper
 janitor::find_header,safe,Pure data cleaning helper
 janitor::get_dupes,safe,Pure data cleaning helper
@@ -691,29 +823,45 @@ lavaan::cfa,safe,Pure computation — fits confirmatory factor analysis model
 lavaan::fitMeasures,safe,Pure computation — extracts fit indices from lavaan model
 lavaan::growth,safe,Pure computation — fits latent growth curve model
 lavaan::inspect,safe,Pure computation — extracts internal matrices from lavaan model
-lavaan::lavaan,callable_with_caveats,Validated SEM workflow; model fitting can be expensive
 lavaan::lavInspect,safe,Pure SEM inspection helper
 lavaan::lavNames,safe,Pure SEM inspection helper
-lavaan::lavParseModelString,safe,Pure SEM inspection helper
 lavaan::lavParTable,safe,Pure SEM inspection helper
+lavaan::lavParseModelString,safe,Pure SEM inspection helper
 lavaan::lavPredict,safe,Pure SEM inspection helper
 lavaan::lavPredictY,safe,Pure SEM inspection helper
 lavaan::lavResiduals,safe,Pure SEM inspection helper
 lavaan::lavTestLRT,safe,Pure computation — likelihood ratio test between lavaan models
+lavaan::lavaan,callable_with_caveats,Validated SEM workflow; model fitting can be expensive
 lavaan::modindices,safe,Pure computation — computes modification indices for lavaan model
 lavaan::parameterEstimates,safe,Pure computation — extracts parameter table from lavaan model
 lavaan::sem,safe,Pure computation — fits structural equation model
 lavaan::standardizedSolution,safe,Pure computation — extracts standardized estimates from lavaan model
+lme4::VarCorr,safe,Pure computation
 lme4::confint.merMod,safe,Pure computation
 lme4::fixef,safe,Pure computation
+lme4::getME,safe,Read-only mixed-model accessor
 lme4::glmer,safe,Pure computation
+lme4::isGLMM,safe,Read-only mixed-model accessor
+lme4::isLMM,safe,Read-only mixed-model accessor
+lme4::isNLMM,safe,Read-only mixed-model accessor
 lme4::isSingular,safe,Pure computation
 lme4::lmer,safe,Pure computation
 lme4::nlmer,safe,Pure computation
 lme4::ranef,safe,Pure computation
-lme4::VarCorr,safe,Pure computation
+lme4::vcov.merMod,safe,Read-only mixed-model accessor
+lmtest::bgtest,safe,Pure statistical test
 lmtest::bptest,safe,Pure computation
+lmtest::coefci,safe,Pure statistical test
 lmtest::coeftest,safe,Pure computation
+lmtest::coxtest,safe,Pure statistical test
+lmtest::dwtest,safe,Pure statistical test
+lmtest::encomptest,safe,Pure statistical test
+lmtest::gqtest,safe,Pure statistical test
+lmtest::harvtest,safe,Pure statistical test
+lmtest::hmctest,safe,Pure statistical test
+lmtest::jtest,safe,Pure statistical test
+lmtest::lrtest,safe,Pure statistical test
+lmtest::raintest,safe,Pure statistical test
 lmtest::resettest,safe,Pure computation
 lmtest::waldtest,safe,Pure computation
 lubridate::am,safe,Pure date-time transformation helper
@@ -820,12 +968,6 @@ marginaleffects::inferences,safe,Marginal effects helper on in-memory model obje
 marginaleffects::plot_predictions,callable_with_caveats,Generates predictions plot (graphics side effect on print)
 marginaleffects::predictions,safe,Pure computation — model-based predictions at observed/specified values
 marginaleffects::slopes,safe,Pure computation — partial derivatives (marginal effects) from model
-MASS::boxcox,safe,Pure computation
-MASS::glm.nb,safe,Pure computation
-MASS::lm.ridge,safe,Pure computation
-MASS::polr,safe,Pure computation
-MASS::rlm,safe,Pure computation
-MASS::stepAIC,safe,Model selection
 mgcv::anova.gam,safe,GAM inspection helper
 mgcv::bam,safe,Pure computation
 mgcv::concurvity,safe,GAM inspection helper
@@ -836,6 +978,7 @@ mgcv::gamm,callable_with_caveats,Validated GAM workflow; model fitting can be ex
 mgcv::predict.gam,safe,GAM inspection helper
 mgcv::s,safe,Smooth term specification
 mgcv::te,safe,Tensor product specification
+nlme::VarCorr,safe,Mixed-effects inspection helper
 nlme::anova.lme,safe,Mixed-effects inspection helper
 nlme::augPred,safe,Mixed-effects inspection helper
 nlme::fixef,safe,Mixed-effects inspection helper
@@ -845,7 +988,6 @@ nlme::intervals,safe,Mixed-effects inspection helper
 nlme::lme,safe,Pure computation
 nlme::nlme,safe,Pure computation
 nlme::ranef,safe,Mixed-effects inspection helper
-nlme::VarCorr,safe,Mixed-effects inspection helper
 nnet::multinom,safe,Pure computation — fits multinomial logistic regression
 nnet::nnet,safe,Pure computation — fits single-hidden-layer neural network
 parameters::bootstrap_model,safe,Parameter extraction helper on in-memory objects
@@ -958,27 +1100,55 @@ performance::test_performance,safe,Model diagnostic helper on in-memory objects
 performance::test_vuong,safe,Model diagnostic helper on in-memory objects
 performance::test_wald,safe,Model diagnostic helper on in-memory objects
 plm::Between,safe,Panel-model helper
+plm::Within,safe,Panel-model helper
 plm::between,safe,Panel-model helper
 plm::fixef,safe,Panel-model helper
 plm::lag,safe,Panel-model helper
 plm::lead,safe,Panel-model helper
+plm::pFtest,safe,Panel-model helper
 plm::pbgtest,safe,Panel-model helper
 plm::pdata.frame,safe,Panel-model helper
-plm::pFtest,safe,Panel-model helper
 plm::phtest,safe,Panel-model helper
 plm::plm,callable_with_caveats,Validated panel-model workflow; model fitting can be expensive
 plm::plmtest,safe,Panel-model helper
 plm::pwartest,safe,Panel-model helper
 plm::pwtest,safe,Panel-model helper
 plm::ranef,safe,Panel-model helper
-plm::Within,safe,Panel-model helper
 psych::%+%,safe,Psychometrics/statistical helper on in-memory data
+psych::AUC,safe,Psychometrics/statistical helper on in-memory data
+psych::ICC,safe,Psychometrics/statistical helper on in-memory data
+psych::ICLUST,safe,Psychometrics/statistical helper on in-memory data
+psych::ICLUST.cluster,safe,Psychometrics/statistical helper on in-memory data
+psych::ICLUST.sort,safe,Psychometrics/statistical helper on in-memory data
+psych::KMO,safe,Pure computation — Kaiser-Meyer-Olkin measure of sampling adequacy
+psych::Pinv,safe,Psychometrics/statistical helper on in-memory data
+psych::Procrustes,safe,Psychometrics/statistical helper on in-memory data
+psych::Promax,safe,Psychometrics/statistical helper on in-memory data
+psych::RMSEA,safe,Psychometrics/statistical helper on in-memory data
+psych::RV,safe,Psychometrics/statistical helper on in-memory data
+psych::SAPAfy,safe,Psychometrics/statistical helper on in-memory data
+psych::SD,safe,Psychometrics/statistical helper on in-memory data
+psych::TargetQ,safe,Psychometrics/statistical helper on in-memory data
+psych::TargetT,safe,Psychometrics/statistical helper on in-memory data
+psych::VSS,safe,Psychometrics/statistical helper on in-memory data
+psych::VSS.parallel,safe,Psychometrics/statistical helper on in-memory data
+psych::VSS.scree,safe,Psychometrics/statistical helper on in-memory data
+psych::VSS.sim,safe,Psychometrics/statistical helper on in-memory data
+psych::VSS.simulate,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule.inv,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule2phi,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule2phi.matrix,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule2poly,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule2poly.matrix,safe,Psychometrics/statistical helper on in-memory data
+psych::Yule2tetra,safe,Psychometrics/statistical helper on in-memory data
+psych::YuleBonett,safe,Psychometrics/statistical helper on in-memory data
+psych::YuleCor,safe,Psychometrics/statistical helper on in-memory data
 psych::acs,safe,Psychometrics/statistical helper on in-memory data
 psych::alpha,safe,Pure computation — Cronbach's alpha and reliability statistics
 psych::alpha.ci,safe,Psychometrics/statistical helper on in-memory data
 psych::alpha2r,safe,Psychometrics/statistical helper on in-memory data
 psych::anova.psych,safe,Psychometrics/statistical helper on in-memory data
-psych::AUC,safe,Psychometrics/statistical helper on in-memory data
 psych::autoR,safe,Psychometrics/statistical helper on in-memory data
 psych::bassAckward,safe,Psychometrics/statistical helper on in-memory data
 psych::bassAckward.diagram,safe,Psychometrics/statistical helper on in-memory data
@@ -997,8 +1167,8 @@ psych::chi2r,safe,Psychometrics/statistical helper on in-memory data
 psych::circ.sim,safe,Psychometrics/statistical helper on in-memory data
 psych::circ.simulation,safe,Psychometrics/statistical helper on in-memory data
 psych::circ.tests,safe,Psychometrics/statistical helper on in-memory data
-psych::circadian.cor,safe,Psychometrics/statistical helper on in-memory data
 psych::circadian.F,safe,Psychometrics/statistical helper on in-memory data
+psych::circadian.cor,safe,Psychometrics/statistical helper on in-memory data
 psych::circadian.linear.cor,safe,Psychometrics/statistical helper on in-memory data
 psych::circadian.mean,safe,Psychometrics/statistical helper on in-memory data
 psych::circadian.phase,safe,Psychometrics/statistical helper on in-memory data
@@ -1031,10 +1201,10 @@ psych::cor2dist,safe,Psychometrics/statistical helper on in-memory data
 psych::corCi,safe,Psychometrics/statistical helper on in-memory data
 psych::corFiml,safe,Psychometrics/statistical helper on in-memory data
 psych::corInfo,safe,Psychometrics/statistical helper on in-memory data
+psych::corTest,safe,Psychometrics/statistical helper on in-memory data
 psych::corr.p,safe,Psychometrics/statistical helper on in-memory data
 psych::corr.test,safe,Pure computation — correlation matrix with significance tests
 psych::correct.cor,safe,Psychometrics/statistical helper on in-memory data
-psych::corTest,safe,Psychometrics/statistical helper on in-memory data
 psych::cortest,safe,Psychometrics/statistical helper on in-memory data
 psych::cortest.bartlett,safe,Psychometrics/statistical helper on in-memory data
 psych::cortest.jennrich,safe,Psychometrics/statistical helper on in-memory data
@@ -1053,9 +1223,9 @@ psych::d.robust,safe,Psychometrics/statistical helper on in-memory data
 psych::d2CL,safe,Psychometrics/statistical helper on in-memory data
 psych::d2OVL,safe,Psychometrics/statistical helper on in-memory data
 psych::d2OVL2,safe,Psychometrics/statistical helper on in-memory data
+psych::d2U3,safe,Psychometrics/statistical helper on in-memory data
 psych::d2r,safe,Psychometrics/statistical helper on in-memory data
 psych::d2t,safe,Psychometrics/statistical helper on in-memory data
-psych::d2U3,safe,Psychometrics/statistical helper on in-memory data
 psych::densityBy,safe,Psychometrics/statistical helper on in-memory data
 psych::describe,safe,Pure computation — descriptive statistics for data frame or matrix
 psych::describe.by,safe,Psychometrics/statistical helper on in-memory data
@@ -1111,8 +1281,12 @@ psych::fa.sort,safe,Psychometrics/statistical helper on in-memory data
 psych::fa.stats,safe,Psychometrics/statistical helper on in-memory data
 psych::fa2irt,safe,Psychometrics/statistical helper on in-memory data
 psych::faBy,safe,Psychometrics/statistical helper on in-memory data
-psych::fac,safe,Psychometrics/statistical helper on in-memory data
 psych::faCor,safe,Psychometrics/statistical helper on in-memory data
+psych::faReg,safe,Psychometrics/statistical helper on in-memory data
+psych::faRegression,safe,Psychometrics/statistical helper on in-memory data
+psych::faRotate,safe,Psychometrics/statistical helper on in-memory data
+psych::faRotations,safe,Psychometrics/statistical helper on in-memory data
+psych::fac,safe,Psychometrics/statistical helper on in-memory data
 psych::factor.congruence,safe,Psychometrics/statistical helper on in-memory data
 psych::factor.fit,safe,Psychometrics/statistical helper on in-memory data
 psych::factor.minres,safe,Psychometrics/statistical helper on in-memory data
@@ -1124,10 +1298,6 @@ psych::factor.scores,safe,Pure computation — computes factor scores from fa/pr
 psych::factor.stats,safe,Psychometrics/statistical helper on in-memory data
 psych::factor.wls,safe,Psychometrics/statistical helper on in-memory data
 psych::factor2cluster,safe,Psychometrics/statistical helper on in-memory data
-psych::faReg,safe,Psychometrics/statistical helper on in-memory data
-psych::faRegression,safe,Psychometrics/statistical helper on in-memory data
-psych::faRotate,safe,Psychometrics/statistical helper on in-memory data
-psych::faRotations,safe,Psychometrics/statistical helper on in-memory data
 psych::fisherz,safe,Psychometrics/statistical helper on in-memory data
 psych::fisherz2r,safe,Psychometrics/statistical helper on in-memory data
 psych::fparse,safe,Psychometrics/statistical helper on in-memory data
@@ -1143,12 +1313,8 @@ psych::headTail,safe,Psychometrics/statistical helper on in-memory data
 psych::headtail,safe,Psychometrics/statistical helper on in-memory data
 psych::het.diagram,safe,Psychometrics/statistical helper on in-memory data
 psych::histBy,safe,Psychometrics/statistical helper on in-memory data
-psych::ICC,safe,Psychometrics/statistical helper on in-memory data
-psych::ICLUST,safe,Psychometrics/statistical helper on in-memory data
 psych::iclust,safe,Psychometrics/statistical helper on in-memory data
-psych::ICLUST.cluster,safe,Psychometrics/statistical helper on in-memory data
 psych::iclust.diagram,safe,Psychometrics/statistical helper on in-memory data
-psych::ICLUST.sort,safe,Psychometrics/statistical helper on in-memory data
 psych::iclust.sort,safe,Psychometrics/statistical helper on in-memory data
 psych::interbattery,safe,Psychometrics/statistical helper on in-memory data
 psych::interp.median,safe,Psychometrics/statistical helper on in-memory data
@@ -1180,7 +1346,6 @@ psych::kaiser,safe,Psychometrics/statistical helper on in-memory data
 psych::keys.lookup,safe,Psychometrics/statistical helper on in-memory data
 psych::keys2list,safe,Psychometrics/statistical helper on in-memory data
 psych::keysort,safe,Psychometrics/statistical helper on in-memory data
-psych::KMO,safe,Pure computation — Kaiser-Meyer-Olkin measure of sampling adequacy
 psych::kurtosi,safe,Psychometrics/statistical helper on in-memory data
 psych::lavaan.diagram,safe,Psychometrics/statistical helper on in-memory data
 psych::levels2numeric,safe,Psychometrics/statistical helper on in-memory data
@@ -1232,13 +1397,14 @@ psych::omega,safe,Psychometrics/statistical helper on in-memory data
 psych::omega.diagram,safe,Psychometrics/statistical helper on in-memory data
 psych::omegaDirect,safe,Psychometrics/statistical helper on in-memory data
 psych::omegaFromSem,safe,Psychometrics/statistical helper on in-memory data
-psych::omegah,safe,Psychometrics/statistical helper on in-memory data
 psych::omegaSem,safe,Psychometrics/statistical helper on in-memory data
+psych::omegah,safe,Psychometrics/statistical helper on in-memory data
 psych::outlier,safe,Psychometrics/statistical helper on in-memory data
 psych::p.rep,safe,Psychometrics/statistical helper on in-memory data
 psych::p.rep.f,safe,Psychometrics/statistical helper on in-memory data
 psych::p.rep.r,safe,Psychometrics/statistical helper on in-memory data
 psych::p.rep.t,safe,Psychometrics/statistical helper on in-memory data
+psych::paSelect,safe,Psychometrics/statistical helper on in-memory data
 psych::paired.r,safe,Psychometrics/statistical helper on in-memory data
 psych::pairs.panels,safe,Psychometrics/statistical helper on in-memory data
 psych::pairwiseCount,safe,Psychometrics/statistical helper on in-memory data
@@ -1250,7 +1416,6 @@ psych::pairwiseSample,safe,Psychometrics/statistical helper on in-memory data
 psych::pairwiseZero,safe,Psychometrics/statistical helper on in-memory data
 psych::parcels,safe,Psychometrics/statistical helper on in-memory data
 psych::partial.r,safe,Psychometrics/statistical helper on in-memory data
-psych::paSelect,safe,Psychometrics/statistical helper on in-memory data
 psych::pca,safe,Psychometrics/statistical helper on in-memory data
 psych::phi,safe,Psychometrics/statistical helper on in-memory data
 psych::phi.demo,safe,Psychometrics/statistical helper on in-memory data
@@ -1258,7 +1423,6 @@ psych::phi.list,safe,Psychometrics/statistical helper on in-memory data
 psych::phi2poly,safe,Psychometrics/statistical helper on in-memory data
 psych::phi2poly.matrix,safe,Psychometrics/statistical helper on in-memory data
 psych::phi2tetra,safe,Psychometrics/statistical helper on in-memory data
-psych::Pinv,safe,Psychometrics/statistical helper on in-memory data
 psych::polar,safe,Psychometrics/statistical helper on in-memory data
 psych::poly.mat,safe,Psychometrics/statistical helper on in-memory data
 psych::polychoric,safe,Pure computation — polychoric correlations for ordinal data
@@ -1268,9 +1432,7 @@ psych::predict.psych,safe,Psychometrics/statistical helper on in-memory data
 psych::predicted.validity,safe,Psychometrics/statistical helper on in-memory data
 psych::principal,safe,Pure computation — principal components analysis (PCA) via psych
 psych::print.psych,safe,Psychometrics/statistical helper on in-memory data
-psych::Procrustes,safe,Psychometrics/statistical helper on in-memory data
 psych::progressBar,safe,Psychometrics/statistical helper on in-memory data
-psych::Promax,safe,Psychometrics/statistical helper on in-memory data
 psych::psych,safe,Psychometrics/statistical helper on in-memory data
 psych::psych.misc,safe,Psychometrics/statistical helper on in-memory data
 psych::quickView,safe,Psychometrics/statistical helper on in-memory data
@@ -1292,10 +1454,7 @@ psych::residuals.psych,safe,Psychometrics/statistical helper on in-memory data
 psych::response.frequencies,safe,Psychometrics/statistical helper on in-memory data
 psych::responseFrequency,safe,Psychometrics/statistical helper on in-memory data
 psych::reverse.code,safe,Psychometrics/statistical helper on in-memory data
-psych::RMSEA,safe,Psychometrics/statistical helper on in-memory data
 psych::rmssd,safe,Psychometrics/statistical helper on in-memory data
-psych::RV,safe,Psychometrics/statistical helper on in-memory data
-psych::SAPAfy,safe,Psychometrics/statistical helper on in-memory data
 psych::scaling.fits,safe,Psychometrics/statistical helper on in-memory data
 psych::scatter.hist,safe,Psychometrics/statistical helper on in-memory data
 psych::scatterHist,safe,Psychometrics/statistical helper on in-memory data
@@ -1317,13 +1476,13 @@ psych::scoreVeryFast,safe,Psychometrics/statistical helper on in-memory data
 psych::scoreWtd,safe,Psychometrics/statistical helper on in-memory data
 psych::scree,callable_with_caveats,Generates scree plot (graphics side effect on print)
 psych::scrub,safe,Psychometrics/statistical helper on in-memory data
-psych::SD,safe,Psychometrics/statistical helper on in-memory data
 psych::selectFromKeys,safe,Psychometrics/statistical helper on in-memory data
 psych::sem.diagram,safe,Psychometrics/statistical helper on in-memory data
 psych::set.cor,safe,Psychometrics/statistical helper on in-memory data
 psych::setCor,safe,Psychometrics/statistical helper on in-memory data
 psych::shannon,safe,Psychometrics/statistical helper on in-memory data
 psych::sim,safe,Psychometrics/statistical helper on in-memory data
+psych::sim.VSS,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.anova,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.bonds,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.circ,safe,Psychometrics/statistical helper on in-memory data
@@ -1353,7 +1512,6 @@ psych::sim.simplex,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.spherical,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.structural,safe,Psychometrics/statistical helper on in-memory data
 psych::sim.structure,safe,Psychometrics/statistical helper on in-memory data
-psych::sim.VSS,safe,Psychometrics/statistical helper on in-memory data
 psych::simCor,safe,Psychometrics/statistical helper on in-memory data
 psych::simulation.circ,safe,Psychometrics/statistical helper on in-memory data
 psych::skew,safe,Psychometrics/statistical helper on in-memory data
@@ -1376,8 +1534,6 @@ psych::table2df,safe,Psychometrics/statistical helper on in-memory data
 psych::table2matrix,safe,Psychometrics/statistical helper on in-memory data
 psych::tableF,safe,Psychometrics/statistical helper on in-memory data
 psych::target.rot,safe,Psychometrics/statistical helper on in-memory data
-psych::TargetQ,safe,Psychometrics/statistical helper on in-memory data
-psych::TargetT,safe,Psychometrics/statistical helper on in-memory data
 psych::tenberge,safe,Psychometrics/statistical helper on in-memory data
 psych::test.all,safe,Psychometrics/statistical helper on in-memory data
 psych::test.irt,safe,Psychometrics/statistical helper on in-memory data
@@ -1395,12 +1551,7 @@ psych::vgQ.targetQ,safe,Psychometrics/statistical helper on in-memory data
 psych::vgQ.varimin,safe,Psychometrics/statistical helper on in-memory data
 psych::violin,safe,Psychometrics/statistical helper on in-memory data
 psych::violinBy,safe,Psychometrics/statistical helper on in-memory data
-psych::VSS,safe,Psychometrics/statistical helper on in-memory data
 psych::vss,safe,Psychometrics/statistical helper on in-memory data
-psych::VSS.parallel,safe,Psychometrics/statistical helper on in-memory data
-psych::VSS.scree,safe,Psychometrics/statistical helper on in-memory data
-psych::VSS.sim,safe,Psychometrics/statistical helper on in-memory data
-psych::VSS.simulate,safe,Psychometrics/statistical helper on in-memory data
 psych::vssSelect,safe,Psychometrics/statistical helper on in-memory data
 psych::winsor,safe,Psychometrics/statistical helper on in-memory data
 psych::winsor.mean,safe,Psychometrics/statistical helper on in-memory data
@@ -1408,38 +1559,48 @@ psych::winsor.means,safe,Psychometrics/statistical helper on in-memory data
 psych::winsor.sd,safe,Psychometrics/statistical helper on in-memory data
 psych::winsor.var,safe,Psychometrics/statistical helper on in-memory data
 psych::wkappa,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule.inv,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule2phi,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule2phi.matrix,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule2poly,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule2poly.matrix,safe,Psychometrics/statistical helper on in-memory data
-psych::Yule2tetra,safe,Psychometrics/statistical helper on in-memory data
-psych::YuleBonett,safe,Psychometrics/statistical helper on in-memory data
-psych::YuleCor,safe,Psychometrics/statistical helper on in-memory data
+purrr::accumulate,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::compact,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::detect,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::detect_index,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::discard,safe,Pure computation — discards list elements matching predicate
+purrr::every,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::head_while,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::imap,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::keep,safe,Pure computation — filters list elements by predicate
 purrr::map,safe,Pure computation — applies function to list/vector elements
 purrr::map2,safe,Pure computation — applies function to two parallel lists
+purrr::map_at,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::map_chr,safe,Pure computation — map returning character vector
 purrr::map_dbl,safe,Pure computation — map returning double vector
+purrr::map_depth,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::map_dfc,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::map_dfr,safe,Pure computation — map returning row-bound data frame
+purrr::map_if,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::map_int,safe,Pure computation — map returning integer vector
 purrr::map_lgl,safe,Pure computation — map returning logical vector
+purrr::modify,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::modify_at,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::modify_if,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::modify_in,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::none,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::pluck,safe,Pure computation — extracts element at given index path
 purrr::pmap,safe,Pure computation — applies function over list of argument lists
 purrr::possibly,safe,Pure computation — wraps function to return default on error
 purrr::reduce,safe,Pure computation — reduces list to single value by iterative application
 purrr::safely,safe,Pure computation — wraps function to return result/error list
+purrr::set_names,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::some,callable_with_caveats,Higher-order function - purity depends on callback
+purrr::tail_while,callable_with_caveats,Higher-order function - purity depends on callback
 purrr::walk,callable_with_caveats,Calls function for side effects; may write files or print depending on .f
-py::pandas::concat,safe,Pure computation — concatenates DataFrames along axis
 py::pandas::DataFrame,safe,Pure computation — constructs DataFrame from data
+py::pandas::Series,safe,Pure computation — constructs Series from data
+py::pandas::concat,safe,Pure computation — concatenates DataFrames along axis
 py::pandas::merge,safe,Pure computation — database-style join of two DataFrames
 py::pandas::pivot_table,safe,Pure computation — creates spreadsheet-style pivot table
 py::pandas::read_csv,safe,File read only — reads CSV file into DataFrame
 py::pandas::read_excel,safe,File read only — reads Excel file into DataFrame
 py::pandas::read_parquet,safe,File read only — reads Parquet file into DataFrame
-py::pandas::Series,safe,Pure computation — constructs Series from data
 py::scipy.stats::chi2_contingency,safe,Pure computation — chi-squared test of independence
 py::scipy.stats::f_oneway,safe,Pure computation — one-way ANOVA F-test
 py::scipy.stats::kruskal,safe,Pure computation — Kruskal-Wallis H-test
@@ -1479,9 +1640,9 @@ py::sklearn.metrics::precision_score,safe,Pure computation — classification pr
 py::sklearn.metrics::r2_score,safe,Pure computation — coefficient of determination
 py::sklearn.metrics::recall_score,safe,Pure computation — classification recall
 py::sklearn.metrics::roc_auc_score,safe,Pure computation — ROC area under curve
-py::sklearn.model_selection::cross_val_score,safe,Pure computation — evaluates model by cross-validation
 py::sklearn.model_selection::GridSearchCV,callable_with_caveats,Grid search with cross-validation; can be very slow with large param grids
 py::sklearn.model_selection::RandomizedSearchCV,callable_with_caveats,Randomized hyperparameter search; uses RNG and can be slow
+py::sklearn.model_selection::cross_val_score,safe,Pure computation — evaluates model by cross-validation
 py::sklearn.model_selection::train_test_split,safe,Pure computation — splits arrays into train and test sets
 py::sklearn.neighbors::KNeighborsClassifier,safe,Pure computation — k-nearest neighbors classifier
 py::sklearn.neighbors::KNeighborsRegressor,safe,Pure computation — k-nearest neighbors regressor
@@ -1574,45 +1735,30 @@ rpart::rpart,safe,Pure computation — fits recursive partitioning/decision tree
 rpart::rpart.control,safe,Pure computation — constructs control parameters list
 rpart::rsq.rpart,safe,Pure tree model helper
 rpart::xpred.rpart,callable_with_caveats,Validated tree-model workflow; model fitting can be expensive
-RSQLite::dbAppendTable,unsafe,Writes or mutates database state
-RSQLite::dbBegin,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbBeginTransaction,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbCanConnect,safe,Read-only SQLite helper
-RSQLite::dbClearResult,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbColumnInfo,safe,Read-only SQLite helper
-RSQLite::dbCommit,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbConnect,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbCreateTable,unsafe,Writes or mutates database state
-RSQLite::dbDataType,safe,Read-only SQLite helper
-RSQLite::dbDisconnect,safe,Read-only SQLite helper
-RSQLite::dbExecute,unsafe,Writes or mutates database state
-RSQLite::dbExistsTable,safe,Read-only SQLite helper
-RSQLite::dbFetch,callable_with_caveats,Streaming SQLite read helper
-RSQLite::dbGetInfo,safe,Read-only SQLite helper
-RSQLite::dbGetQuery,safe,Read-only SQLite helper
-RSQLite::dbIsReadOnly,safe,Read-only SQLite helper
-RSQLite::dbIsValid,safe,Read-only SQLite helper
-RSQLite::dbListFields,safe,Read-only SQLite helper
-RSQLite::dbListTables,safe,Read-only SQLite helper
-RSQLite::dbQuoteIdentifier,safe,Read-only SQLite helper
-RSQLite::dbQuoteString,safe,Read-only SQLite helper
-RSQLite::dbReadTable,safe,Read-only SQLite helper
-RSQLite::dbRemoveTable,unsafe,Writes or mutates database state
-RSQLite::dbRollback,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::dbSendQuery,callable_with_caveats,Validated SQLite workflow with stateful connection handling
-RSQLite::Id,safe,Read-only SQLite helper
-RSQLite::SQLite,safe,Creates SQLite driver object — no side effects
-RSQLite::SQLKeywords,safe,Read-only SQLite helper
 rstanarm::bayes_R2,safe,Pure computation — Bayesian R-squared from rstanarm model
 rstanarm::posterior_interval,safe,Pure computation — credible intervals from posterior draws
 rstanarm::posterior_predict,callable_with_caveats,Draws posterior predictive samples (uses RNG)
 rstanarm::prior_summary,safe,Pure computation — prints prior specification summary
 rstanarm::stan_glm,callable_with_caveats,Runs MCMC sampling (uses RNG; computationally intensive; may write temp files)
 rstanarm::stan_glmer,callable_with_caveats,Runs MCMC for mixed-effects model (RNG; slow; may write temp files)
+sandwich::NeweyWest,safe,Pure robust covariance computation
+sandwich::bread,safe,Pure robust covariance computation
+sandwich::bwAndrews,safe,Pure robust covariance computation
+sandwich::bwNeweyWest,safe,Pure robust covariance computation
+sandwich::kernHAC,safe,Pure robust covariance computation
+sandwich::meat,safe,Pure robust covariance computation
+sandwich::meatCL,safe,Pure robust covariance computation
+sandwich::meatHAC,safe,Pure robust covariance computation
 sandwich::sandwich,safe,Pure computation
+sandwich::vcovBS,safe,Pure robust covariance computation
 sandwich::vcovCL,safe,Pure computation
 sandwich::vcovHAC,safe,Pure computation
 sandwich::vcovHC,safe,Pure computation
+sandwich::vcovOPG,safe,Pure robust covariance computation
+sandwich::vcovPC,safe,Pure robust covariance computation
+sandwich::vcovPL,safe,Pure robust covariance computation
+sandwich::weightsAndrews,safe,Pure robust covariance computation
+sandwich::weightsLumley,safe,Pure robust covariance computation
 scales::comma,safe,Pure computation — formats numbers with comma separators
 scales::dollar,safe,Pure computation — formats numbers as dollar amounts
 scales::label_comma,safe,Pure computation — creates comma-formatting label function
@@ -1621,17 +1767,21 @@ scales::number,safe,Pure computation — formats numbers with flexible options
 scales::percent,safe,Pure computation — formats numbers as percentages
 scales::rescale,safe,Pure computation — rescales numeric vector to new range
 scales::squish,safe,Pure computation — squishes values into specified range
-stats::acf,safe,Pure computation
 stats::AIC,safe,Pure computation
+stats::BIC,safe,Pure computation
+stats::Box.test,safe,Pure computation
+stats::HoltWinters,safe,Pure computation
+stats::TukeyHSD,safe,Pure computation
+stats::acf,safe,Pure computation
+stats::add1,safe,Read-only model accessor or pure statistical helper
 stats::anova,safe,Pure computation
 stats::aov,safe,Pure computation
 stats::approx,safe,Pure computation
 stats::approxfun,safe,Pure computation
 stats::ar,safe,Pure computation
 stats::arima,safe,Pure computation
+stats::ave,safe,Read-only model accessor or pure statistical helper
 stats::bartlett.test,safe,Pure computation
-stats::BIC,safe,Pure computation
-stats::Box.test,safe,Pure computation
 stats::ccf,safe,Pure computation
 stats::chisq.test,safe,Pure computation
 stats::coef,safe,Pure computation
@@ -1642,12 +1792,17 @@ stats::cooks.distance,safe,Pure computation
 stats::cor,safe,Pure computation
 stats::cor.test,safe,Pure computation
 stats::cov,safe,Pure computation
+stats::covratio,safe,Read-only model diagnostic
 stats::cutree,safe,Pure computation
 stats::decompose,safe,Pure computation
 stats::density,safe,Pure computation
+stats::deviance,safe,Read-only model accessor or pure statistical helper
+stats::df.residual,safe,Read-only model accessor or pure statistical helper
+stats::dfbeta,safe,Read-only model diagnostic
 stats::dfbetas,safe,Pure computation
 stats::dffits,safe,Pure computation
 stats::dist,safe,Pure computation
+stats::drop1,safe,Read-only model accessor or pure statistical helper
 stats::ecdf,safe,Pure computation
 stats::embed,safe,Pure computation
 stats::end,safe,Pure computation
@@ -1660,7 +1815,6 @@ stats::friedman.test,safe,Pure computation
 stats::glm,safe,Pure computation
 stats::hatvalues,safe,Pure computation
 stats::hclust,safe,Pure computation
-stats::HoltWinters,safe,Pure computation
 stats::influence,safe,Pure computation
 stats::influence.measures,safe,Pure computation
 stats::integrate,safe,Pure computation
@@ -1669,19 +1823,24 @@ stats::kruskal.test,safe,Pure computation
 stats::ks.test,safe,Pure computation
 stats::lag,safe,Pure computation
 stats::lm,safe,Pure computation
+stats::lm.influence,safe,Read-only model diagnostic
 stats::loess,safe,Pure computation
 stats::logLik,safe,Pure computation
 stats::lowess,safe,Pure computation
 stats::mcnemar.test,safe,Pure computation
 stats::median,safe,Pure computation
+stats::model.frame,safe,Read-only model accessor or pure statistical helper
 stats::model.matrix,safe,Pure computation
+stats::model.response,safe,Read-only model accessor or pure statistical helper
 stats::na.exclude,safe,Pure computation
 stats::na.omit,safe,Pure computation
 stats::nlm,safe,Pure computation
 stats::nls,safe,Pure computation
+stats::nobs,safe,Read-only model accessor or pure statistical helper
 stats::oneway.test,safe,Pure computation
 stats::optim,safe,Pure computation
 stats::optimize,safe,Pure computation
+stats::p.adjust,safe,Read-only model accessor or pure statistical helper
 stats::pacf,safe,Pure computation
 stats::pairwise.t.test,safe,Pure computation
 stats::pairwise.wilcox.test,safe,Pure computation
@@ -1714,13 +1873,13 @@ stats::terms,safe,Pure computation
 stats::time,safe,Pure computation
 stats::ts,safe,Pure computation
 stats::tsdiag,safe,Pure computation
-stats::TukeyHSD,safe,Pure computation
 stats::uniroot,safe,Pure computation
 stats::update,safe,Model update
 stats::var,safe,Pure computation
 stats::var.test,safe,Pure computation
 stats::vcov,safe,Pure computation
 stats::weighted.mean,safe,Pure computation
+stats::weights,safe,Read-only model accessor or pure statistical helper
 stats::wilcox.test,safe,Pure computation
 stats::window,safe,Pure computation
 stringr::boundary,safe,Pure string transformation helper
@@ -1783,34 +1942,54 @@ stringr::str_view_all,safe,Pure string transformation helper
 stringr::str_which,safe,Pure string transformation helper
 stringr::str_width,safe,Pure string transformation helper
 stringr::str_wrap,safe,Pure string transformation helper
+survival::Surv,safe,Pure computation
 survival::basehaz,safe,Pure survival helper
 survival::concordance,safe,Pure computation
 survival::cox.zph,safe,Pure computation
 survival::coxph,safe,Pure computation
-survival::Surv,safe,Pure computation
+survival::frailty,safe,Pure survival helper / model term
+survival::is.Surv,safe,Pure survival helper / model term
+survival::pspline,safe,Pure survival helper / model term
+survival::ridge,safe,Pure survival helper / model term
+survival::strata,safe,Pure survival helper / model term
+survival::survSplit,safe,Pure survival helper
 survival::survdiff,safe,Pure computation
 survival::survexp,safe,Pure survival helper
 survival::survfit,safe,Pure computation
 survival::survreg,safe,Pure computation
-survival::survSplit,safe,Pure survival helper
 tibble::add_column,safe,Pure computation — adds column(s) to tibble
 tibble::add_row,safe,Pure computation — adds row(s) to tibble
 tibble::as_tibble,safe,Pure computation — coerces object to tibble
 tibble::column_to_rownames,safe,Pure computation — moves column to row names
+tibble::deframe,safe,Pure tibble constructor / accessor
+tibble::enframe,safe,Pure tibble constructor / accessor
 tibble::glimpse,safe,Pure computation — prints concise data overview
+tibble::has_rownames,safe,Pure tibble constructor / accessor
+tibble::is_tibble,safe,Pure tibble constructor / accessor
+tibble::new_tibble,safe,Pure tibble constructor / accessor
 tibble::rownames_to_column,safe,Pure computation — moves row names to a column
 tibble::tibble,safe,Pure computation — constructs a tibble
 tibble::tribble,safe,Pure computation — constructs tibble row-by-row
+tidyr::chop,safe,Pure data reshape
 tidyr::complete,callable_with_caveats,Uses NSE
+tidyr::crossing,safe,Pure data reshape
 tidyr::drop_na,safe,Pure computation
+tidyr::expand,safe,Pure data reshape
+tidyr::expand_grid,safe,Pure data reshape
 tidyr::fill,safe,Pure computation
+tidyr::full_seq,safe,Pure data reshape
 tidyr::nest,callable_with_caveats,Uses NSE
+tidyr::pack,safe,Pure data reshape
 tidyr::pivot_longer,callable_with_caveats,Uses NSE
 tidyr::pivot_wider,callable_with_caveats,Uses NSE
 tidyr::replace_na,safe,Pure computation
 tidyr::separate,callable_with_caveats,Uses NSE
+tidyr::unchop,safe,Pure data reshape
 tidyr::unite,callable_with_caveats,Uses NSE
 tidyr::unnest,callable_with_caveats,Uses NSE
+tidyr::unnest_longer,safe,Pure data reshape
+tidyr::unnest_wider,safe,Pure data reshape
+tidyr::unpack,safe,Pure data reshape
 tseries::adf.test,safe,Pure computation — Augmented Dickey-Fuller unit root test
 tseries::pp.test,safe,Pure computation
 utils::available.packages,safe,Network read only
@@ -1839,9 +2018,9 @@ vegan::rarecurve,callable_with_caveats,Generates rarefaction curves plot (graphi
 vegan::rda,safe,Pure computation — redundancy analysis (RDA)
 vegan::specnumber,safe,Pure computation — counts species richness per sample
 vegan::vegdist,safe,Pure computation — computes dissimilarity matrix from community data
+xgboost::xgb.DMatrix,callable_with_caveats,Validated boosting workflow; computation can be expensive
 xgboost::xgb.create.features,safe,XGBoost helper
 xgboost::xgb.cv,callable_with_caveats,Validated boosting workflow; computation can be expensive
-xgboost::xgb.DMatrix,callable_with_caveats,Validated boosting workflow; computation can be expensive
 xgboost::xgb.importance,safe,XGBoost helper
 xgboost::xgb.train,callable_with_caveats,XGBoost training — slow and uses RNG
 xgboost::xgboost,callable_with_caveats,Gradient boosting — slow on large data and uses RNG

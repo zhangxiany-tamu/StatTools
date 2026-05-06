@@ -13,6 +13,185 @@ import { markResolved } from "../engine/session.js";
 import { logUsage, startTimer } from "../util/usageLogger.js";
 import { successResult, errorResult, type StatToolResult } from "../types.js";
 
+// NSE-heavy R functions that capture arguments via rlang::enquos / substitute.
+// Use stat_call's `expressions` (named NSE args) or `dot_expressions` (unnamed
+// `...` slot) instead of `args` for the NSE slots. The hint surfaced from
+// stat_resolve tells the agent which slot to use and gives an example.
+type NseHint = {
+  use_expressions: boolean;
+  expression_args: string[];      // named NSE args (use `expressions` field)
+  dot_expression: boolean;          // function takes unnamed expressions in `...`
+  example: string;
+};
+
+const NSE_HINTS: Record<string, NseHint> = {
+  "dplyr::filter": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['cyl > 4', 'mpg > 20']",
+  },
+  "dplyr::mutate": {
+    use_expressions: true,
+    expression_args: ["..."],
+    dot_expression: false,
+    example: "args={'.data':'mtcars'}, expressions={'mpg_kpl':'mpg * 0.425'}",
+  },
+  "dplyr::transmute": {
+    use_expressions: true,
+    expression_args: ["..."],
+    dot_expression: false,
+    example: "args={'.data':'mtcars'}, expressions={'mpg_kpl':'mpg * 0.425'}",
+  },
+  "dplyr::summarize": {
+    use_expressions: true,
+    expression_args: ["..."],
+    dot_expression: false,
+    example: "args={'.data':'mtcars'}, expressions={'mean_mpg':'mean(mpg)', 'n':'n()'}",
+  },
+  "dplyr::summarise": {
+    use_expressions: true,
+    expression_args: ["..."],
+    dot_expression: false,
+    example: "args={'.data':'mtcars'}, expressions={'mean_mpg':'mean(mpg)', 'n':'n()'}",
+  },
+  "dplyr::group_by": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['cyl', 'gear']",
+  },
+  "dplyr::arrange": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['desc(mpg)', 'cyl']",
+  },
+  "dplyr::select": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['mpg', 'cyl', '-disp']",
+  },
+  "dplyr::count": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['cyl', 'gear']",
+  },
+  "dplyr::distinct": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'mtcars'}, dot_expressions=['cyl', 'gear']",
+  },
+  "tidyr::pivot_longer": {
+    use_expressions: true,
+    expression_args: ["cols"],
+    dot_expression: false,
+    example: "args={'data':'iris'}, expressions={'cols':'-Species'}  # or 'everything()' or 'starts_with(\"Sepal\")'",
+  },
+  "tidyr::pivot_wider": {
+    use_expressions: true,
+    expression_args: ["names_from", "values_from", "id_cols"],
+    dot_expression: false,
+    example: "args={'data':'sleepstudy'}, expressions={'names_from':'Days', 'values_from':'Reaction'}",
+  },
+  "tidyr::nest": {
+    use_expressions: true,
+    expression_args: [],
+    dot_expression: true,
+    example: "args={'.data':'iris'}, dot_expressions=['data = -Species']",
+  },
+  "tidyr::unnest": {
+    use_expressions: true,
+    expression_args: ["cols"],
+    dot_expression: false,
+    example: "args={'data':'nested_df'}, expressions={'cols':'data'}",
+  },
+  "ggplot2::aes": {
+    use_expressions: true,
+    expression_args: ["x", "y", "color", "colour", "fill", "shape", "size", "group", "alpha"],
+    dot_expression: false,
+    example: "expressions={'x':'mpg', 'y':'wt', 'color':'factor(cyl)'}",
+  },
+};
+
+function getNseHint(pkg: string, fn: string): NseHint | null {
+  return NSE_HINTS[`${pkg}::${fn}`] ?? null;
+}
+
+// Functions that dispatch on or require a specific R class for one of their
+// arguments. The agent reads class_hint and either pre-coerces (via a separate
+// stat_call to base::factor / stats::ts) or uses stat_call's `coerce` field.
+type ClassHint = {
+  arg: string;
+  expected_classes: string[];
+  recommended_coerce: string;        // value to pass in stat_call's `coerce` map
+  reason: string;
+};
+
+const CLASS_HINTS: Record<string, ClassHint[]> = {
+  "randomForest::randomForest": [{
+    arg: "y",
+    expected_classes: ["factor"],
+    recommended_coerce: "factor",
+    reason: "Classification dispatch keys off factor; character/numeric y is treated as regression or fails on type check.",
+  }],
+  "glmnet::glmnet": [{
+    arg: "y",
+    expected_classes: ["factor", "numeric", "matrix"],
+    recommended_coerce: "factor",
+    reason: "Pass family='binomial'/'multinomial' with a factor y for classification; numeric y for regression. Use coerce={y:'factor'} when y starts as character.",
+  }],
+  "glmnet::cv.glmnet": [{
+    arg: "y",
+    expected_classes: ["factor", "numeric", "matrix"],
+    recommended_coerce: "factor",
+    reason: "Same dispatch as glmnet::glmnet.",
+  }],
+  "forecast::auto.arima": [{
+    arg: "y",
+    expected_classes: ["ts", "msts", "numeric"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "Seasonal ARIMA detection requires a ts class with explicit frequency. For monthly data use frequency=12, weekly=7, quarterly=4, daily=365.25.",
+  }],
+  "forecast::Arima": [{
+    arg: "y",
+    expected_classes: ["ts", "msts", "numeric"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "Pass a ts object; specify frequency for seasonal models.",
+  }],
+  "forecast::ets": [{
+    arg: "y",
+    expected_classes: ["ts", "msts"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "ETS state-space model requires a ts class. Use coerce={y:'ts(frequency=12)'} for monthly data.",
+  }],
+  "stats::stl": [{
+    arg: "x",
+    expected_classes: ["ts"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "STL decomposition requires a ts class with explicit frequency >= 2.",
+  }],
+  "stats::HoltWinters": [{
+    arg: "x",
+    expected_classes: ["ts"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "Holt-Winters needs a ts class; specify frequency for seasonal models.",
+  }],
+  "stats::decompose": [{
+    arg: "x",
+    expected_classes: ["ts"],
+    recommended_coerce: "ts(frequency=12)",
+    reason: "Classical decomposition requires a ts class with frequency > 1.",
+  }],
+};
+
+function getClassHint(pkg: string, fn: string): ClassHint[] | null {
+  return CLASS_HINTS[`${pkg}::${fn}`] ?? null;
+}
+
 export const STAT_RESOLVE_SCHEMA = {
   type: "object" as const,
   properties: {
@@ -178,6 +357,8 @@ export async function executeStatResolve(
 
   // 6. Return full metadata
   const schemaResult = schema as Record<string, unknown>;
+  const nseHint = !isPython ? getNseHint(pkg, fn) : null;
+  const classHint = !isPython ? getClassHint(pkg, fn) : null;
   return successResult({
     package: pkg,
     function: fn,
@@ -193,5 +374,7 @@ export async function executeStatResolve(
     typical_return_class: schemaResult?.typical_return_class ?? null,
     docstring: isPython ? (schemaResult as any)?.docstring ?? null : undefined,
     caveats: [],
+    ...(nseHint ? { nse_hint: nseHint } : {}),
+    ...(classHint ? { class_hint: classHint } : {}),
   });
 }

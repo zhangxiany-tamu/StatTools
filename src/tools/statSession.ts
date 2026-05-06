@@ -99,11 +99,11 @@ export function executeStatSession(
       standby_ready: poolStatus.standbyReady,
     },
     python: pythonStatus || {
-      enabled: false,
-      healthy: false,
+      state: "not_configured",
       path: process.env.PYTHON_PATH || "python3",
       availableModules: [],
       missingModules: [],
+      recentStderr: [],
     },
     install_jobs: installJobs,
     install_jobs_count: installJobs.length,

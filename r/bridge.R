@@ -117,9 +117,150 @@ dispatch_call <- function(id, params) {
   args <- resolve_refs(args, id)
   if (is.list(args) && isTRUE(args$is_ref_error)) return(args$response)
 
-  # Convert formula-like strings
+  # Coerce arg values to a target R class. Whitelisted specs only — never an
+  # eval of arbitrary R. Use this when stat_resolve's class_hint says an arg
+  # needs a specific class (e.g. randomForest y must be factor for classification,
+  # auto.arima/stl need ts).
+  coerce_spec <- params$coerce %||% list()
+  if (length(coerce_spec) > 0) {
+    for (nm in names(coerce_spec)) {
+      if (is.null(args[[nm]])) next  # arg not present, skip silently
+      spec <- coerce_spec[[nm]]
+      coerced <- tryCatch({
+        if (spec == "factor") base::factor(args[[nm]])
+        else if (spec == "character") base::as.character(args[[nm]])
+        else if (spec == "numeric") base::as.numeric(args[[nm]])
+        else if (spec == "integer") base::as.integer(args[[nm]])
+        else if (spec == "matrix") base::as.matrix(args[[nm]])
+        else if (spec == "data.frame") base::as.data.frame(args[[nm]])
+        else if (spec == "ts") stats::ts(args[[nm]])
+        else if (grepl("^ts\\(", spec)) {
+          # Parse "ts(frequency=12)" or "ts(frequency=12,start=2000)" — strict whitelist.
+          inner <- sub("^ts\\((.*)\\)$", "\\1", spec)
+          if (inner == spec) {
+            stop(paste0("Invalid ts() spec: '", spec, "'. Use 'ts(frequency=N)' or 'ts(frequency=N,start=Y)'."))
+          }
+          kv_pairs <- strsplit(inner, ",")[[1]]
+          ts_args <- list()
+          for (kv in kv_pairs) {
+            parts <- strsplit(trimws(kv), "=")[[1]]
+            if (length(parts) != 2) {
+              stop(paste0("Bad ts() parameter: '", kv, "'. Use key=number form."))
+            }
+            key <- trimws(parts[1])
+            num <- suppressWarnings(as.numeric(trimws(parts[2])))
+            if (!key %in% c("frequency", "start", "end", "deltat")) {
+              stop(paste0("Unsupported ts() parameter: '", key, "'. Allowed: frequency, start, end, deltat."))
+            }
+            if (is.na(num)) {
+              stop(paste0("ts() parameter '", key, "' must be a number, got '", parts[2], "'."))
+            }
+            ts_args[[key]] <- num
+          }
+          do.call(stats::ts, c(list(args[[nm]]), ts_args))
+        }
+        else {
+          stop(paste0("Unknown coerce spec: '", spec, "'. Allowed: factor, character, numeric, integer, matrix, data.frame, ts, ts(frequency=N)."))
+        }
+      }, error = function(e) {
+        return(error_response(id, 5L,
+          paste0("Coercion failed for arg '", nm, "' (spec='", spec, "'): ", conditionMessage(e)),
+          suggestion = "Check the value class and the coerce spec syntax."))
+      })
+      # If coerced is an error response, return it
+      if (is.list(coerced) && !is.null(coerced$error)) return(coerced)
+      args[[nm]] <- coerced
+    }
+  }
+
+  # NSE escape hatch: parse expression strings into language objects so NSE
+  # functions (dplyr verbs, tidyr pivots, ggplot aes, etc.) can capture them
+  # via enquos / substitute. Three slots:
+  #   - expressions: named map { argName: "expr string" } → args[[argName]] <- quote(expr)
+  #   - dot_expressions: array [ "expr1", "expr2" ] → appended as unnamed
+  #     positional entries (consumed by ...). Parsed via rlang::parse_expr.
+  #   - dot_args: array [ "handle1", "handle2" ] → appended as unnamed
+  #     positional entries, but each string is resolved as a session handle
+  #     (NOT parsed as an R expression). Use for functions like stats::anova
+  #     that take a sequence of objects rather than NSE expressions.
+  nse_expressions <- params$expressions %||% list()
+  dot_expressions <- as.list(params$dot_expressions %||% list())
+  dot_args_list <- as.list(params$dot_args %||% list())
+
+  # Resolve dot_args via session lookup; append to args as unnamed entries
+  if (length(dot_args_list) > 0) {
+    session_objects <- ls(envir = .ss)
+    resolved_dots <- vector("list", length(dot_args_list))
+    for (i in seq_along(dot_args_list)) {
+      ref <- dot_args_list[[i]]
+      if (is.character(ref) && length(ref) == 1 && ref %in% session_objects) {
+        resolved_dots[[i]] <- get(ref, envir = .ss, inherits = FALSE)
+      } else if (is.character(ref) && length(ref) == 1) {
+        available <- paste(session_objects, collapse = ", ")
+        return(error_response(id, 4L,
+          paste0("dot_args[[", i, "]] '", ref, "' not found in session. Available: ",
+                 if (nchar(available) > 0) available else "(none)"),
+          suggestion = "Pass a registered session handle ID, or use dot_expressions for an R expression."))
+      } else {
+        # Pass as-is (numeric, list from JSON, etc.)
+        resolved_dots[[i]] <- ref
+      }
+    }
+    args <- c(args, resolved_dots)
+  }
+
+  if ((length(nse_expressions) > 0 || length(dot_expressions) > 0) &&
+      !requireNamespace("rlang", quietly = TRUE)) {
+    return(error_response(id, 3L,
+      "rlang not installed; required for expression parsing",
+      suggestion = "Install rlang: stat_install(package='rlang')"))
+  }
+
+  # Wrap expressions as quosures (not bare language objects) so NSE machinery
+  # like dplyr's data-mask pronouns (n(), cur_group(), etc.) and tidyselect
+  # helpers (everything(), starts_with(), -col) resolve in the right context.
+  # Quosure env: a child of the *function's package namespace* so unqualified
+  # references like n() / everything() resolve even when the package was loaded
+  # via requireNamespace() (not attached to the search path).
+  if (length(nse_expressions) > 0 || length(dot_expressions) > 0) {
+    pkg_ns <- tryCatch(rlang::ns_env(pkg), error = function(e) .ss)
+    nse_quo_env <- new.env(parent = pkg_ns)
+  }
+
+  if (length(nse_expressions) > 0) {
+    for (nm in names(nse_expressions)) {
+      expr_str <- nse_expressions[[nm]]
+      parsed <- tryCatch(rlang::parse_expr(expr_str), error = function(e) NULL)
+      if (is.null(parsed)) {
+        return(error_response(id, 5L,
+          paste0("Failed to parse expression for '", nm, "': '", expr_str, "'"),
+          suggestion = "Use valid R syntax (e.g. 'cyl > 4', 'everything()', '-Species')"))
+      }
+      args[[nm]] <- rlang::new_quosure(parsed, env = nse_quo_env)
+    }
+  }
+
+  if (length(dot_expressions) > 0) {
+    parsed_dots <- vector("list", length(dot_expressions))
+    for (i in seq_along(dot_expressions)) {
+      expr_str <- dot_expressions[[i]]
+      parsed <- tryCatch(rlang::parse_expr(expr_str), error = function(e) NULL)
+      if (is.null(parsed)) {
+        return(error_response(id, 5L,
+          paste0("Failed to parse dot_expressions[[", i, "]]: '", expr_str, "'"),
+          suggestion = "Use valid R syntax (e.g. 'cyl > 4', 'mean(mpg)')"))
+      }
+      parsed_dots[[i]] <- rlang::new_quosure(parsed, env = nse_quo_env)
+    }
+    # Append as unnamed positional args; consumed by `...`
+    args <- c(args, parsed_dots)
+  }
+
+  # Convert formula-like strings. The exact-name list covers known package
+  # idioms that would not match the "formula" substring rule (e.g. fixest uses
+  # "fml", nlme uses "fixed"/"random", caret uses "form").
   for (nm in names(args)) {
-    if (nm %in% c("formula", "fixed", "random") ||
+    if (nm %in% c("formula", "fixed", "random", "fml", "form") ||
         grepl("formula", nm, ignore.case = TRUE)) {
       if (is.character(args[[nm]])) {
         args[[nm]] <- tryCatch(
@@ -143,7 +284,10 @@ dispatch_call <- function(id, params) {
     return(error_response(id, 5L, validation$message, suggestion = validation$suggestion))
   }
 
-  # Execute with warning capture
+  # Execute with warning capture. When NSE expressions are present, use
+  # rlang::call2 + eval so quosures are spliced correctly into the call (do.call
+  # would evaluate quosures eagerly and break dplyr's data-mask pronouns like n()).
+  has_nse <- length(nse_expressions) > 0 || length(dot_expressions) > 0
   warnings_list <- character(0)
   stdout_list <- character(0)
   result <- tryCatch(
@@ -152,7 +296,11 @@ dispatch_call <- function(id, params) {
       output <- capture.output(
         {
           value <- withCallingHandlers(
-            do.call(f, args),
+            if (has_nse) {
+              eval(rlang::call2(f, !!!args), envir = .ss)
+            } else {
+              do.call(f, args)
+            },
             warning = function(w) {
               warnings_list <<- c(warnings_list, conditionMessage(w))
               invokeRestart("muffleWarning")
@@ -199,12 +347,50 @@ dispatch_call <- function(id, params) {
 
 dispatch_load_data <- function(id, params) {
   file_path <- params$file_path
+  dataset <- params$dataset
+  package <- params$package %||% "datasets"
   name <- params$name
   sep <- params$separator
 
-  if (is.null(file_path)) {
-    return(error_response(id, 2L, "Missing 'file_path' parameter"))
+  if (is.null(file_path) && is.null(dataset)) {
+    return(error_response(id, 2L, "Missing 'file_path' or 'dataset' parameter",
+      suggestion = "Provide file_path for CSV/TSV/RDS, or dataset for built-in R datasets (e.g. mtcars, iris)"))
   }
+
+  # Built-in dataset path: data(name, package=...) into a temp env, then register
+  if (!is.null(dataset)) {
+    if (!requireNamespace(package, quietly = TRUE)) {
+      return(error_response(id, 3L,
+        paste0("Package '", package, "' is not installed (needed to load dataset '", dataset, "')")))
+    }
+    tmp_env <- new.env()
+    loaded <- tryCatch({
+      utils::data(list = dataset, package = package, envir = tmp_env)
+      TRUE
+    }, error = function(e) conditionMessage(e),
+       warning = function(w) conditionMessage(w))
+    if (!isTRUE(loaded)) {
+      return(error_response(id, 4L,
+        paste0("Failed to load dataset '", dataset, "' from package '", package, "': ", loaded),
+        suggestion = "Use stat_search to find the right dataset, or check spelling. Common: mtcars, iris, lung (survival), sleepstudy (lme4), AirPassengers."))
+    }
+    if (!exists(dataset, envir = tmp_env, inherits = FALSE)) {
+      return(error_response(id, 4L,
+        paste0("Dataset '", dataset, "' was not materialized after data() call"),
+        suggestion = "Some datasets export under a different name; check ?data and the package documentation."))
+    }
+    data <- get(dataset, envir = tmp_env)
+    ref_id <- name %||% gsub("[^a-zA-Z0-9_]", "_", dataset)
+    assign(ref_id, data, envir = .ss)
+    meta <- make_object_summary(data, ref_id)
+    register_object(meta$id, meta$type, meta$rClass,
+                    meta$sizeBytes, meta$summary, meta$schema)
+    formatted <- format_for_json(data)
+    formatted$object_id <- ref_id
+    formatted$source <- list(dataset = dataset, package = package)
+    return(list(id = id, result = formatted, objectsCreated = list(meta)))
+  }
+
   if (!file.exists(file_path)) {
     return(error_response(id, 4L, paste0("File not found: ", file_path)))
   }

@@ -8,8 +8,20 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { resolve, dirname } from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { PythonRuntimeStatus, RpcRequest, RpcResponse } from "../types.js";
+import type {
+  PythonRuntimeState,
+  PythonRuntimeStatus,
+  RpcRequest,
+  RpcResponse,
+} from "../types.js";
 import { NdjsonCodec, encodeNdjson } from "./protocol.js";
+
+// Stderr ring buffer cap: keeps the last 50 lines or ~4KB, whichever comes
+// first. Surfaced via getStatus().recentStderr so agents can see Python
+// import warnings, traceback context, and crash output without spawning a
+// debug session.
+const MAX_STDERR_LINES = 50;
+const MAX_STDERR_BYTES = 4096;
 
 function findProjectRoot(startDir: string): string {
   let dir = startDir;
@@ -59,15 +71,18 @@ export class PythonWorker {
   private _started = false;
   private _intentionalStop = false;
   private runtimeStatus: PythonRuntimeStatus;
+  private stderrLines: string[] = [];
+  private stderrPartial = "";
+  private stderrBytes = 0;
 
   constructor(config?: Partial<PythonWorkerConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.runtimeStatus = {
-      enabled: false,
-      healthy: false,
+      state: "starting",
       path: this.config.pythonPath,
       availableModules: [],
       missingModules: [],
+      recentStderr: [],
     };
   }
 
@@ -76,17 +91,67 @@ export class PythonWorker {
   }
 
   getStatus(): PythonRuntimeStatus {
-    return this.runtimeStatus;
+    return { ...this.runtimeStatus, recentStderr: [...this.stderrLines] };
   }
 
+  // Push a chunk of stderr text into the ring buffer. Splits on newlines so
+  // each entry is a single line, and trims oldest entries when MAX_STDERR_LINES
+  // or MAX_STDERR_BYTES is exceeded.
+  private appendStderr(chunk: string): void {
+    this.stderrPartial += chunk;
+    const parts = this.stderrPartial.split("\n");
+    this.stderrPartial = parts.pop() ?? "";
+
+    for (const line of parts) {
+      const trimmed = line.replace(/\r$/, "");
+      if (trimmed.length === 0) continue;
+      this.stderrLines.push(trimmed);
+      this.stderrBytes += trimmed.length + 1;
+      while (
+        this.stderrLines.length > MAX_STDERR_LINES ||
+        this.stderrBytes > MAX_STDERR_BYTES
+      ) {
+      const dropped = this.stderrLines.shift();
+        if (dropped == null) break;
+        this.stderrBytes -= dropped.length + 1;
+      }
+    }
+  }
+
+  // Always resolves. Outcome is reflected in getStatus().state:
+  //   "spawn_failed"     — executable missing, permission denied, immediate exit
+  //   "modules_missing"  — process up but required modules not all importable
+  //   "healthy"          — process up, all modules importable
+  // Callers should check state before issuing call().
   async start(): Promise<void> {
     if (this.proc) throw new Error("Python worker already started");
 
-    return new Promise<void>((resolveStart, rejectStart) => {
-      const proc = spawn(this.config.pythonPath, ["-u", BRIDGE_SCRIPT], {
-        stdio: ["pipe", "pipe", "pipe"],
-        env: { ...process.env },
-      });
+    return new Promise<void>((resolveStart) => {
+      let resolved = false;
+      const finish = () => {
+        if (resolved) return;
+        resolved = true;
+        resolveStart();
+      };
+
+      let proc: ChildProcess;
+      try {
+        proc = spawn(this.config.pythonPath, ["-u", BRIDGE_SCRIPT], {
+          stdio: ["pipe", "pipe", "pipe"],
+          env: { ...process.env },
+        });
+      } catch (err) {
+        this.runtimeStatus = {
+          state: "spawn_failed",
+          path: this.config.pythonPath,
+          availableModules: [],
+          missingModules: [],
+          recentStderr: [],
+          error: `Failed to spawn Python: ${(err as Error).message}`,
+        };
+        finish();
+        return;
+      }
 
       this.proc = proc;
 
@@ -112,24 +177,43 @@ export class PythonWorker {
       });
 
       proc.stderr!.setEncoding("utf-8");
-      proc.stderr!.on("data", (_chunk: string) => {
-        // Python stderr (warnings, import messages) — ignore
+      proc.stderr!.on("data", (chunk: string) => {
+        this.appendStderr(chunk);
       });
 
       proc.on("error", (err) => {
         if (!this._started) {
-          rejectStart(new Error(`Failed to spawn Python: ${err.message}`));
+          this.runtimeStatus = {
+            state: "spawn_failed",
+            path: this.config.pythonPath,
+            availableModules: [],
+            missingModules: [],
+            recentStderr: [...this.stderrLines],
+            error: `Failed to spawn Python: ${err.message}`,
+          };
+          finish();
+          return;
         }
         this.handleCrash(err);
       });
 
       proc.on("exit", (code, signal) => {
         if (!this._started) {
-          rejectStart(new Error(`Python exited during startup: code=${code}`));
+          this.runtimeStatus = {
+            state: "spawn_failed",
+            path: this.config.pythonPath,
+            availableModules: [],
+            missingModules: [],
+            recentStderr: [...this.stderrLines],
+            error: `Python exited during startup: code=${code}, signal=${signal}`,
+          };
+          finish();
           return;
         }
         if (this._intentionalStop) return;
-        this.handleCrash(new Error(`Python exited unexpectedly: code=${code}, signal=${signal}`));
+        this.handleCrash(
+          new Error(`Python exited unexpectedly: code=${code}, signal=${signal}`),
+        );
       });
 
       // Python starts faster than R — shorter startup wait
@@ -138,27 +222,29 @@ export class PythonWorker {
         this.call("healthcheck", {})
           .then((response) => {
             const health = (response.result || {}) as PythonHealthcheckResult;
+            const allModulesAvailable =
+              response.error == null && health.healthy === true;
             this.runtimeStatus = {
-              enabled: true,
-              healthy: response.error == null && health.healthy === true,
+              state: allModulesAvailable ? "healthy" : "modules_missing",
               path: this.config.pythonPath,
               pythonVersion: health.python_version,
               availableModules: health.available_modules || [],
               missingModules: health.missing_modules || [],
+              recentStderr: [...this.stderrLines],
               error: response.error?.message,
             };
-            resolveStart();
+            finish();
           })
           .catch((err) => {
             this.runtimeStatus = {
-              enabled: false,
-              healthy: false,
+              state: "modules_missing",
               path: this.config.pythonPath,
               availableModules: [],
               missingModules: [],
+              recentStderr: [...this.stderrLines],
               error: `Healthcheck failed: ${(err as Error).message}`,
             };
-            rejectStart(new Error(`Python startup healthcheck failed: ${(err as Error).message}`));
+            finish();
           });
       }, 300);
 
@@ -202,11 +288,11 @@ export class PythonWorker {
     this.codec = null;
     this._started = false;
     this.runtimeStatus = {
-      enabled: false,
-      healthy: false,
+      state: "not_configured",
       path: this.config.pythonPath,
       availableModules: [],
       missingModules: [],
+      recentStderr: [...this.stderrLines],
     };
 
     return new Promise<void>((resolve) => {
@@ -236,11 +322,11 @@ export class PythonWorker {
     this.codec = null;
     this._started = false;
     this.runtimeStatus = {
-      enabled: false,
-      healthy: false,
+      state: "crashed",
       path: this.config.pythonPath,
       availableModules: [],
       missingModules: [],
+      recentStderr: [...this.stderrLines],
       error: error.message,
     };
     this.config.onCrash?.(error);

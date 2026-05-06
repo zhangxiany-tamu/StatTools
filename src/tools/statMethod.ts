@@ -61,10 +61,27 @@ export async function executeStatMethod(
 ): Promise<StatToolResult> {
   const { object: objId, method, args, positional_args, assign_to } = input;
 
-  // 1. Python worker must be available
-  if (!pythonWorker) {
+  // 1. Python worker must be available AND healthy. Surface structured state
+  // so the agent can self-diagnose without an extra stat_session round trip.
+  const pythonStatus = pythonWorker?.getStatus();
+  if (!pythonWorker || !pythonStatus || pythonStatus.state !== "healthy") {
     return errorResult(
-      "Python runtime not available. stat_method only works with Python objects.",
+      "Python runtime not healthy. stat_method requires a working Python worker.",
+      {
+        python_state: pythonStatus?.state ?? "not_configured",
+        python_path: pythonStatus?.path ?? null,
+        missing_modules: pythonStatus?.missingModules ?? [],
+        recent_stderr: pythonStatus?.recentStderr ?? [],
+        runtime_error: pythonStatus?.error ?? null,
+        hint:
+          pythonStatus?.state === "modules_missing"
+            ? `Install missing modules: pip install ${(pythonStatus.missingModules ?? []).join(" ")}`
+            : pythonStatus?.state === "spawn_failed"
+              ? `Set PYTHON_PATH to a working python3 binary, then restart the server.`
+              : pythonStatus?.state === "crashed"
+                ? `Python worker crashed. Restart the server to retry.`
+                : `Configure PYTHON_PATH and restart the server.`,
+      },
     );
   }
 

@@ -100,7 +100,15 @@ describe("MCP Server End-to-End", () => {
     expect(typeof data.python.path).toBe("string");
     expect(Array.isArray(data.python.availableModules)).toBe(true);
     expect(Array.isArray(data.python.missingModules)).toBe(true);
-    expect(typeof data.python.healthy).toBe("boolean");
+    expect(Array.isArray(data.python.recentStderr)).toBe(true);
+    expect([
+      "not_configured",
+      "starting",
+      "spawn_failed",
+      "modules_missing",
+      "crashed",
+      "healthy",
+    ]).toContain(data.python.state);
   });
 
   it("full flow: search → resolve → load → call → session", async () => {
