@@ -254,13 +254,64 @@ function exactRecipes(fx: FixtureLibrary): Map<string, Recipe> {
   r.set("bayestestR::eti", { recipe: "bay_eti_x", args: { x: fx.vectors.x } });
   r.set("bayestestR::ci", { recipe: "bay_ci_x", args: { x: fx.vectors.x } });
   r.set("bayestestR::map_estimate", { recipe: "bay_map_x", args: { x: fx.vectors.x } });
-  r.set("bayestestR::point_estimate", { recipe: "bay_point_x", args: { x: fx.vectors.x } });
-  r.set("bayestestR::describe_posterior", { recipe: "bay_describe_x", args: { posterior: fx.vectors.x } });
   r.set("bayestestR::density_at", { recipe: "bay_density_at", args: { posterior: fx.vectors.x, x: 3 } });
   r.set("bayestestR::estimate_density", { recipe: "bay_estimate_density", args: { x: fx.vectors.x } });
   r.set("bayestestR::pd_to_p", { recipe: "bay_pd_to_p", args: { pd: 0.95 } });
   r.set("bayestestR::p_to_pd", { recipe: "bay_p_to_pd", args: { p: 0.05 } });
   r.set("bayestestR::convert_p_to_pd", { recipe: "bay_convert_p_to_pd", args: { p: 0.05 } });
+
+  // Group A — describe/point on posterior_draws data frame.
+  // diagnostic_*/effective_sample/mcse are NOT here: those reject data frames at
+  // runtime and require a fitted Bayesian model, so they're routed to the
+  // NEEDS_STAN_FIT structured skip below. weighted_posteriors does accept a
+  // data frame via `...`, so it gets a dot_args recipe instead of a skip.
+  r.set("bayestestR::describe_posterior",  { recipe: "bay_describe_draws", args: { posterior: fx.draws.posterior } });
+  r.set("bayestestR::point_estimate",      { recipe: "bay_point_draws",    args: { x: fx.draws.posterior } });
+  r.set("bayestestR::weighted_posteriors", { recipe: "bay_weighted_post_draws", dot_args: [fx.draws.posterior] });
+
+  // Group B — posterior + prior. These also need the optional `logspline`
+  // package, which isn't installed in this environment. Routed to a structured
+  // skip below; install logspline to enable.
+
+  // Group C — distribution generators (scalar n + shape params)
+  r.set("bayestestR::distribution",          { recipe: "bay_dist",          args: { n: 100 } });
+  r.set("bayestestR::distribution_normal",   { recipe: "bay_dist_normal",   args: { n: 100 } });
+  r.set("bayestestR::distribution_gaussian", { recipe: "bay_dist_gaussian", args: { n: 100 } });
+  r.set("bayestestR::distribution_uniform",  { recipe: "bay_dist_uniform",  args: { n: 100 } });
+  r.set("bayestestR::distribution_cauchy",   { recipe: "bay_dist_cauchy",   args: { n: 100 } });
+  r.set("bayestestR::distribution_beta",     { recipe: "bay_dist_beta",     args: { n: 100, shape1: 2, shape2: 5 } });
+  r.set("bayestestR::distribution_binom",    { recipe: "bay_dist_binom",    args: { n: 100, size: 10, prob: 0.5 } });
+  r.set("bayestestR::distribution_binomial", { recipe: "bay_dist_binomial", args: { n: 100, size: 10, prob: 0.5 } });
+  r.set("bayestestR::distribution_chisq",    { recipe: "bay_dist_chisq",    args: { n: 100, df: 3 } });
+  r.set("bayestestR::distribution_chisquared", { recipe: "bay_dist_chisquared", args: { n: 100, df: 3 } });
+  r.set("bayestestR::distribution_gamma",    { recipe: "bay_dist_gamma",    args: { n: 100, shape: 2 } });
+  r.set("bayestestR::distribution_nbinom",   { recipe: "bay_dist_nbinom",   args: { n: 100, size: 10, prob: 0.5 } });
+  r.set("bayestestR::distribution_poisson",  { recipe: "bay_dist_poisson",  args: { n: 100, lambda: 2 } });
+  r.set("bayestestR::distribution_student",  { recipe: "bay_dist_student",  args: { n: 100, df: 5 } });
+  r.set("bayestestR::distribution_student_t", { recipe: "bay_dist_student_t", args: { n: 100, df: 5 } });
+  r.set("bayestestR::distribution_t",        { recipe: "bay_dist_t",        args: { n: 100, df: 5 } });
+  // distribution_tweedie needs the optional `tweedie` package (not installed);
+  // routed to structured skip below.
+  r.set("bayestestR::distribution_mixture_normal", { recipe: "bay_dist_mix_normal", args: { n: 100 } });
+  r.set("bayestestR::distribution_custom",   { recipe: "bay_dist_custom",   args: { n: 100, type: "norm" } });
+
+  // Group D — contrasts (scalar n)
+  r.set("bayestestR::contr.bayes",                  { recipe: "bay_contr_bayes",        args: { n: 3 } });
+  r.set("bayestestR::contr.equalprior",             { recipe: "bay_contr_equalprior",   args: { n: 3 } });
+  r.set("bayestestR::contr.equalprior_pairs",       { recipe: "bay_contr_eq_pairs",     args: { n: 3 } });
+  r.set("bayestestR::contr.equalprior_deviations",  { recipe: "bay_contr_eq_dev",       args: { n: 3 } });
+  r.set("bayestestR::contr.orthonorm",              { recipe: "bay_contr_orthonorm",    args: { n: 3 } });
+
+  // Group E — simulators (scalar args)
+  r.set("bayestestR::simulate_correlation", { recipe: "bay_sim_corr",   args: { n: 50, r: 0.5 } });
+  r.set("bayestestR::simulate_difference",  { recipe: "bay_sim_diff",   args: { n: 50, d: 0.5 } });
+  r.set("bayestestR::simulate_ttest",       { recipe: "bay_sim_ttest",  args: { n: 50, d: 0.5 } });
+  r.set("bayestestR::simulate_simpson",     { recipe: "bay_sim_simpson", args: { n: 50, r: 0.5, groups: 3 } });
+
+  // Group F — BF scalar utilities + p_to_bf fix (signature is p_to_bf(x, ...))
+  r.set("bayestestR::bic_to_bf",       { recipe: "bay_bic_to_bf",       args: { bic: 100, denominator: 105 } });
+  r.set("bayestestR::convert_pd_to_p", { recipe: "bay_convert_pd_to_p", args: { pd: 0.95 } });
+  r.set("bayestestR::p_to_bf",         { recipe: "bay_p_to_bf",         args: { x: 0.05, n_obs: 100 } });
 
   // ---- effectsize ----
   r.set("effectsize::cohens_d", { recipe: "es_cohens_d_xy", args: { x: fx.vectors.x, y: fx.vectors.y } });
@@ -271,12 +322,162 @@ function exactRecipes(fx: FixtureLibrary): Map<string, Recipe> {
   r.set("effectsize::eta_squared", { recipe: "es_eta_sq_aov", args: { model: fx.models.aov_mtcars } });
   r.set("effectsize::omega_squared", { recipe: "es_omega_sq_aov", args: { model: fx.models.aov_mtcars } });
   r.set("effectsize::epsilon_squared", { recipe: "es_eps_sq_aov", args: { model: fx.models.aov_mtcars } });
-  r.set("effectsize::eta_squared_posterior", { recipe: "es_eta_sq_posterior", args: { model: fx.models.aov_mtcars } });
   r.set("effectsize::standardize_parameters", { recipe: "es_standardize_lm", args: { model: fx.models.lm_mtcars } });
   r.set("effectsize::interpret_d", { recipe: "es_interpret_d", args: { d: 0.5 } });
   r.set("effectsize::interpret_r", { recipe: "es_interpret_r", args: { r: 0.5 } });
   r.set("effectsize::interpret_r2", { recipe: "es_interpret_r2", args: { r2: 0.5 } });
   r.set("effectsize::interpret_oddsratio", { recipe: "es_interpret_or", args: { OR: 2.0 } });
+  const addEffectsizeArgs = (fn: string, args: Record<string, unknown>): void => {
+    r.set(`effectsize::${fn}`, { recipe: `es_${fn}`, args });
+  };
+
+  for (const fn of [
+    "F_to_epsilon2", "F_to_eta2", "F_to_eta2_adj",
+    "F_to_f", "F_to_f2", "F_to_omega2",
+  ]) {
+    addEffectsizeArgs(fn, { f: 4.2, df: 2, df_error: 30 });
+  }
+  for (const fn of ["F_to_d", "F_to_r"]) {
+    addEffectsizeArgs(fn, { f: 4.2, df: 1, df_error: 30 });
+  }
+  for (const fn of [
+    "t_to_d", "t_to_epsilon2", "t_to_eta2", "t_to_eta2_adj",
+    "t_to_f", "t_to_f2", "t_to_omega2", "t_to_r",
+  ]) {
+    addEffectsizeArgs(fn, { t: 2.2, df_error: 30 });
+  }
+  for (const fn of ["z_to_d", "z_to_r"]) {
+    addEffectsizeArgs(fn, { z: 2.2, n: 40 });
+  }
+  for (const fn of [
+    "chisq_to_cohens_w", "chisq_to_cramers_v",
+    "chisq_to_pearsons_c", "chisq_to_phi", "chisq_to_tschuprows_t",
+  ]) {
+    addEffectsizeArgs(fn, { chisq: 5.4, n: 60, nrow: 2, ncol: 2 });
+  }
+  for (const fn of [
+    "d_to_logoddsratio", "d_to_oddsratio", "d_to_r",
+  ]) {
+    addEffectsizeArgs(fn, { d: 0.5, n1: 20, n2: 20 });
+  }
+  for (const fn of ["d_to_overlap", "d_to_p_superiority", "d_to_u1", "d_to_u2", "d_to_u3"]) {
+    addEffectsizeArgs(fn, { d: 0.5 });
+  }
+  for (const fn of ["r_to_d", "r_to_logoddsratio", "r_to_oddsratio"]) {
+    addEffectsizeArgs(fn, { r: 0.3, n1: 20, n2: 20 });
+  }
+  for (const fn of [
+    "arr_to_logoddsratio", "arr_to_nnt", "arr_to_oddsratio", "arr_to_riskratio",
+  ]) {
+    addEffectsizeArgs(fn, { ARR: 0.1, p0: 0.2 });
+  }
+  for (const fn of [
+    "logoddsratio_to_arr", "logoddsratio_to_d", "logoddsratio_to_nnt",
+    "logoddsratio_to_r", "logoddsratio_to_riskratio",
+  ]) {
+    addEffectsizeArgs(fn, { logOR: 0.7, p0: 0.2, n1: 20, n2: 20 });
+  }
+  for (const fn of [
+    "nnt_to_arr", "nnt_to_logoddsratio", "nnt_to_oddsratio", "nnt_to_riskratio",
+  ]) {
+    addEffectsizeArgs(fn, { NNT: 10, p0: 0.2 });
+  }
+  for (const fn of [
+    "oddsratio_to_arr", "oddsratio_to_d", "oddsratio_to_nnt",
+    "oddsratio_to_r", "oddsratio_to_riskratio",
+  ]) {
+    addEffectsizeArgs(fn, { OR: 2, p0: 0.2, n1: 20, n2: 20 });
+  }
+  for (const fn of [
+    "riskratio_to_arr", "riskratio_to_logoddsratio",
+    "riskratio_to_nnt", "riskratio_to_oddsratio",
+  ]) {
+    addEffectsizeArgs(fn, { RR: 1.5, p0: 0.2 });
+  }
+  for (const [fn, args] of Object.entries({
+    c_to_w: { c: 0.3 },
+    eta2_to_f: { es: 0.2 },
+    eta2_to_f2: { es: 0.2 },
+    f2_to_eta2: { f2: 0.25 },
+    f_to_eta2: { f: 0.5 },
+    fei_to_w: { fei: 0.3, p: 0.5 },
+    odds_to_probs: { odds: 2 },
+    probs_to_odds: { probs: 0.25 },
+    phi_to_chisq: { phi: 0.3, n: 60 },
+    rb_to_p_superiority: { rb: 0.3 },
+    rb_to_vda: { rb: 0.3 },
+    rb_to_wmw_odds: { rb: 0.3 },
+    t_to_v: { t: 2.2, nrow: 2, ncol: 2 },
+    t_to_w: { t: 2.2, nrow: 2, ncol: 2 },
+    v_to_t: { v: 0.3, nrow: 2, ncol: 2 },
+    v_to_w: { v: 0.3, nrow: 2, ncol: 2 },
+    w_to_c: { w: 0.3 },
+    w_to_fei: { w: 0.3, p: 0.5 },
+    w_to_t: { w: 0.3, nrow: 2, ncol: 2 },
+    w_to_v: { w: 0.3, nrow: 2, ncol: 2 },
+  })) {
+    addEffectsizeArgs(fn, args);
+  }
+  for (const [fn, args] of Object.entries({
+    interpret_bf: { bf: 3 },
+    interpret_cohens_d: { d: 0.5 },
+    interpret_cohens_g: { g: 0.2 },
+    interpret_cramers_v: { r: 0.3 },
+    interpret_epsilon_squared: { es: 0.2 },
+    interpret_ess: { ess: 1000 },
+    interpret_eta_squared: { es: 0.2 },
+    interpret_fei: { r: 0.3 },
+    interpret_glass_delta: { delta: 0.5 },
+    interpret_hedges_g: { g: 0.5 },
+    interpret_icc: { icc: 0.6 },
+    interpret_kendalls_w: { w: 0.3 },
+    interpret_omega_squared: { es: 0.2 },
+    interpret_p: { p: 0.03 },
+    interpret_pd: { pd: 0.95 },
+    interpret_phi: { r: 0.3 },
+    interpret_r2_semipartial: { es: 0.1 },
+    interpret_rank_biserial: { r: 0.3 },
+    interpret_rhat: { rhat: 1.01 },
+    interpret_rope: { rope: 0.03 },
+    interpret_vif: { vif: 3 },
+  })) {
+    addEffectsizeArgs(fn, args);
+  }
+  for (const fn of ["cohens_f", "cohens_f_squared"]) {
+    addEffectsizeArgs(fn, { model: fx.models.aov_mtcars });
+  }
+  for (const fn of ["effectsize", "r2_semipartial", "standardize_info"]) {
+    addEffectsizeArgs(fn, { model: fx.models.lm_mtcars });
+  }
+  for (const fn of [
+    "cohens_u1", "cohens_u2", "cohens_u3", "means_ratio", "p_overlap",
+    "p_superiority", "rank_epsilon_squared", "rank_eta_squared", "vd_a",
+    "wmw_odds",
+  ]) {
+    addEffectsizeArgs(fn, { x: "mpg ~ factor(am)", data: fx.dataFrames.mtcars });
+  }
+  for (const fn of ["sd_pooled", "mad_pooled"]) {
+    addEffectsizeArgs(fn, { x: fx.vectors.x, y: fx.vectors.y });
+  }
+  addEffectsizeArgs("cov_pooled", { x: "mpg + wt ~ am", data: fx.dataFrames.mtcars });
+  addEffectsizeArgs("mahalanobis_d", { x: "mpg + wt ~ am", data: fx.dataFrames.mtcars });
+  for (const fn of ["arr", "oddsratio", "riskratio", "nnt", "cohens_g"]) {
+    addEffectsizeArgs(fn, { x: fx.tables.twoByTwo });
+  }
+  for (const fn of ["phi", "cramers_v", "pearsons_c", "tschuprows_t"]) {
+    addEffectsizeArgs(fn, { x: fx.tables.twoByTwo });
+  }
+  r.set("effectsize::cohens_h", {
+    recipe: "es_cohens_h",
+    args: { x: [10, 12], y: [5, 7] },
+    coerce: { x: "numeric", y: "numeric" },
+  });
+  r.set("effectsize::cohens_w", {
+    recipe: "es_cohens_w",
+    args: { x: [10, 20, 30], p: [1 / 3, 1 / 3, 1 / 3] },
+    coerce: { x: "numeric", p: "numeric" },
+  });
+  addEffectsizeArgs("kendalls_w", { x: fx.matrices.m5x5 });
 
   // ---- lubridate — date/time parsing ----
   r.set("lubridate::ymd",        { recipe: "lub_ymd",        args: { x: "2020-01-15" } });
@@ -358,7 +559,37 @@ const CLASS_SUFFIXED_RE = /\.(gbm|svm|glmnet|coxph|brms|stan|rstanarm|aov|nlme|g
 // S3 generics whose dispatch invariably needs a class-specific object.
 // Calling them with a numeric vector errors with "no applicable method".
 // Skip rather than attempt a recipe.
-const S3_DISPATCH_RE = /^(print_html|print_md|print_json|print_yaml|print_color|print_inline|reshape_draws|reshape_iterations|reshape_grouplevel|tidy_summary|knit_print|knit_meta|html_dependencies)/;
+const S3_DISPATCH_RE = /^(print_html|print_md|print_json|print_yaml|print_color|print_inline|reshape_draws|reshape_iterations|reshape_grouplevel|tidy_summary|knit_print|knit_meta|html_dependencies|display)$/;
+
+// bayestestR functions that require a fitted Bayesian model (rstanarm/brms).
+// rstan is blocked on this toolchain (Rcpp::loadModule segfault on macOS arm64
+// + Homebrew R + GCC-15), so these can never be exercised here. Skip with a
+// structured reason so the next iteration finds them.
+//
+// diagnostic_posterior/diagnostic_draws/effective_sample/mcse/weighted_posteriors
+// also belong here — they reject posterior_draws data frames at runtime
+// ("only works with rstanarm/brms/blavaan models" / "not yet implemented for
+// objects of class 'data.frame'").
+const BAYESTESTR_NEEDS_STAN_FIT = new Set([
+  "bayesfactor", "bayesfactor_inclusion", "bayesfactor_models",
+  "bayesfactor_restricted", "bf_inclusion", "bf_models", "bf_restricted",
+  "bayesian_as_frequentist", "convert_bayesian_as_frequentist",
+  "check_prior", "describe_prior", "model_to_priors",
+  "sensitivity_to_prior", "unupdate", "mediation", "simulate_prior",
+  "diagnostic_posterior", "diagnostic_draws",
+  "effective_sample", "mcse",
+]);
+
+// bayestestR functions that depend on optional R packages not installed in
+// this environment. Skip with a structured reason; the next iteration can
+// `install.packages(...)` and convert these to call_pass.
+const BAYESTESTR_NEEDS_OPTIONAL_PKG = new Set([
+  // Need `logspline` (used internally for prior-density estimation):
+  "bayesfactor_parameters", "bayesfactor_pointnull", "bayesfactor_rope",
+  "bf_parameters", "bf_pointnull", "bf_rope", "si",
+  // Need `tweedie`:
+  "distribution_tweedie",
+]);
 
 // Supervised-ML training entry points: schema only exposes `x` because the
 // generic doesn't capture the .default formals, but the real call needs at
@@ -412,6 +643,13 @@ export function patternRecipe(
     return { skip: true, reason: "s3_generic_no_dispatch" };
   }
 
+  if (pkg === "bayestestR" && BAYESTESTR_NEEDS_STAN_FIT.has(fn)) {
+    return { skip: true, reason: "needs_bayesian_model_fixture" };
+  }
+  if (pkg === "bayestestR" && BAYESTESTR_NEEDS_OPTIONAL_PKG.has(fn)) {
+    return { skip: true, reason: "needs_optional_r_package" };
+  }
+
   // Supervised-ML trainers — schema lies about required args; skip generic
   // recipes and rely on exact recipes (per-package) when added.
   if (ML_TRAINER_RE.test(fn)) {
@@ -459,6 +697,10 @@ export function patternRecipe(
         return { recipe: "pattern_psych_cormat", args: { [k]: fx.matrices.cormat } };
       }
     }
+  }
+
+  if (pkg === "effectsize" && fn === "interpret") {
+    return { skip: true, reason: "generic_interpret_needs_rules" };
   }
 
   // Pattern 1: model accessor — only when name strongly signals a post-fit

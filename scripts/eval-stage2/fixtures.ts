@@ -24,6 +24,7 @@ export type FixtureKind =
   | "numeric_vector"
   | "factor"
   | "matrix"
+  | "table"
   | "model";
 
 export type Fixture = {
@@ -40,7 +41,9 @@ export type FixtureLibrary = {
   vectors: { x: string; y: string; xy_pair: [string, string]; char: string };
   groups: { factor3: string };
   matrices: { m5x5: string; cormat: string };
+  tables: { twoByTwo: string };
   models: { lm_mtcars: string; glm_mtcars: string; aov_mtcars: string };
+  draws: { posterior: string };
 };
 
 type ToolResponse = { content: Array<{ type: string; text: string }>; isError?: boolean };
@@ -108,6 +111,24 @@ async function buildViaExtract(
   return err ? { ok: false, error: err } : { ok: true };
 }
 
+// Seeded normal sampler (LCG + Box-Muller) so the posterior_draws fixture is
+// reproducible across runs without relying on R's RNG state. Statistical
+// quality doesn't matter — recipes just need a 3-column numeric data frame.
+function seededNormals(n: number, mean: number, sd: number, seed: number): number[] {
+  let state = seed >>> 0;
+  const rand = (): number => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return (state + 1) / 0x100000001; // open interval (0, 1)
+  };
+  const out: number[] = new Array(n);
+  for (let i = 0; i < n; i++) {
+    const u1 = rand();
+    const u2 = rand();
+    out[i] = mean + sd * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  return out;
+}
+
 /**
  * Build the standard fixture library. Throws if any fixture fails — recipes
  * reference these by name, and a missing fixture would silently break recipes
@@ -120,6 +141,8 @@ export async function buildFixtures(server: Server, log: (s: string) => void = (
   await ensureResolved(server, "stats", "aov");
   await ensureResolved(server, "stats", "cor");
   await ensureResolved(server, "base", "as.character");
+  await ensureResolved(server, "base", "matrix");
+  await ensureResolved(server, "base", "data.frame");
 
   const fx: Fixture[] = [];
   const failures: Array<{ id: string; error: string }> = [];
@@ -151,6 +174,26 @@ export async function buildFixtures(server: Server, log: (s: string) => void = (
     { kind: "call", pkg: "stats", fn: "cor",
       args: { args: { x: "matrix5x5" } },
       handle: "cormat5x5", type: "matrix", description: "5×5 correlation matrix from matrix5x5" },
+    // 2×2 contingency-shaped matrix. Despite the `table2x2` handle name
+    // (kept for backwards compatibility with existing recipes), this is an R
+    // matrix, not a `table` object — base::as.table is unclassified in the
+    // safety registry and effectsize::Yule* functions accept a matrix anyway.
+    { kind: "call", pkg: "base", fn: "matrix",
+      args: { args: { data: [12, 5, 7, 20], nrow: 2 }, coerce: { data: "numeric" } },
+      handle: "table2x2", type: "matrix", description: "2×2 contingency matrix (numeric)" },
+
+    // ----- simulated posterior draws (3 cols × 1000 rows, seeded JS-side) -----
+    { kind: "call", pkg: "base", fn: "data.frame",
+      args: {
+        args: {
+          b0:    seededNormals(1000, 0,   1,   42),
+          b1:    seededNormals(1000, 0.5, 0.4, 43),
+          sigma: seededNormals(1000, 1,   0.3, 44).map(Math.abs),
+        },
+        coerce: { b0: "numeric", b1: "numeric", sigma: "numeric" },
+      },
+      handle: "posterior_draws", type: "data_frame",
+      description: "1000 × 3 simulated posterior draws (b0, b1, sigma)" },
 
     // ----- fitted models -----
     { kind: "call", pkg: "stats", fn: "lm",
@@ -194,6 +237,8 @@ export async function buildFixtures(server: Server, log: (s: string) => void = (
     vectors: { x: "vec_x", y: "vec_y", xy_pair: ["vec_x", "vec_y"], char: "char_vec" },
     groups: { factor3: "factor3" },
     matrices: { m5x5: "matrix5x5", cormat: "cormat5x5" },
+    tables: { twoByTwo: "table2x2" },
     models: { lm_mtcars: "lm_mtcars", glm_mtcars: "glm_mtcars", aov_mtcars: "aov_mtcars" },
+    draws: { posterior: "posterior_draws" },
   };
 }

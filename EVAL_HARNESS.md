@@ -46,8 +46,8 @@ npm run eval-search-quality               # Stage 3 (~30 s)
 | Track | Result | Target |
 |---|---|---|
 | Stage 1 (resolve) | 2,008 / 2,021 (99.36%) | "every classified fn resolves" |
-| Stage 2 (call) of attempted | 526 / 717 (73.4%) | qualitative |
-| Stage 2 (call) of inventory | 526 / 2,021 (26.0%) | grow with more recipes |
+| Stage 2 (call) of attempted | 685 / 873 (78.47%) | qualitative |
+| Stage 2 (call) of inventory | 685 / 2,021 (33.9%) | grow with more recipes |
 | Search common | 86.05% | ≥80% ✓ |
 | Search long-tail | 76.67% | ≥60% ✓ |
 
@@ -78,7 +78,9 @@ Per-session fixtures (built once via `fixtures.ts` against a fresh
   `factor3` = `iris$Species`, `matrix5x5` = `mtcars[, mpg:wt]` as_matrix.
 - Derived via `stat_call`: `char_vec` = `as.character(factor3)`, `cormat5x5`
   = `cor(matrix5x5)` (5×5 square positive semi-definite — used for
-  chol/eigen/det/factor analysis fns).
+  chol/eigen/det/factor analysis fns), `table2x2` = 2×2 contingency-shaped
+  numeric matrix (used by `effectsize::Yule*`), `posterior_draws` = 1000×3
+  data frame of seeded normals (used by bayestestR descriptive functions).
 - Fitted models: `lm_mtcars`, `glm_mtcars` (logistic), `aov_mtcars`.
 
 The harness **recycles the server every 250 calls** to limit accumulated
@@ -121,20 +123,34 @@ Reports hit rate + MRR per bucket (common / long_tail).
 
 ## Backlog — what's left for the next iteration
 
-### High-leverage Stage 2 expansion (1,291 still skipped_no_recipe)
+### High-leverage Stage 2 expansion (1,135 still skipped_no_recipe)
 
 Top still-skipped packages, ordered by impact:
 
 | Package | Skipped | Approach |
 |---|---:|---|
-| psych | 336 | Multi-arg fns (factor analysis with rotation, cluster analysis with `n`, error.bars with `by`). Need bespoke per-function exact recipes. |
-| effectsize | 154 | Many take `(formula, data)` or `(model)`. Pattern_formula_data_mtcars covers some; rest need exact recipes for class-dispatch fns. |
-| base | 130 | Diverse: higher-order fns (`Reduce`, `do.call`, `mapply`) need a function-fixture (out of scope today). |
-| bayestestR | 78 | Most take posterior draws (matrix/data.frame). Add `posterior_draws` fixture (3 columns × 1000 rows of normals). |
-| stringr | 56 | Already has 2 patterns; some take additional args (`replacement`, `sep`). Add 2-arg patterns. |
-| readr | 44 | File readers — need per-format temp-file fixtures (CSV, TSV, JSON). |
-| dplyr | 44 | NSE-heavy; exact recipes covered the core verbs. Remaining are utility fns (`pull`, `rename_with`, `n`, `cur_data`). |
-| forcats | 31 | Factor manipulation; add a `forcats` pattern using `factor3` for `f`-arg fns. |
+| psych | 317 | Multi-arg fns (factor analysis with rotation, cluster analysis with `n`, error.bars with `by`). Need bespoke per-function exact recipes. |
+| base | 60 | Diverse: higher-order fns (`Reduce`, `do.call`, `mapply`) need a function-fixture (out of scope today). |
+| stats | 60 | Mixed generic/model helpers; add exact recipes only where fixture shape is clear. |
+| lubridate | 52 | Many duration/interval helpers need date-time fixtures beyond scalar strings. |
+| dplyr | 38 | NSE-heavy; exact recipes covered the core verbs. Remaining are utility fns (`pull`, `rename_with`, `n`, `cur_data`). |
+| bayestestR | 33 | All structured skips: 21 `needs_bayesian_model_fixture` (rstan blocked on this toolchain), 8 `needs_optional_r_package` (logspline / tweedie not installed), 4 `s3_generic_no_dispatch` (print_html/print_md/reshape_*). |
+| forcats | 30 | Factor manipulation; add a `forcats` pattern using `factor3` for `f`-arg fns. |
+| readr | 28 | File readers — need per-format temp-file fixtures (CSV, TSV, JSON). |
+
+Effectsize scalar/model recipe expansion is now mostly complete: 161 pass,
+0 fail, 9 intentionally skipped (`display`, print helpers, posterior-only
+standardization, and other class/reporting helpers).
+
+bayestestR: 92 → 59 call_pass / 0 call_fail / 33 structured-skip. 30 new
+exact recipes covering distribution generators, contrasts, simulators, and
+BF scalar utilities, anchored on the new `posterior_draws` fixture. Two
+quick unblocks for the next iteration: `install.packages("logspline")` →
++7 BF-pair functions; `install.packages("tweedie")` → +1.
+
+Recommended next iteration: tackle `psych` (largest remaining skip count),
+or invest in a fitted Bayesian-model fixture if/when rstan is unblocked
+(would convert all 21 `needs_bayesian_model_fixture` to call_pass).
 
 ### Search quality — common still <100%
 
