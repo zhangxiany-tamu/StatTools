@@ -72,6 +72,20 @@ export function executeStatSession(
   }));
 
   const resolvedFunctions = [...state.resolvedFunctions];
+  const recentFailures = state.recentFailures.map((failure) => ({
+    id: failure.id,
+    timestamp: failure.timestamp,
+    tool: failure.tool,
+    message: failure.message,
+    input: failure.input,
+    package: failure.package,
+    function: failure.functionName,
+    code: failure.code,
+    hint: failure.hint,
+    suggestion: failure.suggestion,
+    did_you_mean: failure.didYouMean,
+    retry_hint: failure.retryHint,
+  }));
 
   // Install jobs
   const installJobs = installManager
@@ -107,5 +121,7 @@ export function executeStatSession(
     },
     install_jobs: installJobs,
     install_jobs_count: installJobs.length,
+    recent_failures: recentFailures,
+    recent_failure_count: recentFailures.length,
   });
 }

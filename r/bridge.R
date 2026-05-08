@@ -261,7 +261,9 @@ dispatch_call <- function(id, params) {
   # "fml", nlme uses "fixed"/"random", caret uses "form").
   for (nm in names(args)) {
     if (nm %in% c("formula", "fixed", "random", "fml", "form") ||
-        grepl("formula", nm, ignore.case = TRUE)) {
+        grepl("formula", nm, ignore.case = TRUE) ||
+        (nm == "x" && is.character(args[[nm]]) && length(args[[nm]]) == 1 &&
+         grepl("~", args[[nm]], fixed = TRUE) && !is.null(args$data))) {
       if (is.character(args[[nm]])) {
         args[[nm]] <- tryCatch(
           as.formula(args[[nm]], env = .ss),
@@ -446,7 +448,23 @@ dispatch_schema <- function(id, params) {
 
   f <- tryCatch(getExportedValue(pkg, fn), error = function(e) NULL)
   if (is.null(f) || !is.function(f)) {
-    return(error_response(id, 2L, paste0("'", fn, "' not found in '", pkg, "'")))
+    # Fall back to S3 methods registered in the namespace's
+    # .__S3MethodsTable__. — S3 methods (e.g. clean_names.default in janitor)
+    # are not direct namespace exports but are real, dispatchable functions.
+    s3_lookup <- tryCatch({
+      ns <- asNamespace(pkg)
+      if (exists(".__S3MethodsTable__.", envir = ns, inherits = FALSE)) {
+        s3_tbl <- get(".__S3MethodsTable__.", envir = ns, inherits = FALSE)
+        if (exists(fn, envir = s3_tbl, inherits = FALSE)) {
+          get(fn, envir = s3_tbl, inherits = FALSE)
+        } else NULL
+      } else NULL
+    }, error = function(e) NULL)
+    if (is.function(s3_lookup)) {
+      f <- s3_lookup
+    } else {
+      return(error_response(id, 2L, paste0("'", fn, "' not found in '", pkg, "'")))
+    }
   }
 
   fmls <- formals(f)

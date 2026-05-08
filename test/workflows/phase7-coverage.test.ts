@@ -272,9 +272,12 @@ describe("Phase 7 Coverage", () => {
     if (!bayesProbe.isError) {
       available++;
       expectSuccess(bayesProbe);
+      expectSuccess(await callTool(ts.server, "stat_extract", {
+        handle: "group_data", columns: ["y"], assign_to: "phase7_y_for_hdi",
+      }));
       expectSuccess(await callTool(ts.server, "stat_call", {
         package: "bayestestR", function: "hdi",
-        args: { x: [1, 2, 3, 4, 5] },
+        args: { x: "phase7_y_for_hdi" },
       }));
       successes++;
     }

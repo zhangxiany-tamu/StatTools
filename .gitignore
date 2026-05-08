@@ -16,6 +16,10 @@ data/tarball_cache/
 data/usage_log.jsonl
 data/validation_report.json
 data/plots/
+Rplots.pdf
+
+# Eval reports (generated)
+reports/
 
 # Test artifacts
 data/stattools_*_test.db*

@@ -513,14 +513,6 @@ effectsize::cohens_u1,safe,Pure effect size computation
 effectsize::cohens_u2,safe,Pure effect size computation
 effectsize::cohens_u3,safe,Pure effect size computation
 effectsize::cohens_w,safe,Pure effect size computation
-effectsize::convert_d_to_oddsratio,safe,Pure effect size computation
-effectsize::convert_d_to_r,safe,Pure effect size computation
-effectsize::convert_odds_to_probs,safe,Pure effect size computation
-effectsize::convert_oddsratio_to_d,safe,Pure effect size computation
-effectsize::convert_oddsratio_to_r,safe,Pure effect size computation
-effectsize::convert_probs_to_odds,safe,Pure effect size computation
-effectsize::convert_r_to_d,safe,Pure effect size computation
-effectsize::convert_r_to_oddsratio,safe,Pure effect size computation
 effectsize::cov_pooled,safe,Pure effect size computation
 effectsize::cramers_v,safe,Pure computation — Cramer's V for contingency tables
 effectsize::d_to_logoddsratio,safe,Pure effect size computation

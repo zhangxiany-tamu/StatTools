@@ -1,0 +1,140 @@
+id,extra_keywords
+stats::t.test,t test two sample one sample paired welch student
+stats::chisq.test,chi squared chi square pearson goodness of fit
+stats::wilcox.test,wilcoxon rank sum mann whitney signed rank
+stats::cor,correlation pearson spearman kendall covariance
+stats::cor.test,correlation test pearson spearman kendall hypothesis
+stats::ks.test,kolmogorov smirnov empirical distribution
+stats::shapiro.test,shapiro wilk normality test
+stats::fisher.test,fisher exact contingency table
+stats::TukeyHSD,tukey hsd post hoc honestly significant difference pairwise
+stats::aov,analysis of variance anova one way two way factorial
+stats::anova,anova analysis of variance comparison nested models
+stats::kmeans,k means clustering centroid lloyd hartigan unsupervised
+stats::prcomp,principal component analysis pca dimension reduction
+stats::princomp,principal component analysis pca classical
+stats::hclust,hierarchical clustering agglomerative ward average single complete
+stats::lm,linear regression ordinary least squares ols multiple
+stats::glm,generalized linear model logistic poisson gamma binomial
+stats::loess,local regression lowess smoothing nonparametric
+stats::density,kernel density estimation nonparametric
+stats::HoltWinters,exponential smoothing holt winters seasonal
+stats::stl,seasonal trend loess decomposition time series
+stats::Box.test,ljung box pierce autocorrelation portmanteau
+stats::predict,predict prediction forecast newdata
+stats::arima,arima autoregressive integrated moving average box jenkins
+forecast::auto.arima,automatic arima forecasting time series
+forecast::ets,exponential smoothing state space ets time series forecasting
+forecast::forecast,forecast prediction time series horizon
+broom::tidy,tidy clean model output dataframe coefficients
+broom::glance,glance one row model summary fit statistics diagnostics
+broom::augment,augment fitted residuals predictions hat values diagnostics
+dplyr::filter,filter rows subset condition where
+dplyr::mutate,mutate add column transform compute
+dplyr::summarise,summarise summarize aggregate reduce group statistics
+dplyr::summarize,summarize summarise aggregate reduce group statistics
+dplyr::group_by,group by grouping aggregate split apply combine
+dplyr::arrange,arrange order sort rows
+dplyr::select,select columns choose pick variables
+dplyr::inner_join,inner join merge data frames intersection key
+dplyr::left_join,left join merge data frames keep left key
+dplyr::right_join,right join merge data frames keep right key
+dplyr::full_join,full outer join merge data frames union key
+dplyr::anti_join,anti join merge filter difference
+tidyr::pivot_longer,pivot longer reshape melt long format wide to long
+tidyr::pivot_wider,pivot wider reshape cast wide format long to wide
+randomForest::randomForest,random forest classifier ensemble bagging trees
+ranger::ranger,random forest fast classifier ensemble
+xgboost::xgboost,xgboost gradient boosting gbdt extreme classifier regressor
+xgboost::xgb.train,xgboost train gradient boosting gbdt
+gbm::gbm,gradient boosting machine generalized boosted models
+rpart::rpart,recursive partitioning decision tree cart classifier regression
+e1071::svm,support vector machine classifier kernel
+kernlab::ksvm,support vector machine classifier kernel
+e1071::naiveBayes,naive bayes classifier conditional probability
+nnet::nnet,neural network multilayer perceptron feedforward classifier
+glmnet::glmnet,lasso ridge elastic net regularization shrinkage
+glmnet::cv.glmnet,cross validation lasso ridge elastic net
+MASS::lm.ridge,ridge regression shrinkage regularization
+MASS::glm.nb,negative binomial regression overdispersion glm
+MASS::rlm,robust regression iteratively reweighted least squares m estimator
+MASS::polr,proportional odds logistic regression ordinal cumulative link
+robustbase::lmrob,robust linear model mm s estimator outlier resistant
+quantreg::rq,quantile regression median least absolute deviations
+mgcv::gam,generalized additive model spline smoothing penalized
+splines::bs,b splines basis matrix
+splines::ns,natural splines basis matrix
+survival::coxph,cox proportional hazards model survival regression
+survival::Surv,survival object event time censoring
+survival::survfit,kaplan meier survival curve fit estimator
+survival::survdiff,log rank test survival difference
+lme4::lmer,linear mixed effects model random effects multilevel
+lme4::glmer,generalized linear mixed effects model random effects multilevel
+nlme::lme,linear mixed effects model variance structure
+sandwich::vcovHC,heteroskedasticity consistent robust standard errors hc0 hc1 hc2 hc3
+sandwich::vcovCL,cluster robust standard errors clustered sandwich
+sandwich::vcovHAC,heteroskedasticity autocorrelation consistent newey west
+lmtest::bptest,breusch pagan heteroskedasticity test
+lmtest::dwtest,durbin watson autocorrelation test
+lmtest::coeftest,coefficient test robust standard errors
+lmtest::waldtest,wald test nested models comparison
+car::Anova,type ii type iii anova analysis of variance
+car::ncvTest,non constant variance heteroskedasticity test
+car::vif,variance inflation factor multicollinearity collinearity
+mice::mice,multiple imputation chained equations missing data
+mice::complete,complete imputed dataset multiple imputation
+boot::boot,bootstrap resampling confidence interval
+boot::boot.ci,bootstrap confidence interval bca percentile basic
+coin::oneway_test,permutation test nonparametric exact two sample
+coin::wilcox_test,wilcoxon permutation test nonparametric
+AER::ivreg,instrumental variables iv regression 2sls two stage least squares
+AER::tobit,tobit censored regression
+fixest::feols,panel data fixed effects high dimensional ols difference in differences event study iv
+fixest::feglm,panel data fixed effects glm logit poisson high dimensional
+plm::plm,panel data linear regression fixed effects random effects
+plm::pgmm,panel data generalized method of moments dynamic
+MatchIt::matchit,propensity score matching causal inference treatment
+Synth::synth,synthetic control method causal inference treatment effect
+gsynth::gsynth,generalized synthetic control panel data treatment
+rdrobust::rdrobust,regression discontinuity robust bandwidth design
+rdd::RDestimate,regression discontinuity design rdd
+didimputation::did_imputation,difference in differences imputation borusyak two way fixed effects
+did2s::did2s,difference in differences two stage event study
+did2s::event_study,event study staggered treatment two way fixed effects
+psych::fa,factor analysis exploratory rotation principal axis maximum likelihood
+psych::principal,principal component analysis factor rotation
+psych::alpha,cronbach alpha reliability internal consistency scale
+mirt::mirt,item response theory irt 2pl 3pl graded response model
+ltm::ltm,latent trait model item response theory irt 2pl
+topicmodels::LDA,latent dirichlet allocation topic modeling text mining
+stm::stm,structural topic model text covariates
+lavaan::sem,structural equation modeling sem path analysis latent
+lavaan::cfa,confirmatory factor analysis cfa measurement model
+BMS::bms,bayesian model averaging bma posterior model probability
+BMA::bicreg,bayesian model averaging bic regression
+brms::brm,bayesian regression rstan formula multilevel
+rstanarm::stan_glm,bayesian glm rstan stan_glm posterior
+BayesFactor::lmBF,bayesian linear regression bayes factor jzs
+pwr::pwr.t.test,power analysis sample size t test cohen d
+pwr::pwr.anova.test,power analysis sample size anova cohen f
+pwr::pwr.r.test,power analysis sample size correlation
+pwr::pwr.chisq.test,power analysis sample size chi squared
+py::sklearn.linear_model::LinearRegression,scikit-learn sklearn linear regression ols ordinary least squares python
+py::sklearn.linear_model::LogisticRegression,scikit-learn sklearn logistic regression classifier python
+py::sklearn.linear_model::Ridge,scikit-learn sklearn ridge regression l2 regularization python
+py::sklearn.linear_model::Lasso,scikit-learn sklearn lasso regression l1 regularization python
+py::sklearn.cluster::KMeans,scikit-learn sklearn k means clustering python
+py::sklearn.decomposition::PCA,scikit-learn sklearn principal component analysis pca python
+py::sklearn.ensemble::RandomForestClassifier,scikit-learn sklearn random forest classifier python
+py::sklearn.ensemble::RandomForestRegressor,scikit-learn sklearn random forest regressor python
+py::sklearn.tree::DecisionTreeClassifier,scikit-learn sklearn decision tree classifier python
+py::scipy.stats::ttest_ind,scipy ttest two sample independent t test python
+py::scipy.stats::ttest_1samp,scipy ttest one sample t test python
+py::scipy.stats::ttest_rel,scipy ttest paired related t test python
+py::scipy.stats::pearsonr,scipy pearson correlation coefficient python
+py::scipy.stats::spearmanr,scipy spearman correlation coefficient python
+py::scipy.stats::shapiro,scipy shapiro wilk normality test python
+py::scipy.stats::kstest,scipy kolmogorov smirnov test python
+performance::check_model,model fit diagnostics check check_model assumptions
+performance::check_normality,normality model fit diagnostics check
+performance::check_collinearity,collinearity multicollinearity vif diagnostics

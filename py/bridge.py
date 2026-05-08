@@ -11,6 +11,7 @@ Protocol: one JSON object per line on stdin, one on stdout.
 
 import sys
 import json
+import math
 import traceback
 import importlib
 import inspect
@@ -43,8 +44,11 @@ def is_serializable(obj: Any) -> bool:
 # ---- Response Helpers -------------------------------------------------------
 
 def send_response(resp: dict) -> None:
+    # allow_nan=False makes plain Python floats with NaN/Inf raise instead of
+    # emitting non-standard JSON tokens that the Node NDJSON parser rejects.
+    # Per-value sanitization should happen at the source; this is the safety net.
     try:
-        line = json.dumps(resp, default=_json_default, ensure_ascii=False)
+        line = json.dumps(resp, default=_json_default, ensure_ascii=False, allow_nan=False)
     except Exception as e:
         line = json.dumps({
             "id": resp.get("id", -1),
@@ -415,7 +419,12 @@ def dispatch_schema(req_id: int, params: dict) -> dict:
             elif isinstance(default, int):
                 prop = {"type": "integer", "default": default}
             elif isinstance(default, float):
-                prop = {"type": "number", "default": default}
+                # NaN/Inf are not valid JSON; sklearn uses np.nan as a sentinel
+                # default for several params (e.g. cross_val_score scoring=nan).
+                if math.isnan(default) or math.isinf(default):
+                    prop = {"type": "number", "default": None}
+                else:
+                    prop = {"type": "number", "default": default}
             elif isinstance(default, str):
                 prop = {"type": "string", "default": default}
             elif default is None:

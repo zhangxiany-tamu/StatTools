@@ -14,7 +14,11 @@ import {
 import { SearchEngine } from "./search/searchEngine.js";
 import { WorkerPool } from "./engine/workerPool.js";
 import { PythonWorker } from "./engine/PythonWorker.js";
-import { createSessionStore, type SessionStore } from "./engine/session.js";
+import {
+  createSessionStore,
+  recordFailure,
+  type SessionStore,
+} from "./engine/session.js";
 
 import {
   STAT_SEARCH_SCHEMA,
@@ -73,7 +77,7 @@ import {
 
 import { reindexPackage } from "./search/incrementalReindex.js";
 
-import type { StatToolResult } from "./types.js";
+import { FAILURE_PAYLOAD, errorResult, type StatToolResult } from "./types.js";
 import { randomBytes } from "node:crypto";
 
 export type ServerConfig = {
@@ -105,7 +109,7 @@ export async function createStatToolsServer(
   // exposed via getStatus().state so tools can return structured diagnostics
   // instead of generic "not available" errors.
   const pythonWorker = new PythonWorker({
-    pythonPath: config.pythonPath || "python3",
+    pythonPath: config.pythonPath || process.env.PYTHON_PATH || "python3",
   });
   await pythonWorker.start();
   const pythonStatus = pythonWorker.getStatus();
@@ -322,18 +326,11 @@ export async function createStatToolsServer(
         break;
 
       default:
-        result = {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                error: true,
-                message: `Unknown tool: ${name}`,
-              }),
-            },
-          ],
-          isError: true,
-        };
+        result = errorResult(`Unknown tool: ${name}`);
+    }
+
+    if (result.isError) {
+      recordToolFailure(sessionStore, name, args, result);
     }
 
     return result;
@@ -347,6 +344,94 @@ export async function createStatToolsServer(
   };
 
   return { server, cleanup };
+}
+
+// PII NOTE: failure history (visible via stat_session.recent_failures) retains
+// the caller's `input`, including data values passed in `args`. Values are
+// truncated/depth-limited by `compactForFailureHistory`, but if user data
+// would be sensitive, do not pass it inline to stat_call — load it via
+// stat_load_data and pass a handle id instead.
+function recordToolFailure(
+  sessionStore: SessionStore,
+  toolName: string,
+  input: unknown,
+  result: StatToolResult,
+): void {
+  const payload = result[FAILURE_PAYLOAD];
+  const message = payload?.message ?? "Tool call failed";
+  const details = payload?.details ?? {};
+
+  recordFailure(sessionStore, {
+    tool: toolName,
+    message,
+    input: compactForFailureHistory(input),
+    package: asOptionalString(details.package),
+    functionName: asOptionalString(details.function),
+    code: asOptionalCode(details.code),
+    hint: compactForFailureHistory(details.hint),
+    suggestion: compactForFailureHistory(details.suggestion),
+    didYouMean: compactForFailureHistory(details.did_you_mean),
+    retryHint: compactForFailureHistory(details.retry_hint),
+  });
+}
+
+function asOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function asOptionalCode(value: unknown): string | number | undefined {
+  return typeof value === "string" || typeof value === "number"
+    ? value
+    : undefined;
+}
+
+const MAX_FAILURE_STRING_LENGTH = 500;
+const MAX_FAILURE_ARRAY_ITEMS = 20;
+const MAX_FAILURE_OBJECT_KEYS = 30;
+const MAX_FAILURE_DEPTH = 4;
+
+function compactForFailureHistory(
+  value: unknown,
+  depth = 0,
+  seen = new WeakSet<object>(),
+): unknown {
+  if (value === null || value === undefined) return value;
+  if (typeof value === "string") {
+    return value.length > MAX_FAILURE_STRING_LENGTH
+      ? `${value.slice(0, MAX_FAILURE_STRING_LENGTH)}... [truncated ${value.length - MAX_FAILURE_STRING_LENGTH} chars]`
+      : value;
+  }
+  if (typeof value !== "object") return value;
+
+  if (seen.has(value)) return "[circular]";
+  if (depth >= MAX_FAILURE_DEPTH) {
+    return Array.isArray(value) ? `[array(${value.length})]` : "[object]";
+  }
+
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    const compacted = value
+      .slice(0, MAX_FAILURE_ARRAY_ITEMS)
+      .map((item) => compactForFailureHistory(item, depth + 1, seen));
+    if (value.length > MAX_FAILURE_ARRAY_ITEMS) {
+      compacted.push(`... ${value.length - MAX_FAILURE_ARRAY_ITEMS} more items`);
+    }
+    return compacted;
+  }
+
+  const entries = Object.entries(value).slice(0, MAX_FAILURE_OBJECT_KEYS);
+  const compacted: Record<string, unknown> = {};
+  for (const [key, entryValue] of entries) {
+    compacted[key] = compactForFailureHistory(entryValue, depth + 1, seen);
+  }
+
+  const remainingKeys = Object.keys(value).length - entries.length;
+  if (remainingKeys > 0) {
+    compacted._truncated_keys = remainingKeys;
+  }
+
+  return compacted;
 }
 
 export async function startServer(config: ServerConfig): Promise<void> {

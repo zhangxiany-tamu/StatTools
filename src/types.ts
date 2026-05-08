@@ -154,6 +154,21 @@ export type PythonRuntimeStatus = {
   readonly error?: string;
 };
 
+export type FailureRecord = {
+  readonly id: string;
+  readonly timestamp: string;
+  readonly tool: string;
+  readonly message: string;
+  readonly input?: unknown;
+  readonly package?: string;
+  readonly functionName?: string;
+  readonly code?: string | number;
+  readonly hint?: unknown;
+  readonly suggestion?: unknown;
+  readonly didYouMean?: unknown;
+  readonly retryHint?: unknown;
+};
+
 // ----------------------------------------------------------------------------
 // Session State (immutable updates)
 // ----------------------------------------------------------------------------
@@ -164,6 +179,7 @@ export type SessionState = {
   readonly resolvedFunctions: ReadonlySet<string>; // "pkg::fn" keys
   readonly loadedPackages: ReadonlySet<string>;
   readonly nextId: Readonly<Record<HandleType, number>>;
+  readonly recentFailures: readonly FailureRecord[];
 };
 
 export function createSessionState(sessionId: string): SessionState {
@@ -173,6 +189,7 @@ export function createSessionState(sessionId: string): SessionState {
     resolvedFunctions: new Set(),
     loadedPackages: new Set(),
     nextId: { data: 0, model: 0, prediction: 0, test_result: 0, generic: 0 },
+    recentFailures: [],
   };
 }
 
@@ -236,9 +253,29 @@ export type SafetyClass =
 // Tool Result Envelope
 // ----------------------------------------------------------------------------
 
+/**
+ * Symbol-keyed structured failure payload attached by `errorResult`.
+ *
+ * Symbol keys are invisible to `JSON.stringify`, so the MCP wire format
+ * stays exactly `{ content, isError }` — but consumers inside the process
+ * (e.g. the central failure recorder in server.ts) can read structured
+ * failure details without re-parsing the JSON inside `content[0].text`.
+ *
+ * Treat this as the source of truth for tool failures. If you create an
+ * error result by hand instead of using `errorResult`, attach this symbol
+ * (or route through `errorResult`) so the failure is recorded faithfully.
+ */
+export const FAILURE_PAYLOAD: unique symbol = Symbol("stattools.failurePayload");
+
+export type FailurePayload = {
+  readonly message: string;
+  readonly details?: Record<string, unknown>;
+};
+
 export type StatToolResult = {
   readonly content: ReadonlyArray<{ type: "text"; text: string }>;
   readonly isError?: boolean;
+  readonly [FAILURE_PAYLOAD]?: FailurePayload;
 };
 
 export function successResult(data: unknown): StatToolResult {
@@ -288,6 +325,7 @@ export function errorResult(
       },
     ],
     isError: true,
+    [FAILURE_PAYLOAD]: { message, details },
   };
 }
 

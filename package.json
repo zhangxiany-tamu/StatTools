@@ -22,7 +22,13 @@
     "extract-tarballs": "tsx scripts/extract-tarballs.ts",
     "apply-safety-overrides": "tsx scripts/apply-safety-overrides.ts",
     "check-safety-overrides": "node --import tsx/esm scripts/check-safety-overrides.ts",
-    "validate": "tsx scripts/validate-setup.ts"
+    "validate": "tsx scripts/validate-setup.ts",
+    "eval-classified-functions": "tsx scripts/eval-classified-functions.ts",
+    "eval-classified-functions-call": "tsx scripts/eval-classified-functions-call.ts",
+    "eval-search-quality": "tsx scripts/eval-search-quality.ts",
+    "verify-install-state": "tsx scripts/verify-install-state.ts",
+    "reindex-packages": "tsx scripts/reindex-packages.ts",
+    "apply-search-keywords": "tsx scripts/apply-search-keywords.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

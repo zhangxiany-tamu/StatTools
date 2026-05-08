@@ -124,7 +124,7 @@ function getNseHint(pkg: string, fn: string): NseHint | null {
 // Functions that dispatch on or require a specific R class for one of their
 // arguments. The agent reads class_hint and either pre-coerces (via a separate
 // stat_call to base::factor / stats::ts) or uses stat_call's `coerce` field.
-type ClassHint = {
+export type ClassHint = {
   arg: string;
   expected_classes: string[];
   recommended_coerce: string;        // value to pass in stat_call's `coerce` map
@@ -188,7 +188,7 @@ const CLASS_HINTS: Record<string, ClassHint[]> = {
   }],
 };
 
-function getClassHint(pkg: string, fn: string): ClassHint[] | null {
+export function getClassHint(pkg: string, fn: string): ClassHint[] | null {
   return CLASS_HINTS[`${pkg}::${fn}`] ?? null;
 }
 
@@ -238,12 +238,21 @@ export async function executeStatResolve(
   );
 
   if (!meta) {
+    const samePackageSuggestions = searchEngine.suggestFunctions(lookupPkg, fn);
+    const packageSuggestions = searchEngine.suggestPackages(lookupPkg);
+    const didYouMean = {
+      ...(samePackageSuggestions.length > 0 ? { same_package: samePackageSuggestions } : {}),
+      ...(packageSuggestions.length > 0 ? { packages: packageSuggestions } : {}),
+    };
+    const hasSuggestions = Object.keys(didYouMean).length > 0;
+
     logUsage({ type: "resolve", timestamp: new Date().toISOString(), package: pkg, function: fn, success: false, error_code: "not_found", latency_ms: elapsed() });
     return errorResult(
       `Function '${fn}' not found in package '${pkg}'. Use stat_search to find the correct function.`,
       {
         package: pkg,
         function: fn,
+        ...(hasSuggestions ? { did_you_mean: didYouMean } : {}),
       },
     );
   }

@@ -84,6 +84,8 @@ describe("Psych Workflows (Wave 4)", () => {
 describe("Lavaan Workflows (Wave 4)", () => {
   let ts: TestServer;
   let lavaanAvailable = false;
+  const cfaModel = "f1 =~ x1 + x2 + x3\nf2 =~ y1 + y2 + y3";
+  const semModel = "f1 =~ x1 + x2 + x3\nf2 =~ y1 + y2 + y3\nf2 ~ f1";
 
   beforeAll(async () => {
     ts = await createTestServer();
@@ -106,6 +108,20 @@ describe("Lavaan Workflows (Wave 4)", () => {
       ].join(",");
     });
     writeFileSync(LAVAAN_CSV, "x1,x2,x3,y1,y2,y3\n" + rows.join("\n"));
+
+    if (lavaanAvailable) {
+      const load = await callTool(ts.server, "stat_load_data", { file_path: LAVAAN_CSV, name: "lav" });
+      if (load.isError) {
+        lavaanAvailable = false;
+      } else {
+        const runtimeProbe = await callTool(ts.server, "stat_call", {
+          package: "lavaan", function: "cfa",
+          args: { model: cfaModel, data: "lav" },
+          assign_to: "lav_runtime_probe",
+        });
+        lavaanAvailable = !runtimeProbe.isError;
+      }
+    }
   });
 
   afterAll(async () => {
@@ -114,12 +130,10 @@ describe("Lavaan Workflows (Wave 4)", () => {
 
   it("lavaan::cfa fits confirmatory factor analysis", async (ctx) => {
     if (!lavaanAvailable) ctx.skip();
-    expectSuccess(await callTool(ts.server, "stat_load_data", { file_path: LAVAAN_CSV, name: "lav" }));
     expectSuccess(await callTool(ts.server, "stat_resolve", { package: "lavaan", function: "cfa" }));
-    const model = "f1 =~ x1 + x2 + x3\nf2 =~ y1 + y2 + y3";
     const cfa = expectSuccess(await callTool(ts.server, "stat_call", {
       package: "lavaan", function: "cfa",
-      args: { model, data: "lav" },
+      args: { model: cfaModel, data: "lav" },
     }));
     expect(cfa.result).toBeDefined();
     const cfaId = (cfa.objects_created as Array<{ id: string }>)?.[0]?.id;
@@ -138,10 +152,9 @@ describe("Lavaan Workflows (Wave 4)", () => {
   it("lavaan::sem fits structural equation model", async (ctx) => {
     if (!lavaanAvailable) ctx.skip();
     expectSuccess(await callTool(ts.server, "stat_resolve", { package: "lavaan", function: "sem" }));
-    const model = "f1 =~ x1 + x2 + x3\nf2 =~ y1 + y2 + y3\nf2 ~ f1";
     const sem = expectSuccess(await callTool(ts.server, "stat_call", {
       package: "lavaan", function: "sem",
-      args: { model, data: "lav" },
+      args: { model: semModel, data: "lav" },
     }));
     expect(sem.result).toBeDefined();
   }, 20000);

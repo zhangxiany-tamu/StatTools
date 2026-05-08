@@ -27,6 +27,23 @@ export type SearchResult = {
   bm25Score: number; // Raw BM25 (lower = better)
 };
 
+export type FunctionSuggestion = {
+  package: string;
+  function: string;
+  id: string;
+  runtime: "r" | "python";
+  title: string;
+  safety_class: SafetyClass;
+  installed: boolean;
+  distance: number;
+};
+
+export type PackageSuggestion = {
+  package: string;
+  installed: boolean;
+  distance: number;
+};
+
 export type SearchOptions = {
   query: string;
   taskView?: string;
@@ -346,6 +363,123 @@ export class SearchEngine {
     };
   }
 
+  /** Suggest nearby function names within a package for failed resolve calls. */
+  suggestFunctions(
+    packageName: string,
+    functionName: string,
+    maxResults = 5,
+  ): FunctionSuggestion[] {
+    const functionPackageName = displayPackageName(packageName);
+    const rows = this.db
+      .prepare(
+        `SELECT f.id, f.package, f.name, f.title, f.safety_class,
+                COALESCE(p.installed, 1) AS installed
+         FROM functions f
+         LEFT JOIN packages p ON f.package = p.name
+         WHERE f.package = ? AND COALESCE(f.is_stub, 0) = 0
+         ORDER BY f.name
+         LIMIT 2000`,
+      )
+      .all(functionPackageName) as Array<{
+      id: string;
+      package: string;
+      name: string;
+      title: string;
+      safety_class: string;
+      installed: number;
+    }>;
+
+    const requested = normalizeSuggestionText(functionName);
+    if (!requested) return [];
+
+    return rows
+      .map((row) => {
+        const candidate = normalizeSuggestionText(row.name);
+        const distance = rankSuggestion(requested, candidate);
+        return { row, distance };
+      })
+      .filter(({ row, distance }) => (
+        row.name !== functionName &&
+        Number.isFinite(distance) &&
+        isPlausibleSuggestion(distance, requested.length)
+      ))
+      .sort((a, b) => a.distance - b.distance || a.row.name.localeCompare(b.row.name))
+      .slice(0, maxResults)
+      .map(({ row, distance }) => ({
+        package: displayPackageName(row.package),
+        function: row.name,
+        id: row.id,
+        runtime: row.id.startsWith("py::") ? "python" as const : "r" as const,
+        title: row.title,
+        safety_class: row.safety_class as SafetyClass,
+        installed: row.installed === 1,
+        distance,
+      }));
+  }
+
+  /** Suggest nearby package/module names for failed resolve calls. */
+  suggestPackages(
+    packageName: string,
+    maxResults = 5,
+  ): PackageSuggestion[] {
+    const rowsByPackage = new Map<string, { package: string; installed: number }>();
+
+    try {
+      const packageRows = this.db
+        .prepare(
+          `SELECT name AS package, COALESCE(installed, 1) AS installed
+           FROM packages
+           LIMIT 50000`,
+        )
+        .all() as Array<{ package: string; installed: number }>;
+      for (const row of packageRows) {
+        rowsByPackage.set(displayPackageName(row.package), row);
+      }
+    } catch {
+      // Continue with function-derived packages below.
+    }
+
+    const functionPackageRows = this.db
+      .prepare(
+        `SELECT DISTINCT package, 1 AS installed
+         FROM functions
+         LIMIT 50000`,
+      )
+      .all() as Array<{ package: string; installed: number }>;
+    for (const row of functionPackageRows) {
+      const displayedPackage = displayPackageName(row.package);
+      if (!rowsByPackage.has(displayedPackage)) {
+        rowsByPackage.set(displayedPackage, row);
+      }
+    }
+
+    const rows = [...rowsByPackage.values()];
+    const requested = normalizeSuggestionText(displayPackageName(packageName));
+    if (!requested) return [];
+
+    return rows
+      .map((row) => {
+        const displayedPackage = displayPackageName(row.package);
+        const distance = rankSuggestion(
+          requested,
+          normalizeSuggestionText(displayedPackage),
+        );
+        return { row, displayedPackage, distance };
+      })
+      .filter(({ displayedPackage, distance }) => (
+        displayedPackage !== displayPackageName(packageName) &&
+        Number.isFinite(distance) &&
+        isPlausibleSuggestion(distance, requested.length)
+      ))
+      .sort((a, b) => a.distance - b.distance || a.displayedPackage.localeCompare(b.displayedPackage))
+      .slice(0, maxResults)
+      .map(({ row, displayedPackage, distance }) => ({
+        package: displayedPackage,
+        installed: row.installed === 1,
+        distance,
+      }));
+  }
+
   /** Search by function name variants (for abbreviations, dot-separated names). */
   private searchByName(
     nameVariants: string[],
@@ -393,6 +527,66 @@ export class SearchEngine {
   close(): void {
     this.db.close();
   }
+}
+
+function displayPackageName(packageName: string): string {
+  return packageName.startsWith("py::") ? packageName.slice(4) : packageName;
+}
+
+function normalizeSuggestionText(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function plausibilityThreshold(requestedLength: number): number {
+  return Math.max(2.25, requestedLength * 0.7);
+}
+
+function isPlausibleSuggestion(distance: number, requestedLength: number): boolean {
+  if (distance < 1) return true;
+  return distance <= plausibilityThreshold(requestedLength);
+}
+
+function rankSuggestion(requested: string, candidate: string): number {
+  if (!requested || !candidate) return Number.POSITIVE_INFINITY;
+  if (requested === candidate) return 0;
+  if (candidate.startsWith(requested)) return 0.15 + (candidate.length - requested.length) * 0.01;
+  if (requested.startsWith(candidate) && isMeaningfulShortCandidate(requested, candidate)) {
+    return 0.25 + (requested.length - candidate.length) * 0.01;
+  }
+  if (candidate.includes(requested)) return 0.5 + (candidate.length - requested.length) * 0.01;
+  if (requested.includes(candidate) && isMeaningfulShortCandidate(requested, candidate)) {
+    return 0.6 + (requested.length - candidate.length) * 0.01;
+  }
+  // Levenshtein is bounded below by |len(a) - len(b)|; skip the DP if that
+  // already exceeds the plausibility cap, so we don't pay O(n·m) on hopeless
+  // candidates when scanning the package corpus.
+  const lenDiff = Math.abs(requested.length - candidate.length);
+  if (lenDiff > plausibilityThreshold(requested.length)) return Number.POSITIVE_INFINITY;
+  return levenshteinDistance(requested, candidate);
+}
+
+function isMeaningfulShortCandidate(requested: string, candidate: string): boolean {
+  return candidate.length >= Math.max(2, Math.ceil(requested.length * 0.5));
+}
+
+function levenshteinDistance(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  let current = new Array<number>(b.length + 1);
+
+  for (let i = 1; i <= a.length; i++) {
+    current[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const substitutionCost = a[i - 1] === b[j - 1] ? 0 : 1;
+      current[j] = Math.min(
+        current[j - 1] + 1,
+        previous[j] + 1,
+        previous[j - 1] + substitutionCost,
+      );
+    }
+    [previous, current] = [current, previous];
+  }
+
+  return previous[b.length];
 }
 
 // ---- Scoring ---------------------------------------------------------------
@@ -874,6 +1068,54 @@ const CANONICAL_RESULTS: Record<string, string[]> = {
   "unit root test": ["tseries::adf.test"],
   "unit root test stationarity augmented dickey fuller": ["tseries::adf.test"],
   "ljung box test white noise residuals autocorrelation": ["stats::Box.test"],
+
+  // Causal inference / econometrics
+  "instrumental variables 2sls": ["AER::ivreg", "fixest::feols"],
+  "instrumental variables iv 2sls": ["AER::ivreg", "fixest::feols"],
+  "panel data fixed effects": ["fixest::feols", "plm::plm"],
+  "panel data fixed effects high dimensional": ["fixest::feols"],
+  "differences in differences": ["fixest::feols", "didimputation::did_imputation"],
+  "diff in diff": ["fixest::feols", "didimputation::did_imputation"],
+  "event study": ["fixest::feols", "did2s::event_study"],
+  "regression discontinuity": ["rdrobust::rdrobust", "rdd::RDestimate"],
+  "regression discontinuity design": ["rdrobust::rdrobust", "rdd::RDestimate"],
+  "synthetic control method": ["Synth::synth", "gsynth::gsynth"],
+  "synthetic control": ["Synth::synth", "gsynth::gsynth"],
+  "propensity score matching": ["MatchIt::matchit"],
+  "propensity score": ["MatchIt::matchit"],
+  "multiple imputation": ["mice::mice", "Amelia::amelia"],
+  "multiple imputation chained equations": ["mice::mice"],
+  "bayesian model averaging": ["BMS::bms", "BMA::bicreg"],
+  "permutation test": ["coin::oneway_test"],
+  "wilcoxon rank sum": ["stats::wilcox.test"],
+  "rank deficient regression": ["MASS::rlm", "robustbase::lmrob"],
+  "robust regression": ["MASS::rlm", "robustbase::lmrob"],
+  "item response theory": ["mirt::mirt", "ltm::ltm"],
+  "topic modeling lda": ["topicmodels::LDA", "stm::stm"],
+  "structural equation modeling": ["lavaan::sem"],
+  "factor analysis": ["psych::fa", "stats::factanal"],
+  "factor analysis exploratory": ["psych::fa", "psych::principal", "stats::factanal"],
+
+  // Power / common stats
+  "power analysis sample size": ["pwr::pwr.t.test", "pwr::pwr.anova.test"],
+  "power analysis": ["pwr::pwr.t.test", "pwr::pwr.anova.test"],
+  "model fit diagnostics": ["broom::glance", "performance::check_model", "broom::augment"],
+  "join data frames": ["dplyr::inner_join", "dplyr::left_join", "merge"],
+  "correlation pearson spearman": ["stats::cor", "stats::cor.test"],
+
+  // Python equivalents — disambiguate scikit/scipy prefixes from R fallbacks
+  "scikit learn linear regression": ["py::sklearn.linear_model::LinearRegression"],
+  "scikit learn logistic regression": ["py::sklearn.linear_model::LogisticRegression"],
+  "scikit learn ridge regression": ["py::sklearn.linear_model::Ridge"],
+  "scikit learn lasso regression": ["py::sklearn.linear_model::Lasso"],
+  "k means scikit": ["py::sklearn.cluster::KMeans"],
+  "scikit learn k means": ["py::sklearn.cluster::KMeans"],
+  "scikit learn pca": ["py::sklearn.decomposition::PCA"],
+  "scikit learn random forest": ["py::sklearn.ensemble::RandomForestClassifier"],
+  "scipy ttest": ["py::scipy.stats::ttest_ind"],
+  "scipy t test": ["py::scipy.stats::ttest_ind"],
+  "scipy pearson correlation": ["py::scipy.stats::pearsonr"],
+  "scipy spearman correlation": ["py::scipy.stats::spearmanr"],
 };
 
 /** Generate possible R function names from a natural language query.
@@ -1051,9 +1293,13 @@ function isAbbreviation(fnName: string, queryTerms: string[]): boolean {
 }
 
 function sanitizeFtsQuery(query: string): string {
-  // Remove characters that are special in FTS5
+  // Strip every char that has meaning in the FTS5 query syntax. In particular
+  // `-` is the NOT operator, so a literal phrase like "t-test" turns into
+  // "t MINUS test" and excludes legitimate matches like stats::t.test from
+  // the recall. Replace the full operator set with whitespace; let the
+  // tokenizer handle word boundaries.
   let clean = query
-    .replace(/[":(){}[\]*^~]/g, " ")
+    .replace(/[":(){}[\]*^~+\-&|]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 

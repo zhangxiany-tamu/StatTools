@@ -13,6 +13,7 @@ import {
 } from "../engine/session.js";
 import { successResult, errorResult, type StatToolResult } from "../types.js";
 import { logUsage, startTimer } from "../util/usageLogger.js";
+import { getClassHint } from "./statResolve.js";
 
 export const STAT_CALL_SCHEMA = {
   type: "object" as const,
@@ -144,12 +145,16 @@ export async function executeStatCall(
   // 3. Handle R errors
   if (response.error) {
     logUsage({ type: "call", timestamp: new Date().toISOString(), package: pkg, function: fn, runtime: isPython ? "python" : "r", success: false, error_code: String(response.error.code), latency_ms: elapsed() });
+    const retryHint = !isPython
+      ? buildCoercionRetryHint(input, response.error.message)
+      : null;
     return errorResult(response.error.message, {
       package: pkg,
       function: fn,
       code: response.error.code,
       suggestion: response.error.suggestion,
       traceback: response.error.traceback,
+      ...(retryHint ? { retry_hint: retryHint } : {}),
     });
   }
 
@@ -190,4 +195,57 @@ export async function executeStatCall(
   }
 
   return successResult(result);
+}
+
+function buildCoercionRetryHint(
+  input: StatCallInput,
+  errorMessage: string,
+): Record<string, unknown> | null {
+  const { package: pkg, function: fn, args, expressions, dot_expressions, dot_args, coerce, assign_to } = input;
+  const classHints = getClassHint(pkg, fn);
+  if (!classHints || classHints.length === 0) return null;
+
+  if (!looksLikeClassOrCoercionError(errorMessage)) return null;
+
+  const recommendedCoerce: Record<string, string> = {};
+  const matchingHints = classHints.filter((hint) => (
+    Object.prototype.hasOwnProperty.call(args, hint.arg) &&
+    !coerce?.[hint.arg]
+  ));
+
+  for (const hint of matchingHints) {
+    recommendedCoerce[hint.arg] = hint.recommended_coerce;
+  }
+
+  if (Object.keys(recommendedCoerce).length === 0) return null;
+
+  const retryCall: Record<string, unknown> = {
+    package: pkg,
+    function: fn,
+    args,
+    coerce: {
+      ...(coerce ?? {}),
+      ...recommendedCoerce,
+    },
+  };
+
+  if (expressions) retryCall.expressions = expressions;
+  if (dot_expressions) retryCall.dot_expressions = dot_expressions;
+  if (dot_args) retryCall.dot_args = dot_args;
+  if (assign_to) retryCall.assign_to = assign_to;
+
+  return {
+    strategy: "retry_with_coerce",
+    reason: matchingHints.map((hint) => hint.reason).join(" "),
+    coerce: recommendedCoerce,
+    retry_call: retryCall,
+    note: "Retry stat_call with retry_call. Adjust ts frequency/start if your data cadence is not monthly.",
+  };
+}
+
+// Targets phrases R actually emits for class/coercion failures (e.g. stl,
+// HoltWinters, arima, factor-required ops). Avoid bare tokens like "ts" or
+// "series" — those produce false positives on unrelated error messages.
+function looksLikeClassOrCoercionError(message: string): boolean {
+  return /\b(?:univariate|seasonal|periodic|non[- ]?numeric|non[- ]?time[- ]?series|coerc(?:e|ed|ible|ion)|must be (?:a |an )?(?:numeric|matrix|factor|time[- ]?series|ts)|is not (?:a |an )?(?:numeric|matrix|factor|time[- ]?series|ts)|less than \d+ periods?|invalid (?:class|frequency)|tsp attribute)\b/i.test(message);
 }

@@ -9,6 +9,7 @@ import {
   type HandleType,
   type RuntimeType,
   type RpcObjectCreated,
+  type FailureRecord,
   createSessionState,
   nextHandleId,
   getPersistenceClass,
@@ -17,6 +18,8 @@ import {
 } from "../types.js";
 
 export type SessionStore = Store<SessionState>;
+
+const MAX_RECENT_FAILURES = 10;
 
 export function createSessionStore(sessionId: string): SessionStore {
   return createStore(createSessionState(sessionId));
@@ -114,4 +117,30 @@ export function markHandlesLost(
     }
     return { ...prev, handles: newHandles };
   });
+}
+
+/** Record a structured tool failure for agent-loop recovery. */
+export function recordFailure(
+  store: SessionStore,
+  failure: Omit<FailureRecord, "id" | "timestamp">,
+): FailureRecord {
+  const record: FailureRecord = {
+    ...failure,
+    id: `f_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: new Date().toISOString(),
+  };
+
+  store.setState((prev) => ({
+    ...prev,
+    recentFailures: [record, ...prev.recentFailures].slice(0, MAX_RECENT_FAILURES),
+  }));
+
+  return record;
+}
+
+/** Return recent tool failures newest-first. */
+export function getRecentFailures(
+  store: SessionStore,
+): readonly FailureRecord[] {
+  return store.getState().recentFailures;
 }
